@@ -9,7 +9,7 @@
  */
 {
   "current": {
-    "page_background_color": "{{ settings.color_palette.background }}",
+    "logo": "shopify://shop_images/image_1.png",
     "page_text_color": "{{ settings.color_palette.foreground }}",
     "type_body_font": "red_hat_text_n4",
     "type_subheading_font": "newsreader_n2",
@@ -36,6 +36,7 @@
     "type_line_height_h6": "display-loose",
     "type_letter_spacing_h6": "heading-normal",
     "type_case_h6": "uppercase",
+    "page_background_color": "{{ settings.color_palette.background }}",
     "badge_corner_radius": 0,
     "badge_sale_background_color": "{{ settings.color_palette.color1 }}",
     "badge_sale_text_color": "{{ settings.color_palette.background }}",
@@ -71,9 +72,9 @@
     "popover_border_radius": 0,
     "currency_code_enabled_product_pages": false,
     "currency_code_enabled_product_cards": false,
+    "mobile_quick_add": true,
     "quick_add_background": "{{ settings.color_palette.background }}",
     "quick_add_text": "{{ settings.color_palette.foreground }}",
-    "mobile_quick_add": true,
     "product_corner_radius": 0,
     "card_corner_radius": 0,
     "card_title_case": "uppercase",
@@ -88,6 +89,7 @@
     "palette_selected_variant_border": "{{ settings.color_palette.foreground }}",
     "variant_button_radius": 0,
     "variant_button_width": "default-width-buttons",
+    "content_for_index": [],
     "color_palette": {
       "background": "#ffffff",
       "foreground": "#000000",
