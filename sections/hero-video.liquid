@@ -1,9 +1,11 @@
 {% comment %}
   Immersive full-bleed video hero. The video and a large centered logo start
-  full-viewport; on scroll the whole stage is pinned and shrinks toward its
-  center while the logo fades up and out, handing off to the site header
-  (hidden here, revealed once the animation completes — see the inline
-  {% style %} block and hero-scroll.js).
+  full-viewport; on scroll the stage shrinks toward its center while the logo
+  fades up and out, handing off to the site header (hidden here, revealed
+  once the animation completes — see the inline {% style %} block and
+  hero-scroll.js). The pinned look comes from native `position: sticky` on
+  `.hero-video` inside the taller `.hero-video-track`, not GSAP's pin —
+  GSAP only scrubs transforms, so it never touches the DOM structure.
 {% endcomment %}
 
 {% liquid
@@ -24,55 +26,60 @@
   }
 {% endstyle %}
 
-<hero-scroll-component class="hero-video">
-  <div
-    class="hero-video__stage"
-    ref="stage"
+<div class="hero-video-track">
+  <hero-scroll-component
+    class="hero-video"
+    data-skip-node-update
   >
-    <div class="hero-video__media">
-      {% if section.settings.video != blank %}
-        {{
-          section.settings.video
-          | video_tag:
-            autoplay: true,
-            loop: true,
-            muted: true,
-            controls: false,
-            playsinline: true,
-            image_size: '1920x',
-            class: 'hero-video__video'
-        }}
-      {% elsif section.settings.poster != blank %}
-        {{
-          section.settings.poster
-          | image_url: width: 1920
-          | image_tag: class: 'hero-video__video', loading: 'eager', sizes: '100vw', widths: '750,1100,1500,1920,2400'
-        }}
-      {% else %}
-        <div class="hero-video__placeholder">
-          <p>Add a video or poster image</p>
-        </div>
-      {% endif %}
-    </div>
     <div
-      class="hero-video__scrim"
-      style="--hero-video-overlay-opacity: {{ overlay_opacity }};"
-    ></div>
-  </div>
+      class="hero-video__stage"
+      ref="stage"
+    >
+      <div class="hero-video__media">
+        {% if section.settings.video != blank %}
+          {{
+            section.settings.video
+            | video_tag:
+              autoplay: true,
+              loop: true,
+              muted: true,
+              controls: false,
+              playsinline: true,
+              image_size: '1920x',
+              class: 'hero-video__video'
+          }}
+        {% elsif section.settings.poster != blank %}
+          {{
+            section.settings.poster
+            | image_url: width: 1920
+            | image_tag: class: 'hero-video__video', loading: 'eager', sizes: '100vw', widths: '750,1100,1500,1920,2400'
+          }}
+        {% else %}
+          <div class="hero-video__placeholder">
+            <p>Add a video or poster image</p>
+          </div>
+        {% endif %}
+      </div>
+      <div
+        class="hero-video__scrim"
+        style="--hero-video-overlay-opacity: {{ overlay_opacity }};"
+      ></div>
+    </div>
 
-  <div
-    class="hero-video__logo"
-    ref="logo"
-  >
-    {% render 'image',
-      image: logo_image,
-      class: 'hero-video__logo-image',
-      height: 400,
-      alt_text_fallback: shop.name,
-      text_fallback: shop.name
-    %}
-  </div>
-</hero-scroll-component>
+    <div
+      class="hero-video__logo"
+      ref="logo"
+    >
+      {% render 'image',
+        image: logo_image,
+        class: 'hero-video__logo-image',
+        height: 400,
+        alt_text_fallback: shop.name,
+        text_fallback: shop.name
+      %}
+    </div>
+  </hero-scroll-component>
+</div>
 
 <script
   src="{{ 'gsap.min.js' | asset_url }}"
@@ -88,9 +95,15 @@
 ></script>
 
 {% stylesheet %}
+  .hero-video-track {
+    position: relative;
+    height: 200svh;
+  }
+
   .hero-video {
     display: block;
-    position: relative;
+    position: sticky;
+    top: 0;
     height: 100svh;
     min-height: 480px;
     background: var(--color-background, #fff);
