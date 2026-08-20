@@ -1,0 +1,197 @@
+{% comment %}
+  Immersive full-bleed video hero. The video and a large centered logo start
+  full-viewport; on scroll the whole stage is pinned and shrinks toward its
+  center while the logo fades up and out, handing off to the site header
+  (hidden here, revealed once the animation completes — see the inline
+  {% style %} block and hero-scroll.js).
+{% endcomment %}
+
+{% liquid
+  assign logo_image = settings.logo_inverse | default: settings.logo
+  assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0
+%}
+
+{% style %}
+  #header-component {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s var(--ease-out-cubic, ease);
+  }
+
+  body.hero-intro-done #header-component {
+    opacity: 1;
+    pointer-events: auto;
+  }
+{% endstyle %}
+
+<hero-scroll-component class="hero-video">
+  <div
+    class="hero-video__stage"
+    ref="stage"
+  >
+    <div class="hero-video__media">
+      {% if section.settings.video != blank %}
+        {{
+          section.settings.video
+          | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            controls: false,
+            playsinline: true,
+            image_size: '1920x',
+            class: 'hero-video__video'
+        }}
+      {% elsif section.settings.poster != blank %}
+        {{
+          section.settings.poster
+          | image_url: width: 1920
+          | image_tag: class: 'hero-video__video', loading: 'eager', sizes: '100vw', widths: '750,1100,1500,1920,2400'
+        }}
+      {% else %}
+        <div class="hero-video__placeholder">
+          <p>Add a video or poster image</p>
+        </div>
+      {% endif %}
+    </div>
+    <div
+      class="hero-video__scrim"
+      style="--hero-video-overlay-opacity: {{ overlay_opacity }};"
+    ></div>
+  </div>
+
+  <div
+    class="hero-video__logo"
+    ref="logo"
+  >
+    {% render 'image',
+      image: logo_image,
+      class: 'hero-video__logo-image',
+      height: 400,
+      alt_text_fallback: shop.name,
+      text_fallback: shop.name
+    %}
+  </div>
+</hero-scroll-component>
+
+<script
+  src="{{ 'gsap.min.js' | asset_url }}"
+  defer
+></script>
+<script
+  src="{{ 'gsap-scrolltrigger.min.js' | asset_url }}"
+  defer
+></script>
+<script
+  src="{{ 'hero-scroll.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  .hero-video {
+    display: block;
+    position: relative;
+    height: 100svh;
+    min-height: 480px;
+    background: var(--color-background, #fff);
+    overflow: clip;
+  }
+
+  .hero-video__stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transform-origin: 50% 50%;
+    will-change: transform, border-radius;
+  }
+
+  .hero-video__media,
+  .hero-video__video,
+  .hero-video__video img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-video__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--color-foreground, #111) 8%, var(--color-background, #fff));
+    color: var(--color-foreground, #111);
+    font-family: var(--font-body--family);
+    opacity: 0.6;
+  }
+
+  .hero-video__scrim {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    opacity: var(--hero-video-overlay-opacity, 0.2);
+    pointer-events: none;
+  }
+
+  .hero-video__logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: clamp(140px, 22vw, 320px);
+    z-index: 2;
+    will-change: transform, opacity;
+  }
+
+  .hero-video__logo-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Hero video",
+  "tag": "section",
+  "class": "hero-video-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Background video"
+    },
+    {
+      "type": "image_picker",
+      "id": "poster",
+      "label": "Poster / fallback image",
+      "info": "Used while the video loads, and as a fallback if no video is set."
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay darkness",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "paragraph",
+      "content": "The centered logo uses the logo set in Theme settings → Logo (inverse logo if one is set)."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero video",
+      "category": "t:categories.banners"
+    }
+  ]
+}
+{% endschema %}
