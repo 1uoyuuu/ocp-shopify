@@ -5,6 +5,15 @@ import { getScrollContainer, scrollContainerMediaQuery } from '@theme/scroll-con
  * docked position. */
 const LOGO_ARRIVE_PROGRESS = 0.65;
 
+/** Must match snippets/site-logo.liquid's `.site-logo` width/scale — the
+ * logo renders natively at LOGO_NATIVE_WIDTH and is always scaled *down*
+ * from there (docked = DOCKED_SCALE, opening = computed per-viewport below,
+ * capped so it never exceeds 1) so a GPU compositing layer is never
+ * rasterized small and then stretched up, which is blurry. */
+const LOGO_NATIVE_WIDTH = 2000;
+const DOCKED_SCALE = 0.1;
+const DOCKED_CENTER_Y = 33;
+
 /**
  * Drives the hero-video intro animation. `.hero-video` is kept in place via
  * native `position: sticky` (see hero-video.liquid) rather than GSAP's
@@ -61,23 +70,19 @@ class HeroScrollComponent extends HTMLElement {
   }
 
   /**
-   * How much bigger/lower the logo should look on load versus its resting,
-   * docked CSS values (a horizontally-centered, fixed-width box near the
-   * top of the viewport) — i.e. the hero's opening state, expressed as an
-   * override on top of that resting state rather than as absolute values.
+   * The hero's opening look: large and vertically centered. Expressed as
+   * absolute x/y/scale (not a delta from the docked state) since GSAP's
+   * `scale` replaces the element's transform outright rather than
+   * multiplying on top of the CSS default — see LOGO_NATIVE_WIDTH's doc
+   * comment for why this is always ≤ ~1, never the small docked scale
+   * stretched up.
    *
    * @returns {{y: number, scale: number}}
    */
-  #computeOpeningOverride() {
-    const rect = this.logo.getBoundingClientRect();
-    const restingWidth = rect.width || 1;
-    const restingCenterY = rect.top + rect.height / 2;
-    const openingWidth = window.innerWidth * 0.7;
-    const openingCenterY = window.innerHeight / 2;
-
+  #computeOpeningTarget() {
     return {
-      y: openingCenterY - restingCenterY,
-      scale: openingWidth / restingWidth,
+      y: window.innerHeight / 2 - DOCKED_CENTER_Y,
+      scale: (window.innerWidth * 0.7) / LOGO_NATIVE_WIDTH,
     };
   }
 
@@ -87,13 +92,13 @@ class HeroScrollComponent extends HTMLElement {
 
     this.#scrollTrigger?.kill();
 
-    const opening = this.#computeOpeningOverride();
+    const opening = this.#computeOpeningTarget();
     gsap.set(this.logo, { y: opening.y, scale: opening.scale });
 
     const tl = gsap
       .timeline()
       .to(this.stage, { scale: 0.15, borderRadius: '20px', ease: 'none', duration: 0.6 }, 0)
-      .to(this.logo, { y: 0, scale: 1, ease: 'none', duration: LOGO_ARRIVE_PROGRESS }, 0);
+      .to(this.logo, { y: 0, scale: DOCKED_SCALE, ease: 'none', duration: LOGO_ARRIVE_PROGRESS }, 0);
 
     if (this.headingTop) {
       tl.fromTo(this.headingTop, { y: 24, opacity: 0 }, { y: 0, opacity: 1, ease: 'none', duration: 0.5 }, 0.5);

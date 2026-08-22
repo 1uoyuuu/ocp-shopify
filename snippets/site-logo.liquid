@@ -14,6 +14,15 @@
   hero plays out — so no separate "landed" class or position-mode switch is
   needed; the resting values here ARE the landing target.
 
+  The native width is deliberately huge (2000px) with the docked look coming
+  entirely from `scale(0.1)` — never the other way around. A GPU compositing
+  layer's raster is sized to its pre-transform layout box, so an element
+  that's natively 200px and gets scaled *up* for the hero's big state is
+  visibly blurry (a 200px raster stretched ~4–5x). Rendering natively large
+  and always scaling *down* avoids that; hero-scroll.js's opening-state
+  scale is calibrated against this same 2000px, and must stay in sync with
+  it if this ever changes.
+
   This fully replaces the theme's own header-logo block (see the global
   override in this file's stylesheet) — simpler than trying to hide it only
   on some templates.
@@ -32,7 +41,9 @@
     top: 33px;
     left: 50%;
     translate: -50% -50%;
-    width: 200px;
+    width: 2000px;
+    transform: scale(0.1);
+    transform-origin: 50% 50%;
     z-index: 1000;
     display: block;
     will-change: transform;
