@@ -1,11 +1,18 @@
 {% comment %}
-  Immersive full-bleed video hero. The video and a large centered logo start
-  full-viewport; on scroll the stage shrinks toward its center while the logo
-  fades up and out, handing off to the site header (hidden here, revealed
-  once the animation completes — see the inline {% style %} block and
-  hero-scroll.js). The pinned look comes from native `position: sticky` on
-  `.hero-video` inside the taller `.hero-video-track`, not GSAP's pin —
-  GSAP only scrubs transforms, so it never touches the DOM structure.
+  Immersive full-bleed video hero with a locked-viewport intro timeline
+  (poezabride.com-style). The video and a large centered logo start
+  full-viewport; scrolling through `.hero-video-track` drives a single GSAP
+  timeline — never a normal page scroll — that: shrinks the video down to a
+  small badge (~15vw) while it fades the logo out, then fades/slides the
+  heading into view. Only once that timeline finishes does `hero-intro-done`
+  get added to <body>, which reveals the site header (hidden here) and lets
+  scrolling continue into the next section.
+
+  The locked-viewport feel comes from native `position: sticky` on
+  `.hero-video` inside the taller `.hero-video-track`, not GSAP's `pin` —
+  pinning inserts a wrapper element that fights the theme's own DOM
+  morphing on section re-render. GSAP only scrubs transforms/opacity here,
+  so it never touches the DOM structure. See hero-scroll.js.
 {% endcomment %}
 
 {% liquid
@@ -78,6 +85,15 @@
         text_fallback: shop.name
       %}
     </div>
+
+    {% if section.settings.heading != blank %}
+      <div
+        class="hero-video__heading"
+        ref="heading"
+      >
+        {{ section.settings.heading }}
+      </div>
+    {% endif %}
   </hero-scroll-component>
 </div>
 
@@ -97,7 +113,7 @@
 {% stylesheet %}
   .hero-video-track {
     position: relative;
-    height: 200svh;
+    height: 280svh;
   }
 
   .hero-video {
@@ -162,6 +178,26 @@
     height: auto;
     display: block;
   }
+
+  .hero-video__heading {
+    position: absolute;
+    left: 50%;
+    bottom: 14%;
+    translate: -50% 0;
+    width: min(92vw, 900px);
+    z-index: 3;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    font-family: var(--font-heading--family);
+    font-weight: 600;
+    font-size: clamp(1.75rem, 6vw, 4rem);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--color-foreground, #111);
+    will-change: transform, opacity;
+  }
 {% endstylesheet %}
 
 {% schema %}
@@ -198,6 +234,17 @@
     {
       "type": "paragraph",
       "content": "The centered logo uses the logo set in Theme settings → Logo (inverse logo if one is set)."
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Shown once the video has shrunk down. Use <br> for line breaks.",
+      "default": "THE ONE AND ONLY<br>COFFEE PROJECT"
     }
   ],
   "presets": [

@@ -13,58 +13,8 @@
       "type": "hero-video",
       "settings": {
         "video": "shopify://files/videos/7744417-uhd_4096_2160_25fps.mp4",
-        "overlay_opacity": 20
-      }
-    },
-    "punchy_statement": {
-      "type": "section",
-      "blocks": {
-        "jumbo_text": {
-          "type": "jumbo-text",
-          "settings": {
-            "text": "THE ONE AND ONLY<br>COFFEE PROJECT",
-            "font": "heading",
-            "alignment": "center",
-            "line_height": "0.8",
-            "letter_spacing": "-0.03em",
-            "case": "uppercase",
-            "text_effect": "reveal",
-            "animation_repeat": false,
-            "text_color": ""
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "jumbo_text"
-      ],
-      "settings": {
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "center",
-        "vertical_alignment": "center",
-        "align_baseline": false,
-        "horizontal_alignment_flex_direction_column": "center",
-        "vertical_alignment_flex_direction_column": "center",
-        "gap": 16,
-        "section_width": "page-width",
-        "section_height": "small",
-        "section_height_custom": 50,
-        "background_media": "none",
-        "background_color": "",
-        "video_position": "cover",
-        "background_image_position": "cover",
-        "toggle_overlay": false,
-        "overlay_color": "#00000026",
-        "overlay_style": "solid",
-        "gradient_direction": "to top",
-        "border": "none",
-        "border_width": 1,
-        "border_opacity": 100,
-        "border_color": "",
-        "border_radius": 0,
-        "padding-block-start": 100,
-        "padding-block-end": 100
+        "overlay_opacity": 20,
+        "heading": "THE ONE AND ONLY<br>COFFEE PROJECT"
       }
     },
     "brand_intro": {
@@ -341,7 +291,6 @@
   },
   "order": [
     "hero_video",
-    "punchy_statement",
     "brand_intro",
     "featured_products",
     "subscription_banner"

@@ -13,10 +13,14 @@ import { getScrollContainer, scrollContainerMediaQuery } from '@theme/scroll-con
  * @theme/scroll-container. ScrollTrigger needs to be told which one is
  * actually scrolling, and re-created when that switches.
  *
- * As the user scrolls through `.hero-video-track`, the video stage shrinks
- * toward its center and the big centered logo fades up and out. Past ~92%
- * progress, `hero-intro-done` is added to `<body>`, which reveals the site
- * header (hidden by default while this section is present).
+ * As the user scrolls through `.hero-video-track`, a single locked-viewport
+ * timeline plays: the video stage shrinks down to a small centered badge
+ * while the big centered logo fades out (first ~60% of the range), then the
+ * heading fades/slides into view (final ~50%, overlapping the tail of the
+ * shrink). Only once that timeline finishes — past ~92% progress —
+ * does `hero-intro-done` get added to `<body>`, revealing the site header
+ * (hidden by default while this section is present) and letting the page
+ * continue scrolling normally into the next section.
  */
 class HeroScrollComponent extends HTMLElement {
   connectedCallback() {
@@ -24,6 +28,7 @@ class HeroScrollComponent extends HTMLElement {
     const ScrollTrigger = window.ScrollTrigger;
     this.stage = this.querySelector('[ref="stage"]');
     this.logo = this.querySelector('[ref="logo"]');
+    this.heading = this.querySelector('[ref="heading"]');
     this.track = this.closest('.hero-video-track');
 
     if (!gsap || !ScrollTrigger || !this.stage || !this.logo || !this.track) {
@@ -54,16 +59,28 @@ class HeroScrollComponent extends HTMLElement {
 
     this.#scrollTrigger?.kill();
 
+    const tl = gsap.timeline().to(
+      this.stage,
+      { scale: 0.15, y: '-16vh', borderRadius: '20px', ease: 'none', duration: 0.6 },
+      0
+    ).to(this.logo, { yPercent: -200, scale: 0.4, opacity: 0, ease: 'none', duration: 0.35 }, 0);
+
+    if (this.heading) {
+      tl.fromTo(
+        this.heading,
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, ease: 'none', duration: 0.5 },
+        0.5
+      );
+    }
+
     this.#scrollTrigger = ScrollTrigger.create({
       trigger: this.track,
       scroller: getScrollContainer(),
       start: 'top top',
       end: 'bottom top',
       scrub: 0.4,
-      animation: gsap
-        .timeline()
-        .to(this.stage, { scale: 0.62, borderRadius: '28px', ease: 'none' }, 0)
-        .to(this.logo, { yPercent: -260, scale: 0.3, opacity: 0, ease: 'none' }, 0),
+      animation: tl,
       onUpdate: (self) => {
         document.body.classList.toggle('hero-intro-done', self.progress > 0.92);
       },
