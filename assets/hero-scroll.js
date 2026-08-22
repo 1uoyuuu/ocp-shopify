@@ -141,7 +141,12 @@ class HeroScrollComponent extends HTMLElement {
       scrub: 0.4,
       animation: tl,
       onUpdate: (self) => {
-        document.body.classList.toggle('hero-intro-done', self.progress >= LOGO_ARRIVE_PROGRESS);
+        // Use the animation's own (eased/scrubbed) progress, not self.progress
+        // (the raw, immediate scroll position). With `scrub` as a number the
+        // animation lags behind scroll by design — gating on self.progress
+        // revealed the header before the logo had actually finished
+        // traveling into place, causing a visible jump.
+        document.body.classList.toggle('hero-intro-done', self.animation.progress() >= LOGO_ARRIVE_PROGRESS);
       },
     });
   }
