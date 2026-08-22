@@ -1,5 +1,11 @@
 import { getScrollContainer, scrollContainerMediaQuery } from '@theme/scroll-container';
 
+/** Fraction of the timeline (== scroll progress, since the timeline's total
+ * duration is 1) at which the traveling logo lands on the header logo. The
+ * header reveal is tied to this same value so it appears the instant the
+ * logo arrives, not later. */
+const LOGO_ARRIVE_PROGRESS = 0.65;
+
 /**
  * Drives the hero-video intro animation. `.hero-video` is kept in place via
  * native `position: sticky` (see hero-video.liquid) rather than GSAP's
@@ -17,11 +23,11 @@ import { getScrollContainer, scrollContainerMediaQuery } from '@theme/scroll-con
  * timeline plays: the video stage shrinks down to a small centered badge
  * (staying dead-center — it does not move) while the big centered logo
  * travels (translate + scale, computed via a FLIP-style rect diff) to land
- * exactly on top of the real header logo's position and size — first ~65%
- * of the range. The heading — split into a top and bottom half that
- * sandwich the shrunk video — then fades/slides into view (final ~50%,
- * overlapping the tail of the shrink). Once the timeline finishes — past
- * ~92% progress — `hero-intro-done` is
+ * exactly on top of the real header logo's position and size — first
+ * `LOGO_ARRIVE_PROGRESS` of the range. The heading — split into a top and
+ * bottom half that sandwich the shrunk video — then fades/slides into view
+ * (final ~50%, overlapping the tail of the shrink). The instant the logo
+ * *arrives* (not when the whole intro finishes), `hero-intro-done` is
  * added to `<body>`. That single class flip does two things at once via
  * CSS (see hero-video.liquid and the stylesheet below): the real header
  * fades in and the traveling logo fades out, in the same spot, at the same
@@ -103,7 +109,11 @@ class HeroScrollComponent extends HTMLElement {
     const tl = gsap
       .timeline()
       .to(this.stage, { scale: 0.15, borderRadius: '20px', ease: 'none', duration: 0.6 }, 0)
-      .to(this.logo, { x: target.x, y: target.y, scale: target.scale, ease: 'none', duration: 0.65 }, 0);
+      .to(
+        this.logo,
+        { x: target.x, y: target.y, scale: target.scale, ease: 'none', duration: LOGO_ARRIVE_PROGRESS },
+        0
+      );
 
     if (this.headingTop) {
       tl.fromTo(this.headingTop, { y: 24, opacity: 0 }, { y: 0, opacity: 1, ease: 'none', duration: 0.5 }, 0.5);
@@ -121,7 +131,7 @@ class HeroScrollComponent extends HTMLElement {
       scrub: 0.4,
       animation: tl,
       onUpdate: (self) => {
-        document.body.classList.toggle('hero-intro-done', self.progress > 0.92);
+        document.body.classList.toggle('hero-intro-done', self.progress >= LOGO_ARRIVE_PROGRESS);
       },
     });
   }
