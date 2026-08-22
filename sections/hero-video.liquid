@@ -3,11 +3,20 @@
   (poezabride.com-style). The video and a large centered logo start
   full-viewport; scrolling through `.hero-video-track` drives a single GSAP
   timeline — never a normal page scroll — that: shrinks the video down to a
-  small badge (~15vw) while the big logo travels (translate + scale) onto
-  the real header logo's position, then fades/slides the heading into view.
-  Once that timeline finishes, `hero-intro-done` on <body> crossfades the
-  traveling logo out and the real header in at the same spot (see the
-  {% style %} block), and lets scrolling continue into the next section.
+  small badge (~15vw) while the big logo travels (translate + scale) toward
+  the header's logo slot, then fades/slides the heading into view.
+
+  There's only ever one logo element — no crossfade with a second, separate
+  header logo. Once the travel finishes, `hero-intro-done` on <body> flips
+  `.hero-video__logo` from `position: absolute` (inside the sticky
+  `.hero-video`, which sits at the viewport's top-left the whole time this
+  plays) to `position: fixed` at that same spot — numerically identical
+  origins, so the switch is invisible — and it stays pinned above the
+  header (z-index) for the rest of the page. The real header's own logo
+  block is hidden site-wide on this template (see
+  blocks/_header-logo.liquid's "Hide on home page" setting and the CSS
+  below overriding its scroll-triggered re-show) so there's never a second
+  logo to fight with.
 
   The locked-viewport feel comes from native `position: sticky` on
   `.hero-video` inside the taller `.hero-video-track`, not GSAP's `pin` —
@@ -21,24 +30,14 @@
 %}
 
 {% style %}
-  #header-component {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.6s var(--ease-out-cubic, ease);
-  }
-
-  body.hero-intro-done #header-component {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .hero-video__logo {
-    transition: opacity 0.6s var(--ease-out-cubic, ease);
-  }
-
-  body.hero-intro-done .hero-video__logo {
-    opacity: 0;
-    pointer-events: none;
+  /* blocks/_header-logo.liquid's [data-hidden-on-home-page] shows the real
+     logo again once the header is stuck/scrolled (its rule includes
+     #header-component, which outranks a plain class/attribute selector) —
+     !important is the only way to override that here. We don't want the
+     re-show: .hero-video__logo (fixed, above the header) stands in for it
+     for the whole page, not just the initial view. */
+  body:has(.hero-video-section) [data-hidden-on-home-page] {
+    display: none !important;
   }
 {% endstyle %}
 
@@ -82,12 +81,13 @@
       ></div>
     </div>
 
-    <div
+    <a
+      href="{{ routes.root_url }}"
       class="hero-video__logo"
       ref="logo"
     >
       {% render 'logo-wordmark' %}
-    </div>
+    </a>
 
     {% if section.settings.heading_top != blank %}
       <div
@@ -182,7 +182,19 @@
     translate: -50% -50%;
     width: 70vw;
     z-index: 2;
-    will-change: transform, opacity;
+    display: block;
+    will-change: transform;
+  }
+
+  /* .hero-video (its offset parent up to this point) sits flush at the
+     viewport's top-left the whole time this plays, so switching to `fixed`
+     here — with the same top/left/translate — lands on the exact same
+     pixel as a moment ago. Stays above the header (see z-index) for the
+     rest of the page, since fixed positioning doesn't end when
+     .hero-video's own sticky range does. */
+  body.hero-intro-done .hero-video__logo {
+    position: fixed;
+    z-index: 1000;
   }
 
   .hero-video__logo svg {

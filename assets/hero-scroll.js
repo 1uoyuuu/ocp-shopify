@@ -1,10 +1,16 @@
 import { getScrollContainer, scrollContainerMediaQuery } from '@theme/scroll-container';
 
 /** Fraction of the timeline (== scroll progress, since the timeline's total
- * duration is 1) at which the traveling logo lands on the header logo. The
- * header reveal is tied to this same value so it appears the instant the
- * logo arrives, not later. */
+ * duration is 1) at which the traveling logo finishes landing at its fixed
+ * spot. */
 const LOGO_ARRIVE_PROGRESS = 0.65;
+
+/** Final rendered height (px) of the logo once it's landed, and how far
+ * down (px) from the top of the viewport its center sits — i.e. roughly
+ * the header's own logo size/position. Tune these to taste; there's no
+ * other element being measured against anymore. */
+const LOGO_FINAL_HEIGHT = 32;
+const LOGO_FINAL_CENTER_Y = 33;
 
 /**
  * Drives the hero-video intro animation. `.hero-video` is kept in place via
@@ -22,18 +28,18 @@ const LOGO_ARRIVE_PROGRESS = 0.65;
  * As the user scrolls through `.hero-video-track`, a single locked-viewport
  * timeline plays: the video stage shrinks down to a small centered badge
  * (staying dead-center — it does not move) while the big centered logo
- * travels (translate + scale, computed via a FLIP-style rect diff) to land
- * exactly on top of the real header logo's position and size — first
- * `LOGO_ARRIVE_PROGRESS` of the range. The heading — split into a top and
- * bottom half that sandwich the shrunk video — then fades/slides into view
- * (final ~50%, overlapping the tail of the shrink). The instant the logo
- * *arrives* (not when the whole intro finishes), `hero-intro-done` is
- * added to `<body>`. That single class flip does two things at once via
- * CSS (see hero-video.liquid and the stylesheet below): the real header
- * fades in and the traveling logo fades out, in the same spot, at the same
- * 0.6s speed — a crossfade handoff rather than a scroll-scrubbed one, so it
- * isn't thrown off by the header's fade running on wall-clock time instead
- * of scroll position.
+ * travels (translate + scale) to a fixed point near the top of the viewport
+ * — first `LOGO_ARRIVE_PROGRESS` of the range. The heading — split into a
+ * top and bottom half that sandwich the shrunk video — then fades/slides
+ * into view (final ~50%, overlapping the tail of the shrink).
+ *
+ * Once the logo arrives, `hero-intro-done` on <body> switches it from
+ * `position: absolute` (inside `.hero-video`, sticky at the viewport's
+ * top-left this whole time) to `position: fixed` at that same spot — see
+ * hero-video.liquid's stylesheet. The two positioning modes share the same
+ * origin at that moment, so the switch is invisible, and the logo then
+ * stays put (above the header, via z-index) for the rest of the page —
+ * there is no second, separate header logo to hand off to or align with.
  */
 class HeroScrollComponent extends HTMLElement {
   connectedCallback() {
@@ -46,7 +52,7 @@ class HeroScrollComponent extends HTMLElement {
     this.track = this.closest('.hero-video-track');
 
     if (!gsap || !ScrollTrigger || !this.stage || !this.logo || !this.track) {
-      // Missing a dependency or ref — don't leave the header permanently hidden.
+      // Missing a dependency or ref — leave the logo in its landed state.
       document.body.classList.add('hero-intro-done');
       return;
     }
@@ -60,48 +66,31 @@ class HeroScrollComponent extends HTMLElement {
 
     this.#createTrigger();
     scrollContainerMediaQuery.addEventListener('change', this.#handleScrollerChange);
-    // Logo/header images may still be decoding when connectedCallback runs,
-    // which would measure a 0×0 header-logo rect — remeasure once everything
-    // has loaded so the travel target is accurate.
-    window.addEventListener('load', this.#handleScrollerChange, { once: true });
   }
 
   disconnectedCallback() {
     this.#scrollTrigger?.kill();
     scrollContainerMediaQuery.removeEventListener('change', this.#handleScrollerChange);
-    window.removeEventListener('load', this.#handleScrollerChange);
   }
 
   /**
-   * Diffs the hero logo's current rect against the real header logo's rect
-   * (present in the DOM the whole time, just hidden via opacity) to get the
-   * translate/scale that lands one exactly on the other.
+   * The logo starts centered in the viewport (`.hero-video` is 100vw ×
+   * 100svh, sticky at the top-left). No horizontal move is needed — the
+   * viewport's horizontal center already is the logo's horizontal center.
+   * Vertically, it needs to move from mid-viewport up to
+   * `LOGO_FINAL_CENTER_Y`, and shrink from its natural rendered height down
+   * to `LOGO_FINAL_HEIGHT`.
    *
-   * Measures the actual artwork (the inline `<svg>`), not the link wrapper
-   * around it — the header's `.header-logo` anchor is the height of the
-   * whole nav row (~60px), not the logo inside it, so diffing against the
-   * wrapper produced a scale-*up* instead of a scale-down whenever the
-   * artwork was shorter than the row (e.g. a wide, short wordmark). Falls
-   * back to the wrapper when there's no `<svg>` (text-fallback logo).
-   *
-   * @returns {{x: number, y: number, scale: number} | null}
+   * @returns {{x: number, y: number, scale: number}}
    */
   #computeLogoTarget() {
-    const headerLogo = document.querySelector('.header-logo');
-    if (!headerLogo) return null;
-
-    const heroEl = this.logo.querySelector('svg') ?? this.logo;
-    const headerEl = headerLogo.querySelector('svg') ?? headerLogo;
-
-    const heroRect = heroEl.getBoundingClientRect();
-    const headerRect = headerEl.getBoundingClientRect();
-
-    if (!heroRect.width || !heroRect.height || !headerRect.width || !headerRect.height) return null;
+    const svg = this.logo.querySelector('svg') ?? this.logo;
+    const naturalHeight = svg.getBoundingClientRect().height || 1;
 
     return {
-      x: headerRect.left + headerRect.width / 2 - (heroRect.left + heroRect.width / 2),
-      y: headerRect.top + headerRect.height / 2 - (heroRect.top + heroRect.height / 2),
-      scale: headerRect.height / heroRect.height,
+      x: 0,
+      y: LOGO_FINAL_CENTER_Y - window.innerHeight / 2,
+      scale: LOGO_FINAL_HEIGHT / naturalHeight,
     };
   }
 
@@ -111,10 +100,7 @@ class HeroScrollComponent extends HTMLElement {
 
     this.#scrollTrigger?.kill();
 
-    // Fallback for the rare case the header logo can't be measured yet
-    // (e.g. reduced layout during a design-mode re-render): travel toward
-    // the top-center of the viewport and shrink to a plausible nav size.
-    const target = this.#computeLogoTarget() ?? { x: 0, y: -(window.innerHeight / 2 - 30), scale: 0.16 };
+    const target = this.#computeLogoTarget();
 
     const tl = gsap
       .timeline()
@@ -142,10 +128,9 @@ class HeroScrollComponent extends HTMLElement {
       animation: tl,
       onUpdate: (self) => {
         // Use the animation's own (eased/scrubbed) progress, not self.progress
-        // (the raw, immediate scroll position). With `scrub` as a number the
-        // animation lags behind scroll by design — gating on self.progress
-        // revealed the header before the logo had actually finished
-        // traveling into place, causing a visible jump.
+        // (the raw, immediate scroll position) — with `scrub` as a number the
+        // animation lags behind scroll by design, so gating on self.progress
+        // would flip the logo to `fixed` before it had visually arrived.
         document.body.classList.toggle('hero-intro-done', self.animation.progress() >= LOGO_ARRIVE_PROGRESS);
       },
     });
