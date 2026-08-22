@@ -77,12 +77,12 @@ class HeroScrollComponent extends HTMLElement {
    * (present in the DOM the whole time, just hidden via opacity) to get the
    * translate/scale that lands one exactly on the other.
    *
-   * Measures the actual artwork (`<img>`), not the link wrapper around it —
-   * the header's `.header-logo` anchor is the height of the whole nav row
-   * (~60px), not the logo image inside it, so diffing against the wrapper
-   * produced a scale-*up* instead of a scale-down whenever the artwork was
-   * shorter than the row (e.g. a wide, short wordmark). Falls back to the
-   * wrapper when there's no `<img>` (text-fallback logo).
+   * Measures the actual artwork (the inline `<svg>`), not the link wrapper
+   * around it — the header's `.header-logo` anchor is the height of the
+   * whole nav row (~60px), not the logo inside it, so diffing against the
+   * wrapper produced a scale-*up* instead of a scale-down whenever the
+   * artwork was shorter than the row (e.g. a wide, short wordmark). Falls
+   * back to the wrapper when there's no `<svg>` (text-fallback logo).
    *
    * @returns {{x: number, y: number, scale: number} | null}
    */
@@ -90,8 +90,8 @@ class HeroScrollComponent extends HTMLElement {
     const headerLogo = document.querySelector('.header-logo');
     if (!headerLogo) return null;
 
-    const heroEl = this.logo.querySelector('.hero-video__logo-image') ?? this.logo;
-    const headerEl = headerLogo.querySelector('.header-logo__image') ?? headerLogo;
+    const heroEl = this.logo.querySelector('svg') ?? this.logo;
+    const headerEl = headerLogo.querySelector('svg') ?? headerLogo;
 
     const heroRect = heroEl.getBoundingClientRect();
     const headerRect = headerEl.getBoundingClientRect();

@@ -17,7 +17,6 @@
 {% endcomment %}
 
 {% liquid
-  assign logo_image = settings.logo_inverse | default: settings.logo
   assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0
 %}
 
@@ -87,13 +86,7 @@
       class="hero-video__logo"
       ref="logo"
     >
-      {% render 'image',
-        image: logo_image,
-        class: 'hero-video__logo-image',
-        height: 400,
-        alt_text_fallback: shop.name,
-        text_fallback: shop.name
-      %}
+      {% render 'logo-wordmark' %}
     </div>
 
     {% if section.settings.heading_top != blank %}
@@ -187,15 +180,15 @@
     top: 50%;
     left: 50%;
     translate: -50% -50%;
-    width: clamp(140px, 22vw, 320px);
+    width: 70vw;
     z-index: 2;
     will-change: transform, opacity;
   }
 
-  .hero-video__logo-image {
+  .hero-video__logo svg {
+    display: block;
     width: 100%;
     height: auto;
-    display: block;
   }
 
   .hero-video__heading {

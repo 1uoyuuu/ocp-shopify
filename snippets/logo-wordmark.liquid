@@ -1,0 +1,8 @@
+{% comment %}
+  Inlines the Only Coffee Project wordmark SVG directly into the DOM
+  (rather than as an <img>), so individual paths can be targeted for motion
+  later. Sizing is controlled by the caller via CSS on a wrapping element
+  (`width/height: 100%` on the svg overrides its own width/height
+  attributes) — see hero-video.liquid and blocks/_header-logo.liquid.
+{% endcomment %}
+{{ 'logo-wordmark.svg' | inline_asset_content }}
