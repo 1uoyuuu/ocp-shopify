@@ -15,11 +15,13 @@ import { getScrollContainer, scrollContainerMediaQuery } from '@theme/scroll-con
  *
  * As the user scrolls through `.hero-video-track`, a single locked-viewport
  * timeline plays: the video stage shrinks down to a small centered badge
- * while the big centered logo travels (translate + scale, computed via a
- * FLIP-style rect diff) to land exactly on top of the real header logo's
- * position and size — first ~65% of the range. The heading then
- * fades/slides into view (final ~50%, overlapping the tail of the shrink).
- * Once the timeline finishes — past ~92% progress — `hero-intro-done` is
+ * (staying dead-center — it does not move) while the big centered logo
+ * travels (translate + scale, computed via a FLIP-style rect diff) to land
+ * exactly on top of the real header logo's position and size — first ~65%
+ * of the range. The heading — split into a top and bottom half that
+ * sandwich the shrunk video — then fades/slides into view (final ~50%,
+ * overlapping the tail of the shrink). Once the timeline finishes — past
+ * ~92% progress — `hero-intro-done` is
  * added to `<body>`. That single class flip does two things at once via
  * CSS (see hero-video.liquid and the stylesheet below): the real header
  * fades in and the traveling logo fades out, in the same spot, at the same
@@ -33,7 +35,8 @@ class HeroScrollComponent extends HTMLElement {
     const ScrollTrigger = window.ScrollTrigger;
     this.stage = this.querySelector('[ref="stage"]');
     this.logo = this.querySelector('[ref="logo"]');
-    this.heading = this.querySelector('[ref="heading"]');
+    this.headingTop = this.querySelector('[ref="headingTop"]');
+    this.headingBottom = this.querySelector('[ref="headingBottom"]');
     this.track = this.closest('.hero-video-track');
 
     if (!gsap || !ScrollTrigger || !this.stage || !this.logo || !this.track) {
@@ -99,16 +102,15 @@ class HeroScrollComponent extends HTMLElement {
 
     const tl = gsap
       .timeline()
-      .to(this.stage, { scale: 0.15, y: '-16vh', borderRadius: '20px', ease: 'none', duration: 0.6 }, 0)
+      .to(this.stage, { scale: 0.15, borderRadius: '20px', ease: 'none', duration: 0.6 }, 0)
       .to(this.logo, { x: target.x, y: target.y, scale: target.scale, ease: 'none', duration: 0.65 }, 0);
 
-    if (this.heading) {
-      tl.fromTo(
-        this.heading,
-        { y: 24, opacity: 0 },
-        { y: 0, opacity: 1, ease: 'none', duration: 0.5 },
-        0.5
-      );
+    if (this.headingTop) {
+      tl.fromTo(this.headingTop, { y: 24, opacity: 0 }, { y: 0, opacity: 1, ease: 'none', duration: 0.5 }, 0.5);
+    }
+
+    if (this.headingBottom) {
+      tl.fromTo(this.headingBottom, { y: -24, opacity: 0 }, { y: 0, opacity: 1, ease: 'none', duration: 0.5 }, 0.5);
     }
 
     this.#scrollTrigger = ScrollTrigger.create({

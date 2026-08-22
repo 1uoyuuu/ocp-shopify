@@ -96,12 +96,21 @@
       %}
     </div>
 
-    {% if section.settings.heading != blank %}
+    {% if section.settings.heading_top != blank %}
       <div
-        class="hero-video__heading"
-        ref="heading"
+        class="hero-video__heading hero-video__heading--top"
+        ref="headingTop"
       >
-        {{ section.settings.heading }}
+        {{ section.settings.heading_top }}
+      </div>
+    {% endif %}
+
+    {% if section.settings.heading_bottom != blank %}
+      <div
+        class="hero-video__heading hero-video__heading--bottom"
+        ref="headingBottom"
+      >
+        {{ section.settings.heading_bottom }}
       </div>
     {% endif %}
   </hero-scroll-component>
@@ -192,7 +201,6 @@
   .hero-video__heading {
     position: absolute;
     left: 50%;
-    bottom: 14%;
     translate: -50% 0;
     width: min(92vw, 900px);
     z-index: 3;
@@ -207,6 +215,16 @@
     text-transform: uppercase;
     color: var(--color-foreground, #111);
     will-change: transform, opacity;
+  }
+
+  /* The shrunk video settles to ~15% of the stage, dead center — these sit
+     just outside that band so the sandwich reads as one composed group. */
+  .hero-video__heading--top {
+    bottom: 59%;
+  }
+
+  .hero-video__heading--bottom {
+    top: 59%;
   }
 {% endstylesheet %}
 
@@ -250,11 +268,21 @@
       "content": "Heading"
     },
     {
+      "type": "paragraph",
+      "content": "The video sandwiches between these two: top text sits above the shrunk video, bottom text sits below it."
+    },
+    {
       "type": "textarea",
-      "id": "heading",
-      "label": "Heading",
-      "info": "Shown once the video has shrunk down. Use <br> for line breaks.",
-      "default": "THE ONE AND ONLY<br>COFFEE PROJECT"
+      "id": "heading_top",
+      "label": "Heading — top",
+      "info": "Use <br> for line breaks.",
+      "default": "THE BEST<br>COFFEE SHOP"
+    },
+    {
+      "type": "textarea",
+      "id": "heading_bottom",
+      "label": "Heading — bottom",
+      "default": "IN AUSTRALIA"
     }
   ],
   "presets": [
