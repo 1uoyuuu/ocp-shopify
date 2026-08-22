@@ -1,0 +1,64 @@
+{% comment %}
+  The site's logo as an independent, page-level element — a sibling of the
+  header and main content (rendered directly in layout/theme.liquid), not
+  nested inside any section. This is deliberate: a logo tied to a section's
+  DOM disappears if that section is ever removed/reordered, and — for the
+  home page specifically — needs to sit at a fixed viewport position that
+  survives past the hero section's own scroll range, which a descendant of
+  that section can't do on its own.
+
+  Renders "docked" (small, fixed near the top) by default everywhere. On
+  the home page, hero-scroll.js finds this element via [data-site-logo],
+  gsap.set()s it to a large centered override the moment the page loads,
+  then scrubs it back to identity (i.e. this docked resting state) as the
+  hero plays out — so no separate "landed" class or position-mode switch is
+  needed; the resting values here ARE the landing target.
+
+  This fully replaces the theme's own header-logo block (see the global
+  override in this file's stylesheet) — simpler than trying to hide it only
+  on some templates.
+{% endcomment %}
+<a
+  href="{{ routes.root_url }}"
+  class="site-logo"
+  data-site-logo
+>
+  {% render 'logo-wordmark' %}
+</a>
+
+{% stylesheet %}
+  .site-logo {
+    position: fixed;
+    top: 33px;
+    left: 50%;
+    translate: -50% -50%;
+    width: 200px;
+    z-index: 1000;
+    display: block;
+    will-change: transform;
+  }
+
+  .site-logo svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* This snippet is the single source of truth for the logo everywhere —
+     the theme's own header-logo block is redundant now, on every template
+     (not just the home page), so it's switched off globally here rather
+     than fought with per-template visibility settings. */
+  .header-logo {
+    display: none !important; /* stylelint-disable-line declaration-no-important */
+  }
+
+  /* The theme's transparent+sticky header intentionally goes solid white
+     once "stuck" (see sections/header.liquid's [data-sticky-state] rules).
+     We want it to stay see-through everywhere instead, since .site-logo —
+     not the header — carries the brand mark now. */
+  #header-component,
+  .header__underlay-closed,
+  .header__underlay-open {
+    background: transparent !important; /* stylelint-disable-line declaration-no-important */
+  }
+{% endstylesheet %}
