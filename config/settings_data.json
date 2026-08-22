@@ -9,12 +9,14 @@
  */
 {
   "current": {
-    "logo": "shopify://shop_images/image_1.png",
+    "logo": "shopify://shop_images/word-mark-logo_262b22b0-ee3b-45e0-8692-025d53c07c01.png",
+    "logo_inverse": "shopify://shop_images/word-mark-logo_262b22b0-ee3b-45e0-8692-025d53c07c01.png",
+    "logo_height": 28,
     "page_text_color": "{{ settings.color_palette.foreground }}",
-    "type_body_font": "red_hat_text_n4",
-    "type_subheading_font": "newsreader_n2",
-    "type_heading_font": "newsreader_n2",
-    "type_accent_font": "red_hat_text_n4",
+    "type_body_font": "archivo_n4",
+    "type_subheading_font": "archivo_n4",
+    "type_heading_font": "archivo_n4",
+    "type_accent_font": "archivo_n4",
     "type_size_paragraph": "12",
     "type_line_height_paragraph": "body-loose",
     "type_font_h1": "heading",
@@ -92,9 +94,9 @@
     "content_for_index": [],
     "color_palette": {
       "background": "#ffffff",
-      "foreground": "#000000",
+      "foreground": "#0F80BE",
       "color1": "#383838",
-      "color2": "#F2F2F2"
+      "color2": "#f2f2f2"
     }
   },
   "presets": {
