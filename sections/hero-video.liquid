@@ -3,10 +3,11 @@
   (poezabride.com-style). The video and a large centered logo start
   full-viewport; scrolling through `.hero-video-track` drives a single GSAP
   timeline — never a normal page scroll — that: shrinks the video down to a
-  small badge (~15vw) while it fades the logo out, then fades/slides the
-  heading into view. Only once that timeline finishes does `hero-intro-done`
-  get added to <body>, which reveals the site header (hidden here) and lets
-  scrolling continue into the next section.
+  small badge (~15vw) while the big logo travels (translate + scale) onto
+  the real header logo's position, then fades/slides the heading into view.
+  Once that timeline finishes, `hero-intro-done` on <body> crossfades the
+  traveling logo out and the real header in at the same spot (see the
+  {% style %} block), and lets scrolling continue into the next section.
 
   The locked-viewport feel comes from native `position: sticky` on
   `.hero-video` inside the taller `.hero-video-track`, not GSAP's `pin` —
@@ -30,6 +31,15 @@
   body.hero-intro-done #header-component {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  .hero-video__logo {
+    transition: opacity 0.6s var(--ease-out-cubic, ease);
+  }
+
+  body.hero-intro-done .hero-video__logo {
+    opacity: 0;
+    pointer-events: none;
   }
 {% endstyle %}
 

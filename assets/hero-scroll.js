@@ -15,12 +15,17 @@ import { getScrollContainer, scrollContainerMediaQuery } from '@theme/scroll-con
  *
  * As the user scrolls through `.hero-video-track`, a single locked-viewport
  * timeline plays: the video stage shrinks down to a small centered badge
- * while the big centered logo fades out (first ~60% of the range), then the
- * heading fades/slides into view (final ~50%, overlapping the tail of the
- * shrink). Only once that timeline finishes — past ~92% progress —
- * does `hero-intro-done` get added to `<body>`, revealing the site header
- * (hidden by default while this section is present) and letting the page
- * continue scrolling normally into the next section.
+ * while the big centered logo travels (translate + scale, computed via a
+ * FLIP-style rect diff) to land exactly on top of the real header logo's
+ * position and size — first ~65% of the range. The heading then
+ * fades/slides into view (final ~50%, overlapping the tail of the shrink).
+ * Once the timeline finishes — past ~92% progress — `hero-intro-done` is
+ * added to `<body>`. That single class flip does two things at once via
+ * CSS (see hero-video.liquid and the stylesheet below): the real header
+ * fades in and the traveling logo fades out, in the same spot, at the same
+ * 0.6s speed — a crossfade handoff rather than a scroll-scrubbed one, so it
+ * isn't thrown off by the header's fade running on wall-clock time instead
+ * of scroll position.
  */
 class HeroScrollComponent extends HTMLElement {
   connectedCallback() {
@@ -46,11 +51,39 @@ class HeroScrollComponent extends HTMLElement {
 
     this.#createTrigger();
     scrollContainerMediaQuery.addEventListener('change', this.#handleScrollerChange);
+    // Logo/header images may still be decoding when connectedCallback runs,
+    // which would measure a 0×0 header-logo rect — remeasure once everything
+    // has loaded so the travel target is accurate.
+    window.addEventListener('load', this.#handleScrollerChange, { once: true });
   }
 
   disconnectedCallback() {
     this.#scrollTrigger?.kill();
     scrollContainerMediaQuery.removeEventListener('change', this.#handleScrollerChange);
+    window.removeEventListener('load', this.#handleScrollerChange);
+  }
+
+  /**
+   * Diffs the hero logo's current rect against the real header logo's rect
+   * (present in the DOM the whole time, just hidden via opacity) to get the
+   * translate/scale that lands one exactly on the other.
+   *
+   * @returns {{x: number, y: number, scale: number} | null}
+   */
+  #computeLogoTarget() {
+    const headerLogo = document.querySelector('.header-logo');
+    if (!headerLogo) return null;
+
+    const heroRect = this.logo.getBoundingClientRect();
+    const headerRect = headerLogo.getBoundingClientRect();
+
+    if (!heroRect.width || !heroRect.height || !headerRect.width || !headerRect.height) return null;
+
+    return {
+      x: headerRect.left + headerRect.width / 2 - (heroRect.left + heroRect.width / 2),
+      y: headerRect.top + headerRect.height / 2 - (heroRect.top + heroRect.height / 2),
+      scale: headerRect.height / heroRect.height,
+    };
   }
 
   #createTrigger() {
@@ -59,11 +92,15 @@ class HeroScrollComponent extends HTMLElement {
 
     this.#scrollTrigger?.kill();
 
-    const tl = gsap.timeline().to(
-      this.stage,
-      { scale: 0.15, y: '-16vh', borderRadius: '20px', ease: 'none', duration: 0.6 },
-      0
-    ).to(this.logo, { yPercent: -200, scale: 0.4, opacity: 0, ease: 'none', duration: 0.35 }, 0);
+    // Fallback for the rare case the header logo can't be measured yet
+    // (e.g. reduced layout during a design-mode re-render): travel toward
+    // the top-center of the viewport and shrink to a plausible nav size.
+    const target = this.#computeLogoTarget() ?? { x: 0, y: -(window.innerHeight / 2 - 30), scale: 0.16 };
+
+    const tl = gsap
+      .timeline()
+      .to(this.stage, { scale: 0.15, y: '-16vh', borderRadius: '20px', ease: 'none', duration: 0.6 }, 0)
+      .to(this.logo, { x: target.x, y: target.y, scale: target.scale, ease: 'none', duration: 0.65 }, 0);
 
     if (this.heading) {
       tl.fromTo(
