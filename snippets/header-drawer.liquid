@@ -65,12 +65,16 @@
       aria-label="{{ 'accessibility.menu' | t }}"
       on:click="/toggle"
     >
-      <span class="svg-wrapper header-drawer-icon header-drawer-icon--open">
-        {{- 'icon-menu.svg' | inline_asset_content -}}
-      </span>
-      <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
-        {{- 'icon-close-menu.svg' | inline_asset_content -}}
-      </span>
+      {% if block_settings.menu_trigger_style == 'text' %}
+        <span class="header-drawer__label">{{ block_settings.menu_label | default: 'Menu' }}</span>
+      {% else %}
+        <span class="svg-wrapper header-drawer-icon header-drawer-icon--open">
+          {{- 'icon-menu.svg' | inline_asset_content -}}
+        </span>
+        <span class="svg-wrapper header-drawer-icon header-drawer-icon--close">
+          {{- 'icon-close-menu.svg' | inline_asset_content -}}
+        </span>
+      {% endif %}
     </summary>
     <div
       ref="menuDrawer"
@@ -809,6 +813,15 @@
     margin: auto;
     width: var(--icon-size-xs);
     height: var(--icon-size-xs);
+  }
+
+  .header-drawer__label {
+    font-family: var(--font-body--family);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
   }
 
   .menu-drawer__featured-content {

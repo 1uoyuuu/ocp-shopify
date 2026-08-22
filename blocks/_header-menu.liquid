@@ -14,7 +14,7 @@
 {% case variant %}
   {% when 'mobile' %}
     <div
-      class="header__drawer"
+      class="header__drawer{% if block_settings.always_show_drawer %} header__drawer--forced{% endif %}"
       ref="headerDrawerContainer"
       data-hydration-key="header-drawer-mobile"
       {{ block.shopify_attributes }}
@@ -189,7 +189,7 @@
 
     <header-menu
       ref="headerMenu"
-      class="header-menu"
+      class="header-menu{% if block_settings.always_show_drawer %} header-menu--force-drawer{% endif %}"
       {{ block.shopify_attributes }}
       data-hydration-key="header-menu"
     >
@@ -242,6 +242,15 @@
       display: none;
       min-height: 0;
     }
+  }
+
+  .header__drawer--forced {
+    display: flex !important; /* stylelint-disable-line declaration-no-important */
+    min-height: var(--header-drawer-min-height);
+  }
+
+  .header-menu--force-drawer {
+    display: none !important; /* stylelint-disable-line declaration-no-important */
   }
 
   .header--compact .header__drawer {
@@ -1058,6 +1067,40 @@
       "id": "drawer_dividers",
       "label": "t:settings.dividers",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Menu trigger"
+    },
+    {
+      "type": "checkbox",
+      "id": "always_show_drawer",
+      "label": "Always show a single trigger",
+      "info": "Shows one menu trigger at every screen width instead of switching to inline links on desktop.",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "menu_trigger_style",
+      "label": "Trigger style",
+      "options": [
+        {
+          "value": "icon",
+          "label": "Icon"
+        },
+        {
+          "value": "text",
+          "label": "Text"
+        }
+      ],
+      "default": "text"
+    },
+    {
+      "type": "text",
+      "id": "menu_label",
+      "label": "Trigger label",
+      "default": "Menu",
+      "visible_if": "{{ block.settings.menu_trigger_style == 'text' }}"
     }
   ]
 }
