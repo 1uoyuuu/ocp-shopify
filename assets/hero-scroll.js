@@ -1,3 +1,5 @@
+import { getScrollTop, scrollTo, getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-container';
+
 /** Fraction of the timeline at which the logo finishes travelling back to
  * its resting, docked position. */
 const LOGO_ARRIVE_PROGRESS = 0.65;
@@ -13,7 +15,7 @@ const DOCKED_CENTER_Y = 33;
 
 /** How much accumulated gesture distance (px of wheel/swipe) plays the
  * intro from start to finish. Higher = the intro takes more scrolling. */
-const GESTURE_DISTANCE = 1400;
+const GESTURE_DISTANCE = 1200;
 
 /**
  * Drives the hero-video intro, which is a *locked* sequence rather than a
@@ -51,9 +53,18 @@ class HeroScrollComponent extends HTMLElement {
     this.headingLine2 = this.querySelector('[ref="headingLine2"]');
     this.headingLine3 = this.querySelector('[ref="headingLine3"]');
 
-    if (!gsap || !Observer || !this.stage || !this.logo) return;
+    // The headings are hidden by default in CSS so they can't flash in
+    // before the timeline's "from" state applies — any path that skips the
+    // animation has to reveal them itself.
+    if (!gsap || !Observer || !this.stage || !this.logo) {
+      this.dataset.introStatic = '';
+      return;
+    }
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.dataset.introStatic = '';
+      return;
+    }
 
     gsap.registerPlugin(Observer);
 
@@ -75,14 +86,10 @@ class HeroScrollComponent extends HTMLElement {
       preventDefault: true,
     });
 
-    // Scrolling back to the very top replays the intro, so the page never
-    // sits at the top showing a finished hero with no way to see it again.
-    this.#scrollListener = () => {
-      if (this.#locked || window.scrollY > 0) return;
-      this.#progress = 1;
-      this.#lock();
-    };
-    window.addEventListener('scroll', this.#scrollListener, { passive: true });
+    this.#bindScrollListener();
+    // Which element actually scrolls (and so which one emits scroll events)
+    // flips at the desktop breakpoint — rebind when it does.
+    scrollContainerMediaQuery.addEventListener('change', this.#bindScrollListener);
 
     window.addEventListener('resize', this.#resizeListener);
   }
@@ -92,9 +99,32 @@ class HeroScrollComponent extends HTMLElement {
     this.#timeline?.kill();
     this.#unlock();
     window.gsap?.set(this.logo, { clearProps: 'all' });
-    window.removeEventListener('scroll', this.#scrollListener);
+    this.#scrollEventTarget?.removeEventListener('scroll', this.#scrollListener);
+    scrollContainerMediaQuery.removeEventListener('change', this.#bindScrollListener);
     window.removeEventListener('resize', this.#resizeListener);
   }
+
+  /**
+   * Watches the real scroll container — this theme scrolls `.page-wrapper`
+   * rather than the document at desktop widths, and scroll events don't
+   * bubble from an element up to `window`, so listening on `window` here
+   * silently never fired on desktop.
+   */
+  #bindScrollListener = () => {
+    this.#scrollEventTarget?.removeEventListener('scroll', this.#scrollListener);
+    this.#scrollEventTarget = getScrollEventTarget();
+    this.#scrollEventTarget.addEventListener('scroll', this.#scrollListener, { passive: true });
+  };
+
+  /**
+   * Scrolling back to the very top re-locks the intro at its end, so it can
+   * be rewound by continuing to scroll up.
+   */
+  #scrollListener = () => {
+    if (this.#locked || getScrollTop() > 0) return;
+    this.#progress = 1;
+    this.#lock();
+  };
 
   /**
    * The hero's opening look for the logo: large and vertically centered.
@@ -155,7 +185,7 @@ class HeroScrollComponent extends HTMLElement {
     this.#locked = true;
     document.documentElement.classList.add('hero-intro-locked');
     this.#observer?.enable();
-    window.scrollTo(0, 0);
+    scrollTo({ top: 0, behavior: 'instant' });
     this.#timeline.progress(this.#progress);
   }
 
@@ -177,11 +207,12 @@ class HeroScrollComponent extends HTMLElement {
   /** @type {import('gsap/Observer').Observer | undefined} */
   #observer;
 
+  /** @type {EventTarget | undefined} */
+  #scrollEventTarget;
+
   #locked = false;
 
   #progress = 0;
-
-  #scrollListener = () => {};
 }
 
 if (!customElements.get('hero-scroll-component')) {
