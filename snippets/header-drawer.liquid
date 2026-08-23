@@ -51,7 +51,7 @@
 
 <header-drawer
   class="header-drawer {{ class }}"
-  style="--menu-image-border-radius: {{ image_border_radius }}px; --resource-card-corner-radius: {{ image_border_radius }}px;"
+  style="--menu-image-border-radius: {{ image_border_radius }}px; --resource-card-corner-radius: {{ image_border_radius }}px; --drawer-link-size: {{ block_settings.drawer_link_size | default: '3rem' }}; --drawer-text-color: {{ block_settings.text_color | default: settings.page_background_color }};"
 >
   <details
     id="Details-menu-drawer-container"
@@ -66,7 +66,17 @@
       on:click="/toggle"
     >
       {% if block_settings.menu_trigger_style == 'text' %}
-        <span class="header-drawer__label">{{ block_settings.menu_label | default: 'Menu' }}</span>
+        {% comment %}
+          Both labels are rendered and swapped by CSS off the `.menu-open`
+          class the drawer's JS puts on <details>, so the trigger reads
+          CLOSE while the panel is open without any extra scripting.
+        {% endcomment %}
+        <span class="header-drawer__label header-drawer__label--open">
+          {{- block_settings.menu_label | default: 'Menu' -}}
+        </span>
+        <span class="header-drawer__label header-drawer__label--close">
+          {{- block_settings.menu_label_close | default: 'Close' -}}
+        </span>
       {% else %}
         <span class="svg-wrapper header-drawer-icon header-drawer-icon--open">
           {{- 'icon-menu.svg' | inline_asset_content -}}
@@ -593,6 +603,38 @@
           {% endif %}
         </ul>
       </nav>
+
+      {%- comment -%}
+        Brand mark + social links pinned below the navigation. Both are
+        optional and driven by the menu block's settings so they can be
+        changed (or switched off) from the theme editor.
+      {%- endcomment -%}
+      {% if block_settings.drawer_show_arrow or block_settings.drawer_social_menu != blank %}
+        <div class="menu-drawer__brand menu-drawer__animated-element">
+          {% if block_settings.drawer_show_arrow %}
+            <span class="menu-drawer__arrow">{% render 'logo-arrow' %}</span>
+          {% endif %}
+
+          {% if block_settings.drawer_social_menu != blank %}
+            <ul
+              class="menu-drawer__social list-unstyled"
+              role="list"
+            >
+              {% for link in block_settings.drawer_social_menu.links %}
+                <li>
+                  <a
+                    href="{{ link.url }}"
+                    class="menu-drawer__social-link"
+                  >
+                    {{- link.title -}}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      {% endif %}
+
       <div
         class="menu-drawer__utility-links menu-drawer__animated-element"
         style="--menu-drawer-animation-index: {{ linklist.links.size }};"
@@ -826,6 +868,63 @@
     white-space: nowrap;
   }
 
+  details:not(.menu-open) .header-drawer__label--close,
+  details.menu-open .header-drawer__label--open {
+    display: none;
+  }
+
+  /* The panel covers the viewport, so the header row has to be lifted above
+     it for the CLOSE / CART controls to stay reachable while it's open —
+     and recolored to the panel's own text color, since it's now sitting on
+     the panel's background rather than the page's. */
+  #header-component:has(.menu-open) .header__row {
+    z-index: calc(var(--layer-menu-drawer) + 1);
+    --color-foreground: var(--drawer-text-color);
+  }
+
+  /* CLOSE in the header replaces the panel's own close button, and a
+     full-screen panel leaves nothing behind it to dim. */
+  .menu-drawer > .menu-drawer__close-button,
+  .menu-drawer__backdrop {
+    display: none;
+  }
+
+  .menu-drawer__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(48px, 9vh, 120px);
+    padding-block: clamp(32px, 6vh, 80px);
+  }
+
+  .menu-drawer__arrow {
+    display: block;
+    width: clamp(28px, 3vw, 44px);
+    color: var(--color-foreground);
+  }
+
+  .menu-drawer__arrow svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .menu-drawer__social {
+    display: flex;
+    gap: var(--gap-lg);
+    margin: 0;
+    padding: 0;
+  }
+
+  .menu-drawer__social-link {
+    font-family: var(--header-actions-font-family);
+    font-size: var(--header-actions-font-size);
+    font-weight: var(--header-actions-font-weight);
+    text-transform: var(--header-actions-text-case);
+    color: var(--color-foreground);
+    text-decoration: none;
+  }
+
   .menu-drawer__featured-content {
     z-index: var(--layer-base);
     container-type: inline-size;
@@ -862,12 +961,32 @@
     margin-inline-end: var(--margin-xl);
   }
 
+  /* Centered in the full-screen panel rather than running down its left
+     edge, so it matches the dropdown layout. */
   .menu-drawer__navigation {
     padding: 0;
+    width: 100%;
+  }
 
-    @media screen and (min-width: 750px) {
-      margin-top: var(--drawer-header-desktop-top);
-    }
+  .menu-drawer__menu.has-submenu {
+    margin-block-end: 0;
+  }
+
+  .menu-drawer__menu > .menu-drawer__list-item {
+    justify-content: center;
+    min-height: 0;
+  }
+
+  .menu-drawer__menu-item--mainlist {
+    /* Redeclared here (rather than inherited from menu-font-styles) so the
+       panel's links can be sized independently of the compact mobile-drawer
+       preset — see the menu block's "Panel link size" setting. */
+    --menu-top-level-font-size: var(--drawer-link-size, 1.75rem);
+
+    justify-content: center;
+    text-align: center;
+    min-height: 0;
+    padding-block: 0.12em;
   }
 
   details:not(.menu-open) .header__icon--menu .header-drawer-icon--close {
@@ -888,13 +1007,15 @@
     }
   }
 
+  /* Full-viewport panel that slides down from the top (rather than the
+     stock left-hand side panel), so the menu reads as a dropdown covering
+     the page with the header still visible over it. */
   .menu-drawer {
     position: fixed;
-    transform: translateX(-100%);
+    transform: translateY(-100%);
     visibility: hidden;
-    height: var(--drawer-height);
-    width: var(--drawer-width);
-    max-width: var(--drawer-max-width);
+    height: 100dvh;
+    width: 100vw;
     z-index: var(--layer-menu-drawer);
     left: 0;
     top: 0;
@@ -902,12 +1023,9 @@
     background-color: var(--color-background);
     overflow: auto;
     display: flex;
-    border-right: var(--style-border-drawer);
     flex-direction: column;
-
-    @media screen and (min-width: 750px) {
-      width: 25rem;
-    }
+    justify-content: center;
+    align-items: center;
   }
 
   /* When opening a submenu we don't want the first-level menu to be scrollable, so we reset the overflow  */
@@ -939,7 +1057,7 @@
 
   .menu-open > .menu-drawer,
   .menu-open > .menu-drawer__submenu:not(.menu-drawer__menu--childlist) {
-    transform: translateX(0);
+    transform: translateY(0);
     visibility: visible;
     opacity: 1;
     display: flex;

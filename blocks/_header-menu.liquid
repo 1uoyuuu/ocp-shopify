@@ -1101,6 +1101,57 @@
       "label": "Trigger label",
       "default": "Menu",
       "visible_if": "{{ block.settings.menu_trigger_style == 'text' }}"
+    },
+    {
+      "type": "text",
+      "id": "menu_label_close",
+      "label": "Trigger label when open",
+      "default": "Close",
+      "visible_if": "{{ block.settings.menu_trigger_style == 'text' }}"
+    },
+    {
+      "type": "header",
+      "content": "Menu panel"
+    },
+    {
+      "type": "select",
+      "id": "drawer_link_size",
+      "label": "Panel link size",
+      "options": [
+        {
+          "value": "1.75rem",
+          "label": "28px"
+        },
+        {
+          "value": "2.25rem",
+          "label": "36px"
+        },
+        {
+          "value": "3rem",
+          "label": "48px"
+        },
+        {
+          "value": "3.75rem",
+          "label": "60px"
+        },
+        {
+          "value": "4.5rem",
+          "label": "72px"
+        }
+      ],
+      "default": "3rem"
+    },
+    {
+      "type": "checkbox",
+      "id": "drawer_show_arrow",
+      "label": "Show arrow mark",
+      "default": true
+    },
+    {
+      "type": "link_list",
+      "id": "drawer_social_menu",
+      "label": "Social links",
+      "info": "Shown at the bottom of the open menu panel."
     }
   ]
 }

@@ -1,0 +1,11 @@
+{% comment %}
+  Inlines the Only Coffee Project arrow mark (the "Y" of the wordmark, used
+  standalone). Inlined rather than an <img> so it inherits `currentColor` —
+  the source SVG's fill is set to currentColor, so it picks up whatever text
+  color its container has (e.g. the menu drawer's theme-editor text color)
+  instead of being locked to the brand blue.
+
+  Size it from the caller via CSS on a wrapping element; `width/height: 100%`
+  on the svg overrides its own width/height attributes.
+{% endcomment %}
+{{ 'logo-arrow.svg' | inline_asset_content }}

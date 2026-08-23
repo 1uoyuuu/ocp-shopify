@@ -29,13 +29,13 @@
           "static": true,
           "settings": {
             "menu": "main-menu",
-            "background_color": "{{ settings.color_palette.foreground }}",
-            "text_color": "{{ settings.color_palette.background }}",
+            "background_color": "#0F80BE",
+            "text_color": "#FFFFFF",
             "type_font_primary_size": "0.875rem",
             "menu_font_style": "inverse",
-            "type_font_primary_link": "body",
+            "type_font_primary_link": "subheading",
             "type_case_primary_link": "uppercase",
-            "menu_style": "featured_products",
+            "menu_style": "text",
             "featured_products_aspect_ratio": "4 / 5",
             "featured_collections_aspect_ratio": "16 / 9",
             "image_border_radius": 0,
@@ -47,7 +47,10 @@
             "drawer_dividers": false,
             "always_show_drawer": true,
             "menu_trigger_style": "text",
-            "menu_label": "Menu"
+            "menu_label": "Menu",
+            "menu_label_close": "Close",
+            "drawer_link_size": "3rem",
+            "drawer_show_arrow": true
           },
           "blocks": {}
         }
