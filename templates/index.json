@@ -14,8 +14,9 @@
       "settings": {
         "video": "shopify://files/videos/7744417-uhd_4096_2160_25fps.mp4",
         "overlay_opacity": 20,
-        "heading_top": "THE BEST<br>COFFEE SHOP",
-        "heading_bottom": "IN AUSTRALIA"
+        "heading_line_1": "THE BEST",
+        "heading_line_2": "COFFEE SHOP",
+        "heading_line_3": "IN AUSTRALIA"
       }
     },
     "brand_intro": {

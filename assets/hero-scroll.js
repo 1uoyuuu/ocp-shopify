@@ -97,7 +97,7 @@ class HeroScrollComponent extends HTMLElement {
 
     const tl = gsap
       .timeline()
-      .to(this.stage, { scale: 0.15, borderRadius: '20px', ease: 'none', duration: 0.6 }, 0)
+      .to(this.stage, { scale: 0.15, ease: 'none', duration: 0.6 }, 0)
       .to(this.logo, { y: 0, scale: DOCKED_SCALE, ease: 'none', duration: LOGO_ARRIVE_PROGRESS }, 0);
 
     if (this.headingTop) {

@@ -2,8 +2,16 @@
   Immersive full-bleed video hero with a locked-viewport intro timeline
   (poezabride.com-style). Scrolling through `.hero-video-track` drives a
   single GSAP timeline — never a normal page scroll — that shrinks the
-  video down to a small badge (~15vw) while fading/sliding the heading
-  into view around it.
+  video down to a small badge (~15vw, square corners — no border-radius)
+  while fading/sliding the heading into view around it.
+
+  The heading is 3 lines in a flex column: line 1 and 2 above the video,
+  line 3 below. `.hero-video__text-half--top/--bottom` are both `flex: 1`
+  siblings of the fixed-size `.hero-video__video-slot` spacer between them
+  — equal flex-basis on both sides keeps that spacer (and so the video,
+  which scales toward dead-center independently via `position: absolute`)
+  exactly vertically centered no matter how each line wraps, without
+  measuring anything at runtime.
 
   The logo is NOT part of this section — it's `snippets/site-logo.liquid`,
   rendered once as a page-level element in layout/theme.liquid (a sibling
@@ -65,23 +73,30 @@
       ></div>
     </div>
 
-    {% if section.settings.heading_top != blank %}
+    <div class="hero-video__composition">
       <div
-        class="hero-video__heading hero-video__heading--top"
+        class="hero-video__text-half hero-video__text-half--top"
         ref="headingTop"
       >
-        {{ section.settings.heading_top }}
+        {% if section.settings.heading_line_1 != blank %}
+          <span class="hero-video__heading">{{ section.settings.heading_line_1 }}</span>
+        {% endif %}
+        {% if section.settings.heading_line_2 != blank %}
+          <span class="hero-video__heading">{{ section.settings.heading_line_2 }}</span>
+        {% endif %}
       </div>
-    {% endif %}
 
-    {% if section.settings.heading_bottom != blank %}
+      <div class="hero-video__video-slot"></div>
+
       <div
-        class="hero-video__heading hero-video__heading--bottom"
+        class="hero-video__text-half hero-video__text-half--bottom"
         ref="headingBottom"
       >
-        {{ section.settings.heading_bottom }}
+        {% if section.settings.heading_line_3 != blank %}
+          <span class="hero-video__heading">{{ section.settings.heading_line_3 }}</span>
+        {% endif %}
       </div>
-    {% endif %}
+    </div>
   </hero-scroll-component>
 </div>
 
@@ -119,7 +134,7 @@
     inset: 0;
     overflow: hidden;
     transform-origin: 50% 50%;
-    will-change: transform, border-radius;
+    will-change: transform;
   }
 
   .hero-video__media,
@@ -151,33 +166,54 @@
     pointer-events: none;
   }
 
-  .hero-video__heading {
+  .hero-video__composition {
     position: absolute;
-    left: 50%;
-    translate: -50% 0;
-    width: min(92vw, 900px);
+    inset: 0;
     z-index: 3;
-    text-align: center;
-    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     pointer-events: none;
-    font-family: var(--font-heading--family);
-    font-weight: 600;
-    font-size: clamp(1.75rem, 6vw, 4rem);
-    line-height: 0.95;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    color: var(--color-foreground, #111);
+  }
+
+  /* Equal flex-basis on both sides of .hero-video__video-slot keeps it
+     centered regardless of how each heading wraps — no measuring needed to
+     line it up with the video, which scales toward dead-center on its own. */
+  .hero-video__text-half {
+    flex: 1 1 0%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    opacity: 0;
     will-change: transform, opacity;
   }
 
-  /* The shrunk video settles to ~15% of the stage, dead center — these sit
-     just outside that band so the sandwich reads as one composed group. */
-  .hero-video__heading--top {
-    bottom: 59%;
+  .hero-video__text-half--top {
+    justify-content: flex-end;
   }
 
-  .hero-video__heading--bottom {
-    top: 59%;
+  .hero-video__text-half--bottom {
+    justify-content: flex-start;
+  }
+
+  .hero-video__video-slot {
+    flex: 0 0 auto;
+    width: 15vw;
+    height: 15svh;
+  }
+
+  .hero-video__heading {
+    display: block;
+    width: min(95vw, 1400px);
+    text-align: center;
+    font-family: var(--font-heading--family);
+    font-weight: 700;
+    font-size: clamp(2.75rem, 9vw, 7.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--color-foreground, #111);
   }
 {% endstylesheet %}
 
@@ -218,19 +254,24 @@
     },
     {
       "type": "paragraph",
-      "content": "The video sandwiches between these two: top text sits above the shrunk video, bottom text sits below it."
+      "content": "Three lines, stacked: the first two sit above the shrunk video, the third sits below it."
     },
     {
-      "type": "textarea",
-      "id": "heading_top",
-      "label": "Heading — top",
-      "info": "Use <br> for line breaks.",
-      "default": "THE BEST<br>COFFEE SHOP"
+      "type": "text",
+      "id": "heading_line_1",
+      "label": "Heading — line 1",
+      "default": "THE BEST"
     },
     {
-      "type": "textarea",
-      "id": "heading_bottom",
-      "label": "Heading — bottom",
+      "type": "text",
+      "id": "heading_line_2",
+      "label": "Heading — line 2",
+      "default": "COFFEE SHOP"
+    },
+    {
+      "type": "text",
+      "id": "heading_line_3",
+      "label": "Heading — line 3",
       "default": "IN AUSTRALIA"
     }
   ],
