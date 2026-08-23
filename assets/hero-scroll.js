@@ -1,8 +1,5 @@
-import { getScrollContainer, scrollContainerMediaQuery } from '@theme/scroll-container';
-
-/** Fraction of the timeline (== scroll progress, since the timeline's total
- * duration is 1) at which the logo finishes scrubbing back to its resting,
- * docked position. */
+/** Fraction of the timeline at which the logo finishes travelling back to
+ * its resting, docked position. */
 const LOGO_ARRIVE_PROGRESS = 0.65;
 
 /** Must match snippets/site-logo.liquid's `.site-logo` width/scale — the
@@ -14,70 +11,95 @@ const LOGO_NATIVE_WIDTH = 2000;
 const DOCKED_SCALE = 0.1;
 const DOCKED_CENTER_Y = 33;
 
+/** How much accumulated gesture distance (px of wheel/swipe) plays the
+ * intro from start to finish. Higher = the intro takes more scrolling. */
+const GESTURE_DISTANCE = 1400;
+
 /**
- * Drives the hero-video intro animation. `.hero-video` is kept in place via
- * native `position: sticky` (see hero-video.liquid) rather than GSAP's
- * `pin: true` — pinning inserts a wrapper element, which fights the theme's
- * own DOM-morphing on section re-render. Scrubbing plain transforms here
- * never touches the DOM structure, so the two systems stay out of each
- * other's way.
+ * Drives the hero-video intro, which is a *locked* sequence rather than a
+ * scroll-scrubbed one: while it plays, page scrolling is disabled outright
+ * and wheel/touch gestures are captured by GSAP's Observer and fed into the
+ * timeline's playhead. Only when the timeline completes is scrolling
+ * released, so the page can never move on with the heading still mid-blur.
+ * Scrolling up from the very top of the page re-locks and rewinds it.
  *
- * The theme scrolls `.page-wrapper` (not the document) at desktop widths and
- * switches to native document scrolling below that — see
- * @theme/scroll-container. ScrollTrigger needs to be told which one is
- * actually scrolling, and re-created when that switches.
+ * (This replaced a ScrollTrigger `scrub` setup — with scrub, the page is
+ * really just scrolling normally and the animation follows along, so the
+ * next section starts creeping into view while the intro is unfinished.)
  *
- * The logo (`[data-site-logo]`, snippets/site-logo.liquid) is NOT a child of
- * this component — it's a page-level element, always `position: fixed`,
- * resting by default at its small "docked" CSS size/position (i.e. the
- * site's permanent header logo, on every template). Here on the hero
- * template only, this component overrides it on load with `gsap.set()` to
- * look large and centered, then scrubs that override back to identity
- * (scale/x/y → 0) as the user scrolls through `.hero-video-track` — landing
- * it exactly on its own resting values, so there's nothing to measure or
- * hand off to.
+ * The timeline itself: the video stage shrinks to a small badge settling
+ * ~10svh below dead-center (matching `.hero-video__composition`'s CSS
+ * translate, which the heading is shifted by too), the logo travels from
+ * big-and-centered back to its docked spot, and each of the 3 heading
+ * lines reveals with its own blur → sharp + upward move + fade-in,
+ * staggered so they resolve one after another.
  *
- * The same timeline also shrinks the video stage down to a small badge
- * (settling ~10svh below dead-center — see hero-video.liquid's
- * `.hero-video__composition` translate, which the heading is shifted by
- * the same amount to match), while each of the 3 heading lines reveals
- * with its own blur → sharp + upward move + fade-in, staggered so they
- * resolve one after another rather than all at once.
+ * The logo (`[data-site-logo]`, snippets/site-logo.liquid) is NOT a child
+ * of this component — it's a page-level element, always `position: fixed`,
+ * resting at its small docked size/position on every template. Here it's
+ * overridden on load via `gsap.set()` to look large and centered, then
+ * animated back to identity — landing exactly on its own resting values,
+ * so there's nothing to measure or hand off to.
  */
 class HeroScrollComponent extends HTMLElement {
   connectedCallback() {
     const gsap = window.gsap;
-    const ScrollTrigger = window.ScrollTrigger;
+    const Observer = window.Observer;
     this.stage = this.querySelector('[ref="stage"]');
     this.logo = document.querySelector('[data-site-logo]');
     this.headingLine1 = this.querySelector('[ref="headingLine1"]');
     this.headingLine2 = this.querySelector('[ref="headingLine2"]');
     this.headingLine3 = this.querySelector('[ref="headingLine3"]');
-    this.track = this.closest('.hero-video-track');
 
-    if (!gsap || !ScrollTrigger || !this.stage || !this.logo || !this.track) return;
+    if (!gsap || !Observer || !this.stage || !this.logo) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(Observer);
 
-    this.#createTrigger();
-    scrollContainerMediaQuery.addEventListener('change', this.#handleScrollerChange);
+    this.#buildTimeline();
+    this.#lock();
+
+    this.#observer = Observer.create({
+      target: window,
+      type: 'wheel,touch',
+      onChangeY: (self) => {
+        if (!this.#locked) return;
+        // Observer reports downward gestures as negative deltaY.
+        this.#progress = gsap.utils.clamp(0, 1, this.#progress - self.deltaY / GESTURE_DISTANCE);
+        this.#timeline.progress(this.#progress);
+        if (this.#progress >= 1) this.#unlock();
+      },
+      preventDefault: true,
+    });
+
+    // Scrolling back to the very top replays the intro, so the page never
+    // sits at the top showing a finished hero with no way to see it again.
+    this.#scrollListener = () => {
+      if (this.#locked || window.scrollY > 0) return;
+      this.#progress = 1;
+      this.#lock();
+    };
+    window.addEventListener('scroll', this.#scrollListener, { passive: true });
+
+    window.addEventListener('resize', this.#resizeListener);
   }
 
   disconnectedCallback() {
-    this.#scrollTrigger?.kill();
+    this.#observer?.kill();
+    this.#timeline?.kill();
+    this.#unlock();
     window.gsap?.set(this.logo, { clearProps: 'all' });
-    scrollContainerMediaQuery.removeEventListener('change', this.#handleScrollerChange);
+    window.removeEventListener('scroll', this.#scrollListener);
+    window.removeEventListener('resize', this.#resizeListener);
   }
 
   /**
-   * The hero's opening look: large and vertically centered. Expressed as
-   * absolute x/y/scale (not a delta from the docked state) since GSAP's
-   * `scale` replaces the element's transform outright rather than
+   * The hero's opening look for the logo: large and vertically centered.
+   * Expressed as absolute y/scale (not a delta from the docked state) since
+   * GSAP's `scale` replaces the element's transform outright rather than
    * multiplying on top of the CSS default — see LOGO_NATIVE_WIDTH's doc
-   * comment for why this is always ≤ ~1, never the small docked scale
-   * stretched up.
+   * comment for why this is always ≤ ~1, never the docked scale stretched up.
    *
    * @returns {{y: number, scale: number}}
    */
@@ -88,22 +110,27 @@ class HeroScrollComponent extends HTMLElement {
     };
   }
 
-  #createTrigger() {
+  #buildTimeline() {
     const gsap = window.gsap;
-    const ScrollTrigger = window.ScrollTrigger;
 
-    this.#scrollTrigger?.kill();
+    this.#timeline?.kill();
 
     const opening = this.#computeOpeningTarget();
-    gsap.set(this.logo, { y: opening.y, scale: opening.scale });
 
     const tl = gsap
-      .timeline()
-      .to(this.stage, { scale: 0.15, y: '10svh', ease: 'none', duration: 0.6 }, 0)
-      .to(this.logo, { y: 0, scale: DOCKED_SCALE, ease: 'none', duration: LOGO_ARRIVE_PROGRESS }, 0);
+      .timeline({ paused: true })
+      .fromTo(
+        this.logo,
+        { y: opening.y, scale: opening.scale },
+        { y: 0, scale: DOCKED_SCALE, ease: 'none', duration: LOGO_ARRIVE_PROGRESS },
+        0
+      )
+      .fromTo(this.stage, { scale: 1, y: 0 }, { scale: 0.15, y: '10svh', ease: 'none', duration: 0.6 }, 0);
 
     // Each line: blurred, lower, and transparent → sharp, in place, opaque.
-    // Staggered start times make them resolve one after another.
+    // Staggered start times make them resolve one after another. The last
+    // one finishes at 0.85, comfortably before the timeline's end, so the
+    // lock only releases once every line has fully resolved.
     const lineReveal = (line, start) => {
       if (!line) return;
       tl.fromTo(
@@ -118,20 +145,41 @@ class HeroScrollComponent extends HTMLElement {
     lineReveal(this.headingLine2, 0.4);
     lineReveal(this.headingLine3, 0.5);
 
-    this.#scrollTrigger = ScrollTrigger.create({
-      trigger: this.track,
-      scroller: getScrollContainer(),
-      start: 'top top',
-      end: 'bottom top',
-      scrub: 0.4,
-      animation: tl,
-    });
+    tl.progress(this.#progress);
+    this.#timeline = tl;
   }
 
-  #handleScrollerChange = () => this.#createTrigger();
+  #lock() {
+    this.#locked = true;
+    document.documentElement.classList.add('hero-intro-locked');
+    this.#observer?.enable();
+    window.scrollTo(0, 0);
+    this.#timeline.progress(this.#progress);
+  }
 
-  /** @type {import('gsap/ScrollTrigger').ScrollTrigger | undefined} */
-  #scrollTrigger;
+  #unlock() {
+    this.#locked = false;
+    document.documentElement.classList.remove('hero-intro-locked');
+    this.#observer?.disable();
+  }
+
+  #resizeListener = () => {
+    const wasLocked = this.#locked;
+    this.#buildTimeline();
+    if (!wasLocked) this.#timeline.progress(1);
+  };
+
+  /** @type {import('gsap').gsap.core.Timeline} */
+  #timeline;
+
+  /** @type {import('gsap/Observer').Observer | undefined} */
+  #observer;
+
+  #locked = false;
+
+  #progress = 0;
+
+  #scrollListener = () => {};
 }
 
 if (!customElements.get('hero-scroll-component')) {

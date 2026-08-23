@@ -1,9 +1,11 @@
 {% comment %}
-  Immersive full-bleed video hero with a locked-viewport intro timeline
-  (poezabride.com-style). Scrolling through `.hero-video-track` drives a
-  single GSAP timeline — never a normal page scroll — that shrinks the
-  video down to a small badge (~15vw, square corners — no border-radius)
-  while fading/sliding the heading into view around it.
+  Immersive full-bleed video hero with a genuinely locked intro timeline
+  (poezabride.com-style). While the intro plays, page scrolling is fully
+  blocked: scroll/swipe gestures are captured by GSAP's Observer and fed
+  into the timeline's playhead instead. Only once the timeline reaches the
+  end — video shrunk to its small badge (~15vw, square corners) and all
+  three heading lines fully resolved — is scrolling released and the page
+  continues into the next section. See hero-scroll.js.
 
   The heading is 3 lines in a flex column: line 1 and 2 above the video,
   line 3 below. `.hero-video__text-half--top/--bottom` are both `flex: 1`
@@ -22,22 +24,21 @@
   cross-element position matching and no "becomes part of the hero" DOM
   coupling to reason about.
 
-  The locked-viewport feel comes from native `position: sticky` on
-  `.hero-video` inside the taller `.hero-video-track`, not GSAP's `pin` —
-  pinning inserts a wrapper element that fights the theme's own DOM
-  morphing on section re-render. GSAP only scrubs transforms/opacity here,
-  so it never touches the DOM structure. See hero-scroll.js.
+  The section is a plain 100svh block — no sticky/pin machinery and no
+  oversized scroll track, since the lock is enforced by Observer rather
+  than by scroll distance. That also keeps GSAP away from the DOM
+  structure entirely (pinning inserts a wrapper element, which fights the
+  theme's own DOM morphing on section re-render).
 {% endcomment %}
 
 {% liquid
   assign overlay_opacity = section.settings.overlay_opacity | divided_by: 100.0
 %}
 
-<div class="hero-video-track">
-  <hero-scroll-component
-    class="hero-video"
-    data-skip-node-update
-  >
+<hero-scroll-component
+  class="hero-video"
+  data-skip-node-update
+>
     <div
       class="hero-video__stage"
       ref="stage"
@@ -106,15 +107,14 @@
         {% endif %}
       </div>
     </div>
-  </hero-scroll-component>
-</div>
+</hero-scroll-component>
 
 <script
   src="{{ 'gsap.min.js' | asset_url }}"
   defer
 ></script>
 <script
-  src="{{ 'gsap-scrolltrigger.min.js' | asset_url }}"
+  src="{{ 'gsap-observer.min.js' | asset_url }}"
   defer
 ></script>
 <script
@@ -123,18 +123,21 @@
 ></script>
 
 {% stylesheet %}
-  .hero-video-track {
-    position: relative;
-    height: 280svh;
-  }
-
   .hero-video {
     display: block;
-    position: sticky;
-    top: 0;
+    position: relative;
     height: 100svh;
     min-height: 480px;
     background: var(--color-background, #fff);
+    overflow: clip;
+  }
+
+  /* Set on <html> by hero-scroll.js while the intro timeline is playing.
+     `overflow: clip` (rather than `hidden`) blocks scrolling without
+     collapsing position:sticky descendants elsewhere on the page. */
+  html.hero-intro-locked,
+  html.hero-intro-locked body,
+  html.hero-intro-locked .page-wrapper {
     overflow: clip;
   }
 
