@@ -885,13 +885,21 @@
     display: none;
   }
 
-  /* The panel covers the viewport, so the header row has to be lifted above
-     it for the CLOSE / CART controls to stay reachable while it's open —
-     and recolored to the panel's own text color, since it's now sitting on
-     the panel's background rather than the page's. */
+  /* The panel covers the viewport, so while it's open the header row is
+     recolored to the panel's own text color — it's now sitting on the
+     panel's background rather than the page's. */
   #header-component:has(.menu-open) .header__row {
-    z-index: calc(var(--layer-menu-drawer) + 1);
     --color-foreground: var(--drawer-text-color);
+  }
+
+  /* The controls have to be lifted individually rather than by raising the
+     row: `.menu-drawer` is a *descendant* of the row, so a z-index on the
+     row lifts the panel along with it and the panel still paints over the
+     controls inside. Raising the controls themselves puts them above the
+     panel in the stacking context they share with it. */
+  #header-component:has(.menu-open) :is(.header__icon--summary, header-actions) {
+    position: relative;
+    z-index: calc(var(--layer-menu-drawer) + 1);
   }
 
   /* CLOSE in the header replaces the panel's own close button, and a
