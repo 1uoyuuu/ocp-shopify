@@ -43,6 +43,18 @@
   endif
 %}
 
+{% comment %}
+  Set on the header rather than on <header-drawer>: the header row needs to
+  read this to recolor CLOSE / CART while the panel is open, and the drawer
+  element is a descendant of that row — custom properties only inherit
+  downward, so declaring it there leaves the row unable to see it.
+{% endcomment %}
+{% style %}
+  #header-component {
+    --drawer-text-color: {{ block_settings.text_color | default: settings.page_background_color }};
+  }
+{% endstyle %}
+
 <script
   src="{{ 'header-drawer.js' | asset_url }}"
   type="module"
@@ -51,7 +63,7 @@
 
 <header-drawer
   class="header-drawer {{ class }}"
-  style="--menu-image-border-radius: {{ image_border_radius }}px; --resource-card-corner-radius: {{ image_border_radius }}px; --drawer-link-size: {{ block_settings.drawer_link_size | default: '3rem' }}; --drawer-text-color: {{ block_settings.text_color | default: settings.page_background_color }};"
+  style="--menu-image-border-radius: {{ image_border_radius }}px; --resource-card-corner-radius: {{ image_border_radius }}px; --drawer-link-size: {{ block_settings.drawer_link_size | default: '3rem' }};"
 >
   <details
     id="Details-menu-drawer-container"
@@ -903,7 +915,10 @@
     color: var(--color-foreground);
   }
 
-  .menu-drawer__arrow svg {
+  /* Scoped through .menu-drawer to outrank `.menu-drawer svg`, which sizes
+     every icon in the panel to --icon-size-xs and otherwise wins this on a
+     specificity tie by being later in the stylesheet. */
+  .menu-drawer .menu-drawer__arrow svg {
     display: block;
     width: 100%;
     height: auto;
@@ -977,7 +992,11 @@
     min-height: 0;
   }
 
-  .menu-drawer__menu-item--mainlist {
+  /* Scoped through .menu-drawer to outrank `.menu-drawer__menu-item`, whose
+     `justify-content: space-between` (for the stock layout's trailing
+     chevron) would otherwise win this tie by being later in the stylesheet
+     and push every link to the left edge. */
+  .menu-drawer .menu-drawer__menu-item--mainlist {
     /* Redeclared here (rather than inherited from menu-font-styles) so the
        panel's links can be sized independently of the compact mobile-drawer
        preset — see the menu block's "Panel link size" setting. */
@@ -987,6 +1006,15 @@
     text-align: center;
     min-height: 0;
     padding-block: 0.12em;
+  }
+
+  /* `margin-block-start: auto` on the utility links absorbs every bit of
+     free space in this column, pinning the nav to the top and defeating the
+     panel's `justify-content: center`. */
+  .menu-drawer .menu-drawer__utility-links {
+    margin-block: 0;
+    margin-inline: 0;
+    align-items: center;
   }
 
   details:not(.menu-open) .header__icon--menu .header-drawer-icon--close {
