@@ -37,11 +37,12 @@ const DOCKED_CENTER_Y = 33;
  * it exactly on its own resting values, so there's nothing to measure or
  * hand off to.
  *
- * The same timeline also shrinks the video stage down to a small centered
- * badge (staying dead-center — it does not move), and fades/slides the
- * heading — split into a top and bottom half that sandwich the shrunk
- * video — into view over the final ~50% (overlapping the tail of the
- * shrink).
+ * The same timeline also shrinks the video stage down to a small badge
+ * (settling ~10svh below dead-center — see hero-video.liquid's
+ * `.hero-video__composition` translate, which the heading is shifted by
+ * the same amount to match), while each of the 3 heading lines reveals
+ * with its own blur → sharp + upward move + fade-in, staggered so they
+ * resolve one after another rather than all at once.
  */
 class HeroScrollComponent extends HTMLElement {
   connectedCallback() {
@@ -49,8 +50,9 @@ class HeroScrollComponent extends HTMLElement {
     const ScrollTrigger = window.ScrollTrigger;
     this.stage = this.querySelector('[ref="stage"]');
     this.logo = document.querySelector('[data-site-logo]');
-    this.headingTop = this.querySelector('[ref="headingTop"]');
-    this.headingBottom = this.querySelector('[ref="headingBottom"]');
+    this.headingLine1 = this.querySelector('[ref="headingLine1"]');
+    this.headingLine2 = this.querySelector('[ref="headingLine2"]');
+    this.headingLine3 = this.querySelector('[ref="headingLine3"]');
     this.track = this.closest('.hero-video-track');
 
     if (!gsap || !ScrollTrigger || !this.stage || !this.logo || !this.track) return;
@@ -97,16 +99,24 @@ class HeroScrollComponent extends HTMLElement {
 
     const tl = gsap
       .timeline()
-      .to(this.stage, { scale: 0.15, ease: 'none', duration: 0.6 }, 0)
+      .to(this.stage, { scale: 0.15, y: '10svh', ease: 'none', duration: 0.6 }, 0)
       .to(this.logo, { y: 0, scale: DOCKED_SCALE, ease: 'none', duration: LOGO_ARRIVE_PROGRESS }, 0);
 
-    if (this.headingTop) {
-      tl.fromTo(this.headingTop, { y: 24, opacity: 0 }, { y: 0, opacity: 1, ease: 'none', duration: 0.5 }, 0.5);
-    }
+    // Each line: blurred, lower, and transparent → sharp, in place, opaque.
+    // Staggered start times make them resolve one after another.
+    const lineReveal = (line, start) => {
+      if (!line) return;
+      tl.fromTo(
+        line,
+        { y: 30, opacity: 0, filter: 'blur(14px)' },
+        { y: 0, opacity: 1, filter: 'blur(0px)', ease: 'none', duration: 0.35 },
+        start
+      );
+    };
 
-    if (this.headingBottom) {
-      tl.fromTo(this.headingBottom, { y: -24, opacity: 0 }, { y: 0, opacity: 1, ease: 'none', duration: 0.5 }, 0.5);
-    }
+    lineReveal(this.headingLine1, 0.3);
+    lineReveal(this.headingLine2, 0.4);
+    lineReveal(this.headingLine3, 0.5);
 
     this.#scrollTrigger = ScrollTrigger.create({
       trigger: this.track,

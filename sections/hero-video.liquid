@@ -74,26 +74,35 @@
     </div>
 
     <div class="hero-video__composition">
-      <div
-        class="hero-video__text-half hero-video__text-half--top"
-        ref="headingTop"
-      >
+      <div class="hero-video__text-half hero-video__text-half--top">
         {% if section.settings.heading_line_1 != blank %}
-          <span class="hero-video__heading">{{ section.settings.heading_line_1 }}</span>
+          <span
+            class="hero-video__heading"
+            ref="headingLine1"
+          >
+            {{ section.settings.heading_line_1 }}
+          </span>
         {% endif %}
         {% if section.settings.heading_line_2 != blank %}
-          <span class="hero-video__heading">{{ section.settings.heading_line_2 }}</span>
+          <span
+            class="hero-video__heading"
+            ref="headingLine2"
+          >
+            {{ section.settings.heading_line_2 }}
+          </span>
         {% endif %}
       </div>
 
       <div class="hero-video__video-slot"></div>
 
-      <div
-        class="hero-video__text-half hero-video__text-half--bottom"
-        ref="headingBottom"
-      >
+      <div class="hero-video__text-half hero-video__text-half--bottom">
         {% if section.settings.heading_line_3 != blank %}
-          <span class="hero-video__heading">{{ section.settings.heading_line_3 }}</span>
+          <span
+            class="hero-video__heading"
+            ref="headingLine3"
+          >
+            {{ section.settings.heading_line_3 }}
+          </span>
         {% endif %}
       </div>
     </div>
@@ -166,13 +175,18 @@
     pointer-events: none;
   }
 
+  /* Shifted down ~10svh from dead-center to match .hero-video__stage's own
+     y-offset (see hero-scroll.js) — the two are animated independently but
+     need to land in the same place. */
   .hero-video__composition {
     position: absolute;
     inset: 0;
+    translate: 0 10svh;
     z-index: 3;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: clamp(16px, 3vw, 40px);
     pointer-events: none;
   }
 
@@ -185,8 +199,6 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    opacity: 0;
-    will-change: transform, opacity;
   }
 
   .hero-video__text-half--top {
@@ -208,11 +220,12 @@
     width: min(95vw, 1400px);
     text-align: center;
     font-family: var(--font-heading--family);
-    font-weight: 700;
+    font-weight: 500;
     font-size: clamp(2.75rem, 9vw, 7.5rem);
     line-height: 0.92;
     letter-spacing: -0.02em;
     text-transform: uppercase;
+    will-change: transform, opacity, filter;
     color: var(--color-foreground, #111);
   }
 {% endstylesheet %}
