@@ -123,6 +123,28 @@
 ></script>
 
 {% stylesheet %}
+  /* The site header stays hidden for the whole intro and fades in once it
+     finishes. Keyed off the hero section being in the markup rather than off
+     a JS-added class: the scripts are deferred, so a JS-driven hidden state
+     would let the header paint for a frame before it applied. Pages without
+     this section are unaffected, so every other template keeps its header. */
+  body:has(.hero-video-section) #header-component {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s var(--ease-out-cubic, ease);
+  }
+
+  /* Reveal paths, mirroring the headings' escape hatches so the header can
+     never be stranded invisible: `hero-intro-done` is set by hero-scroll.js
+     when the intro completes (and immediately when it skips the animation —
+     no GSAP, reduced motion), and `:not(:defined)` covers hero-scroll.js
+     failing to load at all, since the element then never upgrades. */
+  html.hero-intro-done body:has(.hero-video-section) #header-component,
+  body:has(hero-scroll-component:not(:defined)) #header-component {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .hero-video {
     display: block;
     position: relative;

@@ -53,16 +53,16 @@ class HeroScrollComponent extends HTMLElement {
     this.headingLine2 = this.querySelector('[ref="headingLine2"]');
     this.headingLine3 = this.querySelector('[ref="headingLine3"]');
 
-    // The headings are hidden by default in CSS so they can't flash in
-    // before the timeline's "from" state applies — any path that skips the
-    // animation has to reveal them itself.
+    // The headings and the site header are hidden by default in CSS so they
+    // can't flash in before the timeline's "from" state applies — any path
+    // that skips the animation has to reveal them itself.
     if (!gsap || !Observer || !this.stage || !this.logo) {
-      this.dataset.introStatic = '';
+      this.#skipIntro();
       return;
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      this.dataset.introStatic = '';
+      this.#skipIntro();
       return;
     }
 
@@ -181,9 +181,22 @@ class HeroScrollComponent extends HTMLElement {
     this.#timeline = tl;
   }
 
+  /**
+   * Marks the intro as never-playing: reveals the elements that are hidden
+   * by default in CSS (the headings, and the site header) so they can't be
+   * stranded invisible when the animation is skipped.
+   */
+  #skipIntro() {
+    this.dataset.introStatic = '';
+    document.documentElement.classList.add('hero-intro-done');
+  }
+
   #lock() {
     this.#locked = true;
     document.documentElement.classList.add('hero-intro-locked');
+    // Re-hides the header — scrolling back to the top replays the intro, so
+    // it should return to its opening state rather than keep the header up.
+    document.documentElement.classList.remove('hero-intro-done');
     this.#observer?.enable();
     scrollTo({ top: 0, behavior: 'instant' });
     this.#timeline.progress(this.#progress);
@@ -192,6 +205,8 @@ class HeroScrollComponent extends HTMLElement {
   #unlock() {
     this.#locked = false;
     document.documentElement.classList.remove('hero-intro-locked');
+    // Reveals the site header (hidden by CSS for the whole intro).
+    document.documentElement.classList.add('hero-intro-done');
     this.#observer?.disable();
   }
 
