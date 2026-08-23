@@ -22,14 +22,37 @@
     "brand_intro": {
       "type": "section",
       "blocks": {
+        "image_XXqh7p": {
+          "type": "image",
+          "name": "t:names.image",
+          "settings": {
+            "link": "",
+            "image_ratio": "adapt",
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_color": "",
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
         "intro_text": {
           "type": "text",
           "settings": {
-            "text": "<p>Only Coffee Project is a small-batch roastery built around one idea: do coffee, and only coffee, properly. Beans sourced with care, roasted in small batches, shipped fresh — nothing else gets in the way.</p>",
-            "width": "fit-content",
-            "max_width": "narrow",
-            "alignment": "center",
-            "type_preset": "rte",
+            "text": "<p>Only Coffee Project started with one idea: strip away everything a coffee shop doesn't need, and focus entirely on the one thing that matters — the coffee itself. No side menu, no distractions. Just great coffee, sourced from a rotating lineup of the world's best roasters, served by people who care about getting it right.</p>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "h2",
             "font": "var(--font-body--family)",
             "font_size": "1rem",
             "line_height": "normal",
@@ -40,19 +63,20 @@
             "background": false,
             "background_color": "#00000026",
             "corner_radius": 0,
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
+            "padding-block-start": 16,
+            "padding-block-end": 16,
+            "padding-inline-start": 16,
+            "padding-inline-end": 16
           },
           "blocks": {}
         }
       },
       "block_order": [
+        "image_XXqh7p",
         "intro_text"
       ],
       "settings": {
-        "content_direction": "column",
+        "content_direction": "row",
         "vertical_on_mobile": true,
         "horizontal_alignment": "center",
         "vertical_alignment": "center",
