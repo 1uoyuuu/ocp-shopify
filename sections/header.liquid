@@ -810,6 +810,24 @@
     }
   }
 
+  /* Horizontal inset for the header's contents.
+     By default the section grid parks `.header__columns` in its central
+     column, so the inset is implicit and only controllable by changing the
+     page grid. This spans it edge to edge and makes the inset real padding
+     instead — one value to change, and it behaves the same in both the
+     `menu` and `drawer` layouts (the stock drawer rule sets its own
+     padding-inline, which this outranks).
+     Set to 2rem to match the 32px inset the home page sections use. Note
+     the theme's own page grid insets sections by `--page-margin` (16px
+     mobile / 40px desktop, base.css) — so anything still relying on that
+     rather than its own 32px padding will sit 8px further in on desktop. */
+  #header-component .header__row--top > .header__columns.spacing-style {
+    --header-inline-padding: 2rem;
+
+    grid-column: 1 / -1;
+    padding-inline: var(--header-inline-padding);
+  }
+
   .header__columns {
     /* Three column layout */
     --header-left: 1fr;

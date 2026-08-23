@@ -860,7 +860,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--padding-lg);
+    /* Block padding only. Inline padding here would push the label past the
+       header's own inset and stop it lining up with the section content
+       below; the row's height keeps the trigger a usable touch target. */
+    padding-block: var(--padding-lg);
+    padding-inline: 0;
   }
 
   .header__icon--summary .header-drawer-icon {
