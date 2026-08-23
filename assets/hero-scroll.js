@@ -65,8 +65,10 @@ class HeroScrollComponent extends HTMLElement {
       type: 'wheel,touch',
       onChangeY: (self) => {
         if (!this.#locked) return;
-        // Observer reports downward gestures as negative deltaY.
-        this.#progress = gsap.utils.clamp(0, 1, this.#progress - self.deltaY / GESTURE_DISTANCE);
+        // Observer normalizes wheel and touch so a downward scroll/swipe is
+        // a positive deltaY — i.e. the same direction that would carry the
+        // page forward — so it advances the intro.
+        this.#progress = gsap.utils.clamp(0, 1, this.#progress + self.deltaY / GESTURE_DISTANCE);
         this.#timeline.progress(this.#progress);
         if (this.#progress >= 1) this.#unlock();
       },
