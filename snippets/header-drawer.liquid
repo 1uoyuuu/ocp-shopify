@@ -815,12 +815,14 @@
     height: var(--icon-size-xs);
   }
 
+  /* Shares the header's typography settings with the cart action (Header >
+     Utilities in the theme editor) so both sides of the header stay in sync
+     and are editable without touching code. */
   .header-drawer__label {
-    font-family: var(--font-body--family);
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-family: var(--header-actions-font-family);
+    font-size: var(--header-actions-font-size);
+    font-weight: var(--header-actions-font-weight);
+    text-transform: var(--header-actions-text-case);
     white-space: nowrap;
   }
 

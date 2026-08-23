@@ -23,12 +23,16 @@
     class="header-actions__cart-icon{% if display_style == 'text' %} header-actions__cart-icon--text{% endif %}{% unless cart == empty %} header-actions__cart-icon--has-cart{% endunless %}"
     data-testid="cart-icon"
   >
-    <span class="{% if display_style == 'icon' %}hidden{% else %}mobile:hidden{% endif %}">
+    {% comment %}
+      The text style shows the label at every width (rather than falling back
+      to the icon on mobile) so the header reads the same on both.
+    {% endcomment %}
+    <span class="{% if display_style == 'icon' %}hidden{% endif %}">
       {{ 'content.cart_title' | t }}
     </span>
 
     <span
-      class="svg-wrapper {% if display_style != 'icon' %}desktop:hidden{% endif %}"
+      class="svg-wrapper {% if display_style != 'icon' %}hidden{% endif %}"
       aria-hidden="true"
     >
       {{ 'icon-cart.svg' | inline_asset_content }}
@@ -63,7 +67,7 @@
   {% endif %}
   {{- block.shopify_attributes -}}
 >
-  {% if shop.customer_accounts_enabled %}
+  {% if shop.customer_accounts_enabled and section.settings.show_account %}
     {% liquid
       assign account_actions_style = ''
       if display_style == 'text' and section
@@ -226,17 +230,17 @@
     }
   }
 
-  @media screen and (min-width: 750px) {
-    .header-actions--text {
-      gap: var(--gap-xl);
-    }
+  .header-actions--text {
+    gap: var(--gap-xl);
+  }
 
-    .header-actions__text-style {
-      font-size: var(--header-actions-font-size);
-      font-family: var(--header-actions-font-family);
-      font-weight: var(--header-actions-font-weight);
-      text-transform: var(--header-actions-text-case);
-    }
+  /* Driven by Header > Utilities in the theme editor — shared with the menu
+     drawer's text trigger so both header items match. */
+  .header-actions__text-style {
+    font-size: var(--header-actions-font-size);
+    font-family: var(--header-actions-font-family);
+    font-weight: var(--header-actions-font-weight);
+    text-transform: var(--header-actions-text-case);
   }
 
   #header-component[data-menu-style='drawer'] header-actions {
@@ -262,16 +266,40 @@
     right: var(--cart-bubble-right);
   }
 
-  @media screen and (min-width: 750px) {
-    .header-actions__cart-icon--text.header-actions__cart-icon .cart-bubble {
-      position: relative;
-      top: 0;
-    }
-  }
-
   .header-actions__cart-icon .cart-bubble__text {
     font-family: var(--font-paragraph--family);
     font-weight: var(--font-paragraph--weight);
+  }
+
+  /* Text mode renders the count as part of the label — "Cart (2)" — rather
+     than as the circular badge overlaying the icon. The bubble markup is
+     kept as-is (cart-icon.js requires its refs and writes the live count
+     into it); it's only restyled here. */
+  .header-actions__cart-icon--text.header-actions__cart-icon .cart-bubble {
+    position: static;
+    width: auto;
+    aspect-ratio: auto;
+    padding-inline: 0;
+    border-radius: 0;
+    color: inherit;
+  }
+
+  .header-actions__cart-icon--text .cart-bubble__background {
+    display: none;
+  }
+
+  .header-actions__cart-icon--text .cart-bubble__text {
+    font-family: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+  }
+
+  .header-actions__cart-icon--text .cart-bubble__text-count:not(.hidden)::before {
+    content: '(';
+  }
+
+  .header-actions__cart-icon--text .cart-bubble__text-count:not(.hidden)::after {
+    content: ')';
   }
 
   .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
@@ -308,26 +336,18 @@
     }
   }
 
-  @media screen and (min-width: 750px) {
-    cart-icon.header-actions__cart-icon--text:has(.cart-bubble__text-count:empty) {
-      --cart-bubble-right: 2.5px;
-    }
-  }
-
   .header-actions__text {
     display: flex;
     align-items: center;
   }
 
-  @media screen and (min-width: 750px) {
-    .header-actions__cart-icon--text {
-      display: flex;
-      align-items: center;
-      gap: var(--gap-xs);
-    }
+  .header-actions__cart-icon--text {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+  }
 
-    .header__column--right .header-actions--text {
-      margin-inline-start: 0;
-    }
+  .header__column--right .header-actions--text {
+    margin-inline-start: 0;
   }
 {% endstylesheet %}

@@ -354,12 +354,15 @@
       --cart-bubble-background: {{ cart_bubble_background }};
       --cart-bubble-text: {{ cart_bubble_text }};
     {% endif %}
-    {% if section.settings.actions_display_style == 'text' %}
-      --header-actions-font-size: {{ section.settings.actions_font_size | default: '1rem' }};
-      --header-actions-font-family: var(--font-{{ section.settings.actions_font | default: 'heading' }}--family);
-      --header-actions-font-weight: var(--font-{{ section.settings.actions_font | default: 'heading' }}--weight);
-      --header-actions-text-case: {{ section.settings.actions_text_case | default: 'none' }};
-    {% endif %}
+    {% comment %}
+      Emitted unconditionally (not just for the 'text' display style) so the
+      menu drawer's text trigger can share them — that keeps MENU and CART
+      on one set of theme-editor controls instead of hardcoded CSS.
+    {% endcomment %}
+    --header-actions-font-size: {{ section.settings.actions_font_size | default: '1rem' }};
+    --header-actions-font-family: var(--font-{{ section.settings.actions_font | default: 'heading' }}--family);
+    --header-actions-font-weight: var(--font-{{ section.settings.actions_font | default: 'heading' }}--weight);
+    --header-actions-text-case: {{ section.settings.actions_text_case | default: 'none' }};
   "
 >
   <div class="header__underlay header__underlay-closed"></div>
@@ -1543,6 +1546,13 @@
     {
       "type": "header",
       "content": "t:content.utilities"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account link",
+      "info": "Only applies when customer accounts are enabled for the store.",
+      "default": false
     },
     {
       "type": "select",
