@@ -29,8 +29,8 @@
           "static": true,
           "settings": {
             "menu": "main-menu",
-            "background_color": "#0F80BE",
-            "text_color": "#FFFFFF",
+            "background_color": "#0f80be",
+            "text_color": "#ffffff",
             "type_font_primary_size": "0.875rem",
             "menu_font_style": "inverse",
             "type_font_primary_link": "subheading",
@@ -50,7 +50,8 @@
             "menu_label": "Menu",
             "menu_label_close": "Close",
             "drawer_link_size": "3rem",
-            "drawer_show_arrow": true
+            "drawer_show_arrow": true,
+            "drawer_social_menu": ""
           },
           "blocks": {}
         }
@@ -70,7 +71,7 @@
         "localization_font_size": "0.875rem",
         "localization_position": "right",
         "localization_row": "top",
-        "section_width": "page-width",
+        "section_width": "full-width",
         "section_height": "standard",
         "enable_sticky_header": "always",
         "divider_width": 0,
