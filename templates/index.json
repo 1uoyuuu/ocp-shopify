@@ -196,7 +196,7 @@
               "name": "t:names.product_card_media",
               "settings": {
                 "image_ratio": "square",
-                "border": "solid",
+                "border": "none",
                 "border_width": 1,
                 "border_opacity": 100,
                 "border_color": "",
