@@ -262,20 +262,13 @@ p:empty {
 }
 
 /* Set up page widths & margins */
+/* Both breakpoints come from --ocp-page-margin (theme-styles-variables), so
+   sections share the header's gutter instead of keeping their own. */
 .page-width-wide,
 .page-width-normal,
 .page-width-narrow,
 .page-width-content {
-  --page-margin: 16px;
-}
-
-@media screen and (min-width: 750px) {
-  .page-width-wide,
-  .page-width-normal,
-  .page-width-narrow,
-  .page-width-content {
-    --page-margin: 40px;
-  }
+  --page-margin: var(--ocp-page-margin);
 }
 
 .page-width-wide {

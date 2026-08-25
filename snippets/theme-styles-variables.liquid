@@ -133,6 +133,17 @@
     --normal-page-width: 120rem;
     --wide-page-width: 150rem;
 
+    /* The house gutter: the distance from the viewport edge to the content
+       of every section, the header included. Sections reach it through
+       --page-margin (see base.css) and the header through
+       --header-inline-padding, so all of them share one edge and changing
+       it here moves the whole site's left and right alignment together. */
+    --ocp-page-margin: 16px;
+
+    @media screen and (min-width: 750px) {
+      --ocp-page-margin: 32px;
+    }
+
     /* Section Heights */
     --section-height-small: 15rem;
     --section-height-medium: 25rem;

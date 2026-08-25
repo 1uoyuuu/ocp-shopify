@@ -859,12 +859,10 @@
      instead — one value to change, and it behaves the same in both the
      `menu` and `drawer` layouts (the stock drawer rule sets its own
      padding-inline, which this outranks).
-     Set to 2rem to match the 32px inset the home page sections use. Note
-     the theme's own page grid insets sections by `--page-margin` (16px
-     mobile / 40px desktop, base.css) — so anything still relying on that
-     rather than its own 32px padding will sit 8px further in on desktop. */
+     Reads the house gutter, which `--page-margin` also resolves to, so the
+     header shares one edge with every section below it. */
   #header-component .header__row--top > .header__columns.spacing-style {
-    --header-inline-padding: 2rem;
+    --header-inline-padding: var(--ocp-page-margin);
 
     grid-column: 1 / -1;
     padding-inline: var(--header-inline-padding);

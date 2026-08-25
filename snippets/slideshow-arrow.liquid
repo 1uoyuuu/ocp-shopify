@@ -41,11 +41,15 @@
   on:click="/{{ action }}"
   ref="{{ action }}"
 >
-  <span class="svg-wrapper icon-{{ icon_name }}">
+  <span class="svg-wrapper icon-{{ icon_name }}{% if icon_name == 'arrow' %} ocp-arrow{% endif %}">
     {%- if icon_name == 'caret' -%}
       {{- 'icon-caret.svg' | inline_asset_content -}}
     {%- else -%}
-      {{- 'icon-arrow.svg' | inline_asset_content -}}
+      {%- comment -%}
+        OCP's own arrow mark rather than the stock icon — see the rotation
+        note in the stylesheet below.
+      {%- endcomment -%}
+      {{- 'logo-arrow.svg' | inline_asset_content -}}
     {%- endif -%}
   </span>
 </button>
@@ -88,5 +92,30 @@
 
   .slideshow-control .icon-caret {
     rotate: -90deg;
+  }
+
+  /*
+   * The OCP mark is the wordmark's "Y" and points down-right, so a -45° turn
+   * lands it flat, pointing right. The previous button carries `.flip-x`,
+   * which mirrors it into a left arrow — that sets `scale` while this sets
+   * `rotate`, and they're separate properties on separate elements, so they
+   * compose instead of overwriting one another.
+   */
+  .slideshow-control .svg-wrapper.ocp-arrow {
+    rotate: -45deg;
+  }
+
+  /*
+   * The mark is drawn corner to corner, so once it's turned flat the arrow
+   * you see is as long as the box's diagonal. Sizing the box down by √2
+   * keeps the drawn arrow at --ocp-arrow-length rather than 1.41x it.
+   *
+   * Specificity has to clear `.slideshow-control--large .svg-wrapper`, which
+   * would otherwise win the tie on source order alone.
+   */
+  .slideshow-control .svg-wrapper.ocp-arrow,
+  .slideshow-control .svg-wrapper.ocp-arrow > svg {
+    width: calc(var(--ocp-arrow-length, 2.5rem) / 1.414);
+    height: calc(var(--ocp-arrow-length, 2.5rem) / 1.414);
   }
 {% endstylesheet %}
