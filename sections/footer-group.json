@@ -45,7 +45,7 @@
           "type": "footer-schedule",
           "settings": {
             "heading": "Locations & hours",
-            "rows": "OCP Crows Nest | 6:30-16:00\nOCP Artarmon | 6:30-16:00\nOCP Victoria Cross | 6:30-16:00\nOCP George St | 6:30-16:00\n\nOCP Docklands (MEL) | 6:30-16:00"
+            "rows": "OCP Crows Nest | 6:30-16:00\nOCP Artarmon | 6:30-16:00\nOCP Victoria Cross | 6:30-16:00\nOCP George St | 6:30-16:00\nOCP Docklands (MEL) | 6:30-16:00"
           },
           "blocks": {}
         },
