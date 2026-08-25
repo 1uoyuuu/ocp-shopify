@@ -9,8 +9,8 @@ import { onAnimationEnd, removeWillChangeOnAnimationEnd } from '@theme/utilities
  * appears. Animating explicitly also lets the close finish before `open` is
  * removed, which is what makes the upward slide visible at all.
  */
-const PANEL_DURATION = 620;
-const PANEL_CLOSE_DURATION = 460;
+const PANEL_DURATION = 600;
+const PANEL_CLOSE_DURATION = 520;
 
 /** Leaves quickly and lands soft. */
 const EASE_OUT = 'cubic-bezier(0.16, 1, 0.3, 1)';
@@ -19,11 +19,11 @@ const EASE_OUT = 'cubic-bezier(0.16, 1, 0.3, 1)';
 const EASE_IN = 'cubic-bezier(0.7, 0, 0.84, 0)';
 
 /** Per-line reveal, and the gap between consecutive lines starting. */
-const ITEM_DURATION = 700;
-const ITEM_STAGGER = 55;
+const ITEM_DURATION = 760;
+const ITEM_STAGGER = 90;
 
 /** How long after the panel starts moving the first line begins. */
-const ITEM_LEAD_IN = 180;
+const ITEM_LEAD_IN = 200;
 
 /**
  * The lines that wipe up as the panel arrives, in the order they do it.
@@ -51,6 +51,12 @@ class HeaderDrawer extends Component {
   /** @type {Animation[]} Everything currently in flight, so an interrupted
    * open can be cancelled rather than left fighting the close. */
   #motion = [];
+
+  /** Bumped on every open and close. A close that finishes after a newer
+   * open has started is stale, and must not run its teardown — stripping
+   * `open` out from under the panel that just reopened is what made a
+   * quick MENU → CLOSE → MENU leave the menu apparently dead. */
+  #sequence = 0;
 
   connectedCallback() {
     super.connectedCallback();
@@ -94,8 +100,16 @@ class HeaderDrawer extends Component {
 
   /**
    * Toggle the main menu drawer
+   * @param {Event} [event]
    */
-  toggle() {
+  toggle(event) {
+    // The summary's own toggle has to be cancelled, not merely worked
+    // around. Left alone it strips `open` the instant a close begins, which
+    // unmounts the panel before it can slide away, and on a fast second
+    // click it flips the attribute out of step with the animation — the
+    // menu then looks like it ignored the click entirely.
+    event?.preventDefault();
+
     return this.isOpen ? this.close() : this.open();
   }
 
@@ -189,6 +203,12 @@ class HeaderDrawer extends Component {
 
     if (!summary) return;
 
+    // Same reason as in toggle() — and because the default is cancelled on
+    // every path into here, `open` is ours to set rather than the browser's.
+    event?.preventDefault();
+    this.#sequence++;
+    details.open = true;
+
     summary.setAttribute('aria-expanded', 'true');
 
     this.preventInitialAccordionAnimations(details);
@@ -245,7 +265,12 @@ class HeaderDrawer extends Component {
     // This avoids waiting for child accordion/resource-card animations which can cause issues on Firefox
     const drawer = details.querySelector('.menu-drawer, .menu-drawer__submenu');
 
+    const token = ++this.#sequence;
+
     const settle = () => {
+      // A newer open has taken over; tearing down now would close it.
+      if (token !== this.#sequence) return;
+
       reset(details);
       if (details === this.refs.details) {
         removeTrapFocus();

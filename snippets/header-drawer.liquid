@@ -1109,11 +1109,13 @@
       opacity var(--drawer-animation-speed) ease;
   }
 
-  /* The panel's own slide belongs to header-drawer.js — a transition on the
-     same property would run alongside it at a different duration. Visibility
-     still transitions, and the script holds it visible while closing. */
+  /* The panel's motion belongs entirely to header-drawer.js, which also
+     holds visibility on through the closing slide and releases it at the
+     end. Any transition left here would run alongside that at its own
+     duration — and a visibility transition in particular would keep the
+     panel painted for --drawer-animation-speed after it had already gone. */
   .menu-drawer.menu-drawer {
-    transition-property: visibility;
+    transition-property: none;
   }
 
   .menu-open > .menu-drawer,
