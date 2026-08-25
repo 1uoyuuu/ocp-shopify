@@ -644,7 +644,7 @@
 
      !important because the transparent-header rules set these through a
      chain of :not()s that outweighs anything reasonable here. */
-  .header-section:has(#header-component[data-blend]):not(:has(.menu-open)) .header__row {
+  .header-section:has(#header-component[data-blend]):not(:has(.menu-drawer-container[open])) .header__row {
     /* stylelint-disable declaration-no-important */
     --color: #ffffff !important;
     --color-rgb: 255 255 255 !important;
@@ -655,8 +655,13 @@
 
   /* Off while the menu panel is open — the panel is a descendant, so it
      would blend too, and its own background/text colours are already
-     chosen to work together. */
-  .header-section:has(.menu-open) {
+     chosen to work together.
+
+     Keyed on [open] rather than .menu-open because the close drops
+     .menu-open up front and only tears down [open] once the panel has
+     finished sliding away. Keyed on the class, difference would switch back
+     on for the whole of that slide and invert the panel on its way out. */
+  .header-section:has(.menu-drawer-container[open]) {
     mix-blend-mode: normal;
   }
 

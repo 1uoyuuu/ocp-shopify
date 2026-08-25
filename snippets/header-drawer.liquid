@@ -891,8 +891,12 @@
 
   /* The panel covers the viewport, so while it's open the header row is
      recolored to the panel's own text color — it's now sitting on the
-     panel's background rather than the page's. */
-  #header-component:has(.menu-open) .header__row {
+     panel's background rather than the page's.
+
+     Keyed on [open], which outlives the closing slide, rather than
+     .menu-open, which is dropped as soon as the close starts and would snap
+     the header back to page colours over a panel still on screen. */
+  #header-component:has(.menu-drawer-container[open]) .header__row {
     --color-foreground: var(--drawer-text-color);
   }
 
@@ -901,7 +905,7 @@
      row lifts the panel along with it and the panel still paints over the
      controls inside. Raising the controls themselves puts them above the
      panel in the stacking context they share with it. */
-  #header-component:has(.menu-open) :is(.header__icon--summary, header-actions) {
+  #header-component:has(.menu-drawer-container[open]) :is(.header__icon--summary, header-actions) {
     position: relative;
     z-index: calc(var(--layer-menu-drawer) + 1);
   }
@@ -1018,6 +1022,16 @@
     text-align: center;
     min-height: 0;
     padding-block: 0.12em;
+
+    /* Clips the text sliding up inside it, so each line wipes into view
+       from nothing rather than drifting in from below the previous one. */
+    overflow: hidden;
+  }
+
+  /* Inline elements can't be transformed reliably; the reveal in
+     header-drawer.js moves this one. */
+  .menu-drawer .menu-drawer__menu-item--mainlist .menu-drawer__menu-item-text {
+    display: block;
   }
 
   /* `margin-block-start: auto` on the utility links absorbs every bit of
@@ -1093,6 +1107,13 @@
   details[open] > .menu-drawer__submenu {
     transition: transform var(--drawer-animation-speed) ease, visibility var(--drawer-animation-speed) ease,
       opacity var(--drawer-animation-speed) ease;
+  }
+
+  /* The panel's own slide belongs to header-drawer.js — a transition on the
+     same property would run alongside it at a different duration. Visibility
+     still transitions, and the script holds it visible while closing. */
+  .menu-drawer.menu-drawer {
+    transition-property: visibility;
   }
 
   .menu-open > .menu-drawer,
@@ -1236,6 +1257,14 @@
     animation: menu-drawer-nav-open var(--drawer-animation-speed) ease-in-out;
     animation-delay: calc(var(--drawer-animation-speed) + (var(--menu-drawer-animation-index) - 1) * 0.1s);
     animation-fill-mode: backwards;
+  }
+
+  /* The stock keyframes above slide each item in from the left, which pulls
+     against the upward wipe that header-drawer.js runs. Scoped through
+     .menu-drawer for the extra class rather than relying on being the later
+     rule at equal specificity. */
+  .menu-drawer-container[open] .menu-drawer .menu-drawer__animated-element {
+    animation: none;
   }
 
   .menu-drawer__menu accordion-custom .details-content--no-animation {
