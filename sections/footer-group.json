@@ -43,9 +43,17 @@
             "menu": "",
             "links": "Instagram | https://www.instagram.com/onlycoffeeproject\nAddress | /pages/locations\n0412 123 123 | tel:0412123123"
           }
+        },
+        "enquiries": {
+          "type": "footer-menu",
+          "settings": {
+            "heading": "Enquiries",
+            "menu": "",
+            "links": "onlycoffeeproject@gmail.com | mailto:onlycoffeeproject@gmail.com"
+          }
         }
       },
-      "block_order": ["newsletter", "shop", "ocp", "locations", "contact"],
+      "block_order": ["newsletter", "shop", "ocp", "locations", "contact", "enquiries"],
       "settings": {
         "background_color": "#0F80BE",
         "text_color": "#FFFFFF",
