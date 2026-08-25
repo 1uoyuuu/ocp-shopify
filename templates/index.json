@@ -128,7 +128,7 @@
             "height": "fit",
             "custom_height": 100,
             "background_media": "none",
-            "background_color": "",
+            "background_color": "{{ settings.color_palette.foreground }}",
             "video_position": "cover",
             "background_image_position": "cover",
             "border": "none",
@@ -146,7 +146,7 @@
               "type": "_product-list-text",
               "name": "t:names.collection_title",
               "settings": {
-                "text": "<h2>{{ closest.collection.title }}</h2>",
+                "text": "<h1>( {{ closest.collection.title }} )</h1>",
                 "width": "fit-content",
                 "max_width": "normal",
                 "alignment": "left",
@@ -167,29 +167,10 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
-            },
-            "product_list_button_wXktJa": {
-              "type": "_product-list-button",
-              "name": "t:names.product_list_button",
-              "settings": {
-                "label": "View all",
-                "open_in_new_tab": false,
-                "style_class": "button-unstyled",
-                "custom_button_background": "{{ settings.color_palette.foreground }}",
-                "custom_button_text": "{{ settings.color_palette.background }}",
-                "custom_button_border": "{{ settings.color_palette.background }}",
-                "link_text_color": "",
-                "width": "fit-content",
-                "custom_width": 100,
-                "width_mobile": "fit-content",
-                "custom_width_mobile": 100
-              },
-              "blocks": {}
             }
           },
           "block_order": [
-            "product_list_text_YKdkGf",
-            "product_list_button_wXktJa"
+            "product_list_text_YKdkGf"
           ]
         },
         "static-product-card": {
@@ -214,8 +195,8 @@
               "type": "_product-card-gallery",
               "name": "t:names.product_card_media",
               "settings": {
-                "image_ratio": "adapt",
-                "border": "none",
+                "image_ratio": "square",
+                "border": "solid",
                 "border_width": 1,
                 "border_opacity": 100,
                 "border_color": "",
