@@ -50,8 +50,10 @@ class HeroScrollComponent extends HTMLElement {
     this.stage = this.querySelector('[ref="stage"]');
     this.logo = document.querySelector('[data-site-logo]');
     this.headingLine1 = this.querySelector('[ref="headingLine1"]');
-    this.headingLine2 = this.querySelector('[ref="headingLine2"]');
+    this.headingLine2Left = this.querySelector('[ref="headingLine2Left"]');
+    this.headingLine2Right = this.querySelector('[ref="headingLine2Right"]');
     this.headingLine3 = this.querySelector('[ref="headingLine3"]');
+    this.videoSlot = this.querySelector('[ref="videoSlot"]');
 
     // The headings and the site header are hidden by default in CSS so they
     // can't flash in before the timeline's "from" state applies — any path
@@ -71,7 +73,12 @@ class HeroScrollComponent extends HTMLElement {
     // Split once, here rather than in #buildTimeline — that re-runs on
     // resize, and re-splitting would throw away the elements the live
     // timeline is animating.
-    for (const line of [this.headingLine1, this.headingLine2, this.headingLine3]) {
+    for (const line of [
+      this.headingLine1,
+      this.headingLine2Left,
+      this.headingLine2Right,
+      this.headingLine3,
+    ]) {
       if (line) this.#chars.set(line, this.#splitChars(line));
     }
 
@@ -198,12 +205,44 @@ class HeroScrollComponent extends HTMLElement {
     return chars;
   }
 
+  /**
+   * Sizes the slot reserved in the middle row to the footprint the video
+   * ends up occupying, and returns the scale that gets it there.
+   *
+   * The video's final height is meant to match the heading's font size, so
+   * the scale is derived from the measured font size rather than being a
+   * fixed number — it then tracks whatever `--hero-heading-size` resolves to
+   * at the current viewport. The stage starts full-bleed, so scaling it by
+   * `fontSize / viewportHeight` lands it at exactly that height, and the
+   * slot takes the matching width (the scale is uniform).
+   *
+   * @returns {number} the stage's final scale
+   */
+  #sizeVideoSlot() {
+    const reference = this.headingLine2Left ?? this.headingLine1;
+    const fontSize = reference ? parseFloat(getComputedStyle(reference).fontSize) : 0;
+    const viewportHeight = window.innerHeight;
+
+    // Fall back to the previous fixed scale if anything is unmeasurable.
+    if (!fontSize || !viewportHeight) return 0.15;
+
+    const scale = fontSize / viewportHeight;
+
+    if (this.videoSlot) {
+      this.videoSlot.style.height = `${fontSize}px`;
+      this.videoSlot.style.width = `${window.innerWidth * scale}px`;
+    }
+
+    return scale;
+  }
+
   #buildTimeline() {
     const gsap = window.gsap;
 
     this.#timeline?.kill();
 
     const opening = this.#computeOpeningTarget();
+    const stageScale = this.#sizeVideoSlot();
 
     const tl = gsap
       .timeline({ paused: true })
@@ -213,7 +252,9 @@ class HeroScrollComponent extends HTMLElement {
         { y: 0, scale: DOCKED_SCALE, ease: 'none', duration: LOGO_ARRIVE_PROGRESS },
         0
       )
-      .fromTo(this.stage, { scale: 1, y: 0 }, { scale: 0.15, y: '10svh', ease: 'none', duration: 0.6 }, 0);
+      // No y offset: the stage stays centred on the viewport, which is where
+      // the slot reserved for it in the middle row sits too.
+      .fromTo(this.stage, { scale: 1 }, { scale: stageScale, ease: 'none', duration: 0.6 }, 0);
 
     // Each character resolves on its own — blurred, lower and transparent →
     // sharp, in place, opaque — rippling left to right across the line, and
@@ -247,8 +288,10 @@ class HeroScrollComponent extends HTMLElement {
       );
     };
 
+    // The middle row's two halves start together so they read as one line.
     lineReveal(this.headingLine1, 0.22);
-    lineReveal(this.headingLine2, 0.36);
+    lineReveal(this.headingLine2Left, 0.36);
+    lineReveal(this.headingLine2Right, 0.36);
     lineReveal(this.headingLine3, 0.5);
 
     tl.progress(this.#progress);
