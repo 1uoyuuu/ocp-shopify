@@ -250,13 +250,26 @@
     line-height: 0.92;
     letter-spacing: -0.02em;
     text-transform: uppercase;
-    will-change: transform, opacity, filter;
     color: var(--color-foreground, #111);
 
     /* Hidden until the intro timeline applies its own "from" state. The
        GSAP scripts are deferred, so without this the headings paint at full
        opacity for a frame on load before the animation takes over. */
     opacity: 0;
+  }
+
+  /* hero-scroll.js splits each heading into per-word and per-character spans
+     so the characters can be revealed in a stagger. Words stay unbreakable
+     so the line still wraps between words rather than mid-word, and both
+     need to be inline-block for transforms to apply to them at all. */
+  .hero-video__word {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .hero-video__char {
+    display: inline-block;
+    will-change: transform, opacity, filter;
   }
 
   /* Both escape hatches for the rule above, so the headings can never be

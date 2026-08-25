@@ -68,6 +68,13 @@ class HeroScrollComponent extends HTMLElement {
 
     gsap.registerPlugin(Observer);
 
+    // Split once, here rather than in #buildTimeline — that re-runs on
+    // resize, and re-splitting would throw away the elements the live
+    // timeline is animating.
+    for (const line of [this.headingLine1, this.headingLine2, this.headingLine3]) {
+      if (line) this.#chars.set(line, this.#splitChars(line));
+    }
+
     this.#buildTimeline();
     this.#lock();
 
@@ -142,6 +149,55 @@ class HeroScrollComponent extends HTMLElement {
     };
   }
 
+  /**
+   * Wraps each character of a heading in its own span so they can be
+   * animated individually, keeping words intact so the line still wraps at
+   * word boundaries rather than mid-word.
+   *
+   * The split spans are `aria-hidden` and the original string is put back on
+   * the element as `aria-label`, so assistive tech reads the heading as text
+   * rather than spelling it out one span at a time.
+   *
+   * @param {HTMLElement} line
+   * @returns {HTMLElement[]} the character elements, in order
+   */
+  #splitChars(line) {
+    const text = line.textContent.trim();
+    if (!text) return [];
+
+    line.setAttribute('aria-label', text);
+    line.textContent = '';
+
+    const chars = [];
+    // Keeps the separators, so spacing between words survives the split.
+    for (const token of text.split(/(\s+)/)) {
+      if (!token) continue;
+
+      if (/^\s+$/.test(token)) {
+        line.appendChild(document.createTextNode(' '));
+        continue;
+      }
+
+      const word = document.createElement('span');
+      word.className = 'hero-video__word';
+      word.setAttribute('aria-hidden', 'true');
+
+      // Iterating the string yields whole code points, so multi-unit
+      // characters aren't split down the middle into broken halves.
+      for (const character of token) {
+        const span = document.createElement('span');
+        span.className = 'hero-video__char';
+        span.textContent = character;
+        word.appendChild(span);
+        chars.push(span);
+      }
+
+      line.appendChild(word);
+    }
+
+    return chars;
+  }
+
   #buildTimeline() {
     const gsap = window.gsap;
 
@@ -159,22 +215,40 @@ class HeroScrollComponent extends HTMLElement {
       )
       .fromTo(this.stage, { scale: 1, y: 0 }, { scale: 0.15, y: '10svh', ease: 'none', duration: 0.6 }, 0);
 
-    // Each line: blurred, lower, and transparent → sharp, in place, opaque.
-    // Staggered start times make them resolve one after another. The last
-    // one finishes at 0.85, comfortably before the timeline's end, so the
-    // lock only releases once every line has fully resolved.
+    // Each character resolves on its own — blurred, lower and transparent →
+    // sharp, in place, opaque — rippling left to right across the line, and
+    // the three lines start in turn. The last finishes at 0.88, before the
+    // timeline's end, so the lock only releases once every line has landed.
+    //
+    // `amount` (rather than `each`) spreads the whole ripple across a fixed
+    // slice of the timeline no matter how many characters there are, so the
+    // pacing holds when the headings are edited in the theme editor.
     const lineReveal = (line, start) => {
-      if (!line) return;
+      const chars = line && this.#chars.get(line);
+      if (!chars?.length) return;
+
+      // The line itself is hidden in CSS to stop it flashing before the
+      // scripts run; from here the characters carry the reveal.
+      gsap.set(line, { opacity: 1 });
+
       tl.fromTo(
-        line,
-        { y: 30, opacity: 0, filter: 'blur(14px)' },
-        { y: 0, opacity: 1, filter: 'blur(0px)', ease: 'none', duration: 0.35 },
+        chars,
+        { yPercent: 120, opacity: 0, filter: 'blur(8px)' },
+        {
+          yPercent: 0,
+          opacity: 1,
+          filter: 'blur(0px)',
+          ease: 'power3.out',
+          duration: 0.18,
+          force3D: true,
+          stagger: { amount: 0.2 },
+        },
         start
       );
     };
 
-    lineReveal(this.headingLine1, 0.3);
-    lineReveal(this.headingLine2, 0.4);
+    lineReveal(this.headingLine1, 0.22);
+    lineReveal(this.headingLine2, 0.36);
     lineReveal(this.headingLine3, 0.5);
 
     tl.progress(this.#progress);
@@ -224,6 +298,12 @@ class HeroScrollComponent extends HTMLElement {
 
   /** @type {EventTarget | undefined} */
   #scrollEventTarget;
+
+  /**
+   * Heading element → its character spans, populated once on connect.
+   * @type {Map<HTMLElement, HTMLElement[]>}
+   */
+  #chars = new Map();
 
   #locked = false;
 
