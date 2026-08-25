@@ -133,9 +133,11 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    /* Scales with height rather than width — this layout is now bound by
-       how tall it can be, not how wide. */
-    gap: clamp(1.5rem, 4svh, 3.5rem);
+    /* Tight floor so the full-width mark has room; any height left over is
+       handed to the gaps by space-between rather than pooling at the end,
+       which is what keeps the section to exactly one viewport. */
+    gap: clamp(1rem, 2.5svh, 2.5rem);
+    justify-content: space-between;
     padding-inline: var(--ocp-footer-padding-inline);
     /* Floored at the header's height: the header is sticky, so at the
        bottom of the page it sits over the top of this section and would
@@ -151,6 +153,11 @@
     flex: 0 0 auto;
     display: grid;
     grid-template-columns: minmax(14rem, 22rem) repeat(3, max-content);
+    /* `dense` matters: with a definite column but an auto row, placement
+       only ever moves the cursor forward, so the later single-block columns
+       would start below the stacked first column instead of beside it.
+       Dense backfills them into the first free row of their own column. */
+    grid-auto-flow: row dense;
     justify-content: space-between;
     align-items: start;
     gap: 2.5rem 3rem;
@@ -295,26 +302,22 @@
     margin: 1em 0 0;
   }
 
-  /* Takes whatever height is left once the columns and the legal bar have
-     taken theirs, which is what keeps the section to exactly one viewport
-     instead of overflowing it. */
+  /* Sized by its own width rather than by leftover space, so the mark always
+     spans the full column width. The slack that used to sit here is absorbed
+     by the gaps above and below instead. */
   .ocp-footer__mark {
-    flex: 1 1 auto;
-    min-height: 0;
+    flex: 0 0 auto;
     display: flex;
-    align-items: flex-end;
     width: 100%;
   }
 
-  /* Normally width-bound, but capped by the space left over. The viewBox
-     scales the glyphs to fit inside that cap rather than distorting them,
-     so a short viewport shrinks the mark instead of pushing the legal bar
-     off the bottom. */
+  /* No height cap: capping it made the viewBox letterbox the glyphs on
+     shorter viewports, which pulled them in from the edges rather than
+     spanning the width. */
   .ocp-footer__mark svg {
     display: block;
     width: 100%;
     height: auto;
-    max-height: 100%;
   }
 
   .ocp-footer__bottom {
