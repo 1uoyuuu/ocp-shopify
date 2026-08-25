@@ -247,7 +247,6 @@
   .ocp-footer .footer-newsletter__form {
     display: flex;
     align-items: center;
-    gap: 1rem;
     border-bottom: 1px solid currentcolor;
     padding-block-end: 0.4em;
   }
@@ -260,6 +259,9 @@
     background: transparent;
     color: inherit;
     font: inherit;
+    /* After the `font` shorthand, which would otherwise pull in the footer's
+       heavier base weight. */
+    font-weight: 400;
     text-transform: inherit;
   }
 
