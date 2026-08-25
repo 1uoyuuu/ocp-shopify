@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "type": "footer",
   "name": "t:names.footer",
@@ -11,7 +20,8 @@
             "heading": "Sign up for our newsletter",
             "placeholder": "Email",
             "success_message": "Thanks for subscribing."
-          }
+          },
+          "blocks": {}
         },
         "shop": {
           "type": "footer-menu",
@@ -19,7 +29,8 @@
             "heading": "Shop",
             "menu": "",
             "links": "Shop all | /collections/all\nCoffee | /collections/all\nEquipment | /collections/all\nSubscription | /collections/all"
-          }
+          },
+          "blocks": {}
         },
         "ocp": {
           "type": "footer-menu",
@@ -27,14 +38,16 @@
             "heading": "OCP",
             "menu": "",
             "links": "Locations | /pages/locations\nAbout us | /pages/about"
-          }
+          },
+          "blocks": {}
         },
         "locations": {
           "type": "footer-schedule",
           "settings": {
             "heading": "Locations & hours",
             "rows": "OCP Crows Nest | 6:30-16:00\nOCP Artarmon | 6:30-16:00\nOCP Victoria Cross | 6:30-16:00\nOCP George St | 6:30-16:00\n\nOCP Docklands (MEL) | 6:30-16:00"
-          }
+          },
+          "blocks": {}
         },
         "contact": {
           "type": "footer-menu",
@@ -42,7 +55,8 @@
             "heading": "Contact us",
             "menu": "",
             "links": "Instagram | https://www.instagram.com/onlycoffeeproject\nAddress | /pages/locations\n0412 123 123 | tel:0412123123"
-          }
+          },
+          "blocks": {}
         },
         "enquiries": {
           "type": "footer-menu",
@@ -50,13 +64,21 @@
             "heading": "Enquiries",
             "menu": "",
             "links": "onlycoffeeproject@gmail.com | mailto:onlycoffeeproject@gmail.com"
-          }
+          },
+          "blocks": {}
         }
       },
-      "block_order": ["newsletter", "shop", "ocp", "locations", "contact", "enquiries"],
+      "block_order": [
+        "newsletter",
+        "shop",
+        "ocp",
+        "locations",
+        "contact",
+        "enquiries"
+      ],
       "settings": {
-        "background_color": "#0F80BE",
-        "text_color": "#FFFFFF",
+        "background_color": "#0f80be",
+        "text_color": "#ffffff",
         "font": "subheading",
         "font_size": "0.875rem",
         "show_wordmark": true,
@@ -66,10 +88,12 @@
         "credit": "Design by ycdat.studio",
         "credit_link": "",
         "padding_inline": 32,
-        "padding-block-start": 48,
+        "padding-block-start": 100,
         "padding-block-end": 24
       }
     }
   },
-  "order": ["footer"]
+  "order": [
+    "footer"
+  ]
 }
