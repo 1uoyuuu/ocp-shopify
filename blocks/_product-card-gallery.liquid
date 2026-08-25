@@ -29,6 +29,7 @@
     {% if product.available and settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add', product: product, section_id: section.id %}
     {% endif %}
+    {% render 'product-card-meta', product: product, block: block %}
   {% endunless %}
 {% endcapture %}
 
@@ -79,6 +80,52 @@
       "default": "portrait",
       "label": "t:settings.aspect_ratio",
       "info": "t:info.aspect_ratio_adjusted"
+    },
+    {
+      "type": "header",
+      "content": "Hover details"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_card_meta",
+      "label": "Show roaster and roast date on hover",
+      "info": "Reads the product's 'roaster name' and 'roast date' metafields. Cards with neither filled in are unaffected.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "card_meta_date_prefix",
+      "label": "Roast date prefix",
+      "info": "Sits before the date, e.g. 'Roasted 12 Aug 2026'. Leave empty for the date alone.",
+      "default": "Roasted",
+      "visible_if": "{{ block.settings.show_card_meta }}"
+    },
+    {
+      "type": "text",
+      "id": "card_meta_date_format",
+      "label": "Roast date format",
+      "info": "%d day, %b short month, %B full month, %m month number, %Y year, %y 2-digit year.",
+      "default": "%d %b %Y",
+      "visible_if": "{{ block.settings.show_card_meta }}"
+    },
+    {
+      "type": "color",
+      "id": "card_meta_color",
+      "label": "Text color",
+      "default": "#ffffff",
+      "visible_if": "{{ block.settings.show_card_meta }}"
+    },
+    {
+      "type": "range",
+      "id": "card_meta_scrim",
+      "label": "Image dimming on hover",
+      "info": "Darkens the image behind the text so it stays readable over any photo.",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 15,
+      "visible_if": "{{ block.settings.show_card_meta }}"
     },
     {
       "type": "header",

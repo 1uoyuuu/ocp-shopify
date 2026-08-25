@@ -1,0 +1,153 @@
+{%- doc -%}
+  The hover strip that rides over a product card's image: roaster on the
+  left, roast date on the right, both read from product metafields.
+
+  Rendered inside `.card-gallery`, which is already `position: relative`
+  with `overflow: hidden` — so the strip can be absolutely positioned
+  against the image and is clipped rather than spilling out of the card.
+
+  Nothing renders when neither metafield is filled in, so cards for
+  equipment or merch stay clean.
+
+  @param {object} product - The product object
+  @param {object} [block] - The block whose settings configure the strip
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+
+  assign roaster = product.metafields.custom.roaster_name.value
+  assign roast_date_value = product.metafields.custom.roast_date.value
+
+  assign date_format = block_settings.card_meta_date_format | default: '%d %b %Y'
+  assign roast_date = ''
+  if roast_date_value != blank
+    assign roast_date = roast_date_value | date: date_format
+    if block_settings.card_meta_date_prefix != blank
+      assign roast_date = block_settings.card_meta_date_prefix | append: ' ' | append: roast_date
+    endif
+  endif
+
+  # Liquid has no operator precedence and evaluates right to left, so the
+  # "enabled AND (either value present)" test is built up rather than
+  # written as one mixed and/or expression.
+  assign has_meta = false
+  if roaster != blank or roast_date != blank
+    assign has_meta = true
+  endif
+  if block_settings.show_card_meta == false
+    assign has_meta = false
+  endif
+%}
+
+{%- if has_meta -%}
+  <product-card-meta
+    class="card-meta"
+    style="
+      --card-meta-color: {{ block_settings.card_meta_color | default: '#ffffff' }};
+      --card-meta-scrim: {{ block_settings.card_meta_scrim | default: 15 | divided_by: 100.0 }};
+    "
+    aria-hidden="true"
+  >
+    <span class="card-meta__item">{{ roaster }}</span>
+    <span class="card-meta__item">{{ roast_date }}</span>
+  </product-card-meta>
+{%- endif -%}
+
+{% stylesheet %}
+  /*
+   * The strip is a full-width band pinned across the image with its two
+   * items pushed to the edges. It stays invisible until the card is
+   * hovered; JS then rides it up and down after the cursor.
+   *
+   * `bottom: 0` is the resting placement used when tracking is off (touch,
+   * reduced motion). Once the element takes over it flips to `top: 0` and
+   * drives position through `transform` instead.
+   */
+  .card-meta {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--padding-sm, 0.75rem);
+
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: 0.75rem;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--card-meta-color, #fff);
+
+    /* Must never swallow the click that opens the product. */
+    pointer-events: none;
+
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-meta[data-tracking] {
+    top: 0;
+    bottom: auto;
+    will-change: transform;
+  }
+
+  .card-meta__item {
+    /* Long roaster names shouldn't wrap the band into two lines. */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .card-meta__item:last-child {
+    flex: 0 0 auto;
+    text-align: end;
+  }
+
+  /*
+   * Product photography is arbitrary, so the text needs something to sit
+   * against. The scrim dims the whole image on hover rather than boxing the
+   * band, which keeps the card reading as one image.
+   */
+  .card-gallery:has(.card-meta)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgb(0 0 0 / var(--card-meta-scrim, 0.15));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card-gallery:hover .card-meta,
+    .card-gallery:has(.card-meta):hover::after {
+      opacity: 1;
+    }
+  }
+
+  /*
+   * Without hover there is no way to reveal the band, so show it outright
+   * rather than hiding the roaster and roast date from touch users.
+   */
+  @media (hover: none) {
+    .card-meta,
+    .card-gallery:has(.card-meta)::after {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-meta {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
