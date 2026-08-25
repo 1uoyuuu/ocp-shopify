@@ -634,12 +634,23 @@
   }
 
   /* Difference is |backdrop - source|, so only a white source inverts
-     cleanly (255 - backdrop); a dark source barely shifts anything. The
-     transparent-header rules set this variable through a long chain of
-     :not()s that outweighs anything reasonable here, hence !important. */
+     cleanly (255 - backdrop); a dark source barely shifts anything.
+
+     `--color` has to be set alongside `--color-foreground`: the row carries
+     a `color-custom-*` class from contrast-override, which renders its
+     colour as `var(--color, var(--color-foreground))` — with `--color`
+     defined, the fallback never runs and overriding only the foreground
+     variable has no effect on the text.
+
+     !important because the transparent-header rules set these through a
+     chain of :not()s that outweighs anything reasonable here. */
   .header-section:has(#header-component[data-blend]):not(:has(.menu-open)) .header__row {
-    --color-foreground: #ffffff !important; /* stylelint-disable-line declaration-no-important */
-    --color-foreground-rgb: 255 255 255 !important; /* stylelint-disable-line declaration-no-important */
+    /* stylelint-disable declaration-no-important */
+    --color: #ffffff !important;
+    --color-rgb: 255 255 255 !important;
+    --color-foreground: #ffffff !important;
+    --color-foreground-rgb: 255 255 255 !important;
+    /* stylelint-enable declaration-no-important */
   }
 
   /* Off while the menu panel is open — the panel is a descendant, so it
