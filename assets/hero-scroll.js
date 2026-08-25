@@ -106,6 +106,11 @@ class HeroScrollComponent extends HTMLElement {
     scrollContainerMediaQuery.addEventListener('change', this.#bindScrollListener);
 
     window.addEventListener('resize', this.#resizeListener);
+
+    // The centring offset is measured from rendered text widths, so a first
+    // pass against fallback metrics goes stale the moment the real face
+    // swaps in. Re-measure once it has.
+    document.fonts?.ready.then(() => this.#alignComposition());
   }
 
   disconnectedCallback() {
@@ -236,6 +241,25 @@ class HeroScrollComponent extends HTMLElement {
     return scale;
   }
 
+  /**
+   * Nudges the heading block sideways so the video sits on the viewport's
+   * centre line.
+   *
+   * The block is centred as a whole, but the video is not at its centre —
+   * the word before it is wider than the word after it, which pushes the
+   * video off by half that difference. Offsetting the block by that much
+   * puts the video back on centre without stretching either word's box,
+   * so the block's own edges stay tight to the outermost words and the
+   * rows above and below still align to them.
+   */
+  #alignComposition() {
+    const lines = this.querySelector('.hero-video__lines');
+    if (!lines || !this.headingLine2Left || !this.headingLine2Right) return;
+
+    const overhang = (this.headingLine2Left.offsetWidth - this.headingLine2Right.offsetWidth) / 2;
+    lines.style.setProperty('--hero-center-offset', `${-overhang}px`);
+  }
+
   #buildTimeline() {
     const gsap = window.gsap;
 
@@ -243,6 +267,7 @@ class HeroScrollComponent extends HTMLElement {
 
     const opening = this.#computeOpeningTarget();
     const stageScale = this.#sizeVideoSlot();
+    this.#alignComposition();
 
     const tl = gsap
       .timeline({ paused: true })
