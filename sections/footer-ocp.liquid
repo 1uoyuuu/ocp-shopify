@@ -272,9 +272,13 @@
     outline: none;
   }
 
+  /* Thickens the underline with a shadow rather than a wider border. A
+     border change has to be compensated by padding to hold the height, and
+     the two only cancel exactly in CSS pixels — once the border is rounded
+     to whole device pixels the row shifts, nudging the arrow. A shadow is
+     painted outside layout, so nothing moves. */
   .ocp-footer .footer-newsletter__form:focus-within {
-    border-bottom-width: 2px;
-    padding-block-end: calc(0.4em - 1px);
+    box-shadow: 0 1px 0 0 currentcolor;
   }
 
   .ocp-footer .footer-newsletter__submit {
