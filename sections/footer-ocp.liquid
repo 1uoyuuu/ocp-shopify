@@ -1,0 +1,430 @@
+{% comment %}
+  Only Coffee Project's footer: a row of columns across the top, the "ONLY"
+  lockup oversized beneath them, and a legal bar at the bottom.
+
+  The columns are blocks, so which ones appear and in what order is set in
+  the theme editor rather than fixed here. Colour and type come from section
+  settings that default to the brand palette.
+{% endcomment %}
+
+{% liquid
+  assign font = section.settings.font | default: 'subheading'
+%}
+
+<footer
+  class="ocp-footer"
+  style="
+    --ocp-footer-background: {{ section.settings.background_color }};
+    --ocp-footer-text: {{ section.settings.text_color }};
+    --ocp-footer-font: var(--font-{{ font }}--family);
+    --ocp-footer-font-weight: var(--font-{{ font }}--weight);
+    --ocp-footer-size: {{ section.settings.font_size }};
+    --ocp-footer-padding-inline: {{ section.settings.padding_inline }}px;
+    --padding-block-start: {{ section.settings.padding-block-start }}px;
+    --padding-block-end: {{ section.settings.padding-block-end }}px;
+  "
+>
+  <div class="ocp-footer__inner">
+    <div class="ocp-footer__columns">
+      {% content_for 'blocks' %}
+    </div>
+
+    {% if section.settings.show_wordmark %}
+      {%- comment -%}
+        Decorative — the shop name is already in the copyright line below, so
+        announcing this again would just be a repeat.
+      {%- endcomment -%}
+      <div
+        class="ocp-footer__mark"
+        aria-hidden="true"
+      >
+        {% render 'logo-only' %}
+      </div>
+    {% endif %}
+
+    <div class="ocp-footer__bottom">
+      <p class="ocp-footer__copyright">
+        {%- if section.settings.copyright != blank -%}
+          {{ section.settings.copyright }}
+        {%- else -%}
+          © {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.
+        {%- endif -%}
+      </p>
+
+      {%- comment -%}
+        Same pattern as the footer menu columns: a navigation menu when one
+        exists, otherwise the typed list, so this isn't empty before the
+        menus are built.
+      {%- endcomment -%}
+      {% if section.settings.legal_menu != blank or section.settings.legal_links != blank %}
+        <ul
+          class="ocp-footer__legal list-unstyled"
+          role="list"
+        >
+          {% if section.settings.legal_menu != blank %}
+            {% for link in section.settings.legal_menu.links %}
+              <li>
+                <a
+                  class="ocp-footer__link"
+                  href="{{ link.url }}"
+                >
+                  {{- link.title -}}
+                </a>
+              </li>
+            {% endfor %}
+          {% else %}
+            {% assign legal_lines = section.settings.legal_links | newline_to_br | split: '<br />' %}
+            {% for line in legal_lines %}
+              {% assign trimmed = line | strip %}
+              {% if trimmed == blank %}
+                {% continue %}
+              {% endif %}
+              {% assign parts = trimmed | split: '|' %}
+              <li>
+                <a
+                  class="ocp-footer__link"
+                  href="{{ parts[1] | strip | default: '#' }}"
+                >
+                  {{- parts[0] | strip -}}
+                </a>
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      {% endif %}
+
+      {% if section.settings.credit != blank %}
+        <p class="ocp-footer__credit">
+          {%- if section.settings.credit_link != blank -%}
+            <a
+              class="ocp-footer__link"
+              href="{{ section.settings.credit_link }}"
+            >
+              {{- section.settings.credit -}}
+            </a>
+          {%- else -%}
+            {{ section.settings.credit }}
+          {%- endif -%}
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</footer>
+
+{% stylesheet %}
+  .ocp-footer {
+    background-color: var(--ocp-footer-background);
+    color: var(--ocp-footer-text);
+    font-family: var(--ocp-footer-font);
+    font-weight: var(--ocp-footer-font-weight);
+    font-size: var(--ocp-footer-size);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 1.45;
+  }
+
+  .ocp-footer__inner {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3rem, 9vw, 8rem);
+    padding-inline: var(--ocp-footer-padding-inline);
+    padding-block: var(--padding-block-start) var(--padding-block-end);
+  }
+
+  /* The newsletter is given room to grow while the link columns stay at
+     their natural width, so the row reads as one wide column followed by
+     several narrow ones rather than an even split. */
+  .ocp-footer__columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5rem 3rem;
+  }
+
+  .ocp-footer .footer-column {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .ocp-footer .footer-newsletter {
+    flex: 1 1 16rem;
+    max-width: 26rem;
+  }
+
+  .ocp-footer .footer-column__heading {
+    margin: 0 0 1.5em;
+    font: inherit;
+    text-transform: inherit;
+  }
+
+  .ocp-footer .footer-column__list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ocp-footer .footer-column__link,
+  .ocp-footer__link {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity var(--animation-speed, 0.2s) var(--animation-easing, ease);
+  }
+
+  .ocp-footer .footer-column__link:hover,
+  .ocp-footer__link:hover {
+    opacity: 0.65;
+  }
+
+  /* Two aligned columns rather than name and hours running together. */
+  .ocp-footer .footer-schedule {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    gap: 0 2.5rem;
+    margin: 0;
+  }
+
+  .ocp-footer .footer-schedule__row {
+    display: contents;
+  }
+
+  .ocp-footer .footer-schedule__name,
+  .ocp-footer .footer-schedule__value {
+    margin: 0;
+    font: inherit;
+  }
+
+  .ocp-footer .footer-schedule__spacer {
+    grid-column: 1 / -1;
+    height: 1.45em;
+  }
+
+  .ocp-footer .footer-newsletter__form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid currentcolor;
+    padding-block-end: 0.4em;
+  }
+
+  .ocp-footer .footer-newsletter__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-transform: inherit;
+  }
+
+  .ocp-footer .footer-newsletter__input::placeholder {
+    color: inherit;
+    opacity: 0.75;
+  }
+
+  .ocp-footer .footer-newsletter__input:focus {
+    outline: none;
+  }
+
+  .ocp-footer .footer-newsletter__form:focus-within {
+    border-bottom-width: 2px;
+    padding-block-end: calc(0.4em - 1px);
+  }
+
+  .ocp-footer .footer-newsletter__submit {
+    flex: 0 0 auto;
+    display: flex;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .ocp-footer .footer-newsletter__arrow {
+    display: block;
+    width: 1em;
+  }
+
+  .ocp-footer .footer-newsletter__arrow svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .ocp-footer .footer-newsletter__message {
+    margin: 1em 0 0;
+  }
+
+  .ocp-footer__mark {
+    display: block;
+    width: 100%;
+  }
+
+  .ocp-footer__mark svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .ocp-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem 3rem;
+  }
+
+  .ocp-footer__copyright,
+  .ocp-footer__credit {
+    margin: 0;
+  }
+
+  .ocp-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Footer",
+  "tag": "section",
+  "class": "ocp-footer-section",
+  "blocks": [
+    { "type": "footer-newsletter" },
+    { "type": "footer-menu" },
+    { "type": "footer-schedule" }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#0F80BE"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "subheading"
+    },
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "Size",
+      "options": [
+        { "value": "0.75rem", "label": "12px" },
+        { "value": "0.875rem", "label": "14px" },
+        { "value": "1rem", "label": "16px" },
+        { "value": "1.125rem", "label": "18px" }
+      ],
+      "default": "0.875rem"
+    },
+    {
+      "type": "header",
+      "content": "Wordmark"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wordmark",
+      "label": "Show oversized wordmark",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Bottom bar"
+    },
+    {
+      "type": "text",
+      "id": "copyright",
+      "label": "Copyright",
+      "info": "Leave blank to use the store name and the current year."
+    },
+    {
+      "type": "link_list",
+      "id": "legal_menu",
+      "label": "Legal menu",
+      "info": "Preferred once the menu exists. Overrides the typed list below."
+    },
+    {
+      "type": "textarea",
+      "id": "legal_links",
+      "label": "Legal links",
+      "info": "Used only when no menu is selected. One per line, as: Label | /url"
+    },
+    {
+      "type": "text",
+      "id": "credit",
+      "label": "Credit"
+    },
+    {
+      "type": "url",
+      "id": "credit_link",
+      "label": "Credit link"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_inline",
+      "label": "Horizontal padding",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer"
+    }
+  ]
+}
+{% endschema %}

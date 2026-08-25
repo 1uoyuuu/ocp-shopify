@@ -1,0 +1,80 @@
+{% comment %}
+  A footer column: a heading over a list of links.
+
+  Links can come from a Shopify navigation menu, which is the better option
+  once one exists — it keeps them managed in Navigation and they follow any
+  later renaming. Failing that, the typed list is used, so a column can be
+  filled in before the menus are built rather than rendering as a bare
+  heading.
+{% endcomment %}
+
+<div
+  class="footer-column"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.heading != blank %}
+    <h2 class="footer-column__heading">{{ block.settings.heading }}</h2>
+  {% endif %}
+
+  <ul
+    class="footer-column__list list-unstyled"
+    role="list"
+  >
+    {% if block.settings.menu != blank %}
+      {% for link in block.settings.menu.links %}
+        <li>
+          <a
+            class="footer-column__link"
+            href="{{ link.url }}"
+          >
+            {{- link.title -}}
+          </a>
+        </li>
+      {% endfor %}
+    {% elsif block.settings.links != blank %}
+      {% assign lines = block.settings.links | newline_to_br | split: '<br />' %}
+      {% for line in lines %}
+        {% assign trimmed = line | strip %}
+        {% if trimmed == blank %}
+          {% continue %}
+        {% endif %}
+        {% assign parts = trimmed | split: '|' %}
+        <li>
+          <a
+            class="footer-column__link"
+            href="{{ parts[1] | strip | default: '#' }}"
+          >
+            {{- parts[0] | strip -}}
+          </a>
+        </li>
+      {% endfor %}
+    {% endif %}
+  </ul>
+</div>
+
+{% schema %}
+{
+  "name": "Footer menu",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "info": "Preferred once the menu exists — links stay managed in Navigation. Overrides the typed list below."
+    },
+    {
+      "type": "textarea",
+      "id": "links",
+      "label": "Links",
+      "info": "Used only when no menu is selected. One per line, as: Label | /url"
+    }
+  ]
+}
+{% endschema %}

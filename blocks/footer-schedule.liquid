@@ -1,0 +1,58 @@
+{% comment %}
+  A footer column of paired rows — a place on the left, its hours on the
+  right — kept in two aligned columns rather than run together as one line
+  of text.
+
+  Rows come from one textarea, one row per line, split on a pipe. That keeps
+  it to a single field to edit instead of a block per location, and a blank
+  line renders as a gap so groups can be separated.
+{% endcomment %}
+
+<div
+  class="footer-column"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.heading != blank %}
+    <h2 class="footer-column__heading">{{ block.settings.heading }}</h2>
+  {% endif %}
+
+  {% if block.settings.rows != blank %}
+    <dl class="footer-schedule">
+      {% assign lines = block.settings.rows | newline_to_br | split: '<br />' %}
+      {% for line in lines %}
+        {% assign trimmed = line | strip %}
+        {% if trimmed == blank %}
+          <div class="footer-schedule__spacer"></div>
+        {% else %}
+          {% assign parts = trimmed | split: '|' %}
+          <div class="footer-schedule__row">
+            <dt class="footer-schedule__name">{{ parts[0] | strip }}</dt>
+            <dd class="footer-schedule__value">{{ parts[1] | strip }}</dd>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </dl>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Footer schedule",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Locations & hours"
+    },
+    {
+      "type": "textarea",
+      "id": "rows",
+      "label": "Rows",
+      "info": "One per line, as: Name | Hours. Leave a line blank to add a gap.",
+      "default": "OCP Crows Nest | 6:30-16:00\nOCP Artarmon | 6:30-16:00"
+    }
+  ]
+}
+{% endschema %}

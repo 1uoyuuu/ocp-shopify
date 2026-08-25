@@ -1,0 +1,11 @@
+{% comment %}
+  The "ONLY" lockup — the first four glyphs of the wordmark, with the arrow
+  standing in as the Y, as it does in the full mark. Used oversized in the
+  footer.
+
+  Inlined rather than an <img> so it inherits `currentColor`, which lets the
+  footer's own text-color setting drive it instead of it being locked to the
+  brand blue. Size it from the caller via CSS on a wrapping element;
+  `width/height: 100%` on the svg overrides its own width/height attributes.
+{% endcomment %}
+{{ 'logo-only.svg' | inline_asset_content }}
