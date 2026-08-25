@@ -242,20 +242,16 @@
   }
 
   /* Shrinks to its widest row (the middle one), which gives the top and
-     bottom rows a shared edge to sit flush against.
-
-     Centring this block would leave the video off-centre, since the word
-     before it is wider than the word after it. Instead the block is nudged
-     by half that difference — measured in hero-scroll.js — which puts the
-     video on the viewport's centre line while the block's own edges stay
-     tight to the outermost words. */
+     bottom rows a shared edge to sit flush against. This block is what's
+     centred on the viewport; the video is laid out in the middle row like
+     any other item and simply lands wherever that puts it, rather than the
+     block being shifted to put the video on centre. */
   .hero-video__lines {
     display: flex;
     flex-direction: column;
     width: fit-content;
     max-width: 100vw;
     gap: var(--hero-heading-gap);
-    translate: var(--hero-center-offset, 0px) 0;
   }
 
   .hero-video__row--top {

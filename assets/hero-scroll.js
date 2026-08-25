@@ -107,10 +107,10 @@ class HeroScrollComponent extends HTMLElement {
 
     window.addEventListener('resize', this.#resizeListener);
 
-    // The centring offset is measured from rendered text widths, so a first
-    // pass against fallback metrics goes stale the moment the real face
-    // swaps in. Re-measure once it has.
-    document.fonts?.ready.then(() => this.#alignComposition());
+    // Where the video lands depends on the width of the words either side of
+    // it, so a timeline built against fallback font metrics goes stale the
+    // moment the real face swaps in. Rebuild once it has.
+    document.fonts?.ready.then(() => this.#resizeListener());
   }
 
   disconnectedCallback() {
@@ -242,22 +242,33 @@ class HeroScrollComponent extends HTMLElement {
   }
 
   /**
-   * Nudges the heading block sideways so the video sits on the viewport's
-   * centre line.
+   * Where the video has to travel to land in the gap the middle row leaves
+   * for it, and at what scale.
    *
-   * The block is centred as a whole, but the video is not at its centre —
-   * the word before it is wider than the word after it, which pushes the
-   * video off by half that difference. Offsetting the block by that much
-   * puts the video back on centre without stretching either word's box,
-   * so the block's own edges stay tight to the outermost words and the
-   * rows above and below still align to them.
+   * The stage is `inset: 0` on the section, so scaling alone keeps it
+   * centred on the section — but the slot is not at that centre: the word
+   * before it is wider than the word after it, so the row's midpoint sits
+   * off to one side. The difference between the two centres is the offset
+   * the stage needs.
+   *
+   * Both are read as viewport rects and subtracted, so the result is a
+   * section-relative delta and stays correct whatever the page's scroll
+   * position is when this runs.
+   *
+   * @returns {{scale: number, x: number, y: number}}
    */
-  #alignComposition() {
-    const lines = this.querySelector('.hero-video__lines');
-    if (!lines || !this.headingLine2Left || !this.headingLine2Right) return;
+  #computeStageTarget() {
+    const scale = this.#sizeVideoSlot();
+    if (!this.videoSlot) return { scale, x: 0, y: 0 };
 
-    const overhang = (this.headingLine2Left.offsetWidth - this.headingLine2Right.offsetWidth) / 2;
-    lines.style.setProperty('--hero-center-offset', `${-overhang}px`);
+    const slot = this.videoSlot.getBoundingClientRect();
+    const section = this.getBoundingClientRect();
+
+    return {
+      scale,
+      x: slot.left + slot.width / 2 - (section.left + section.width / 2),
+      y: slot.top + slot.height / 2 - (section.top + section.height / 2),
+    };
   }
 
   #buildTimeline() {
@@ -266,8 +277,7 @@ class HeroScrollComponent extends HTMLElement {
     this.#timeline?.kill();
 
     const opening = this.#computeOpeningTarget();
-    const stageScale = this.#sizeVideoSlot();
-    this.#alignComposition();
+    const stage = this.#computeStageTarget();
 
     const tl = gsap
       .timeline({ paused: true })
@@ -277,9 +287,14 @@ class HeroScrollComponent extends HTMLElement {
         { y: 0, scale: DOCKED_SCALE, ease: 'none', duration: LOGO_ARRIVE_PROGRESS },
         0
       )
-      // No y offset: the stage stays centred on the viewport, which is where
-      // the slot reserved for it in the middle row sits too.
-      .fromTo(this.stage, { scale: 1 }, { scale: stageScale, ease: 'none', duration: 0.6 }, 0);
+      // Travels to the slot the middle row leaves for it, rather than just
+      // shrinking in place — the slot is not at the section's centre.
+      .fromTo(
+        this.stage,
+        { scale: 1, x: 0, y: 0 },
+        { scale: stage.scale, x: stage.x, y: stage.y, ease: 'none', duration: 0.6 },
+        0
+      );
 
     // Each character resolves on its own — blurred, lower and transparent →
     // sharp, in place, opaque — rippling left to right across the line, and
