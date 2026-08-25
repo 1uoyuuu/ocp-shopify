@@ -143,29 +143,46 @@
     padding-block: max(var(--padding-block-start), var(--header-height, 60px)) var(--padding-block-end);
   }
 
-  /* The newsletter is given room to grow while the link columns stay at
-     their natural width, so the row reads as one wide column followed by
-     several narrow ones rather than an even split. */
+  /* A grid rather than a flex row so blocks can be assigned to a column and
+     several can share one, stacking in the order they're listed. The first
+     column is given room for the newsletter field; the rest take their
+     content's width. */
   .ocp-footer__columns {
     flex: 0 0 auto;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(14rem, 22rem) repeat(3, max-content);
+    justify-content: space-between;
+    align-items: start;
     gap: 2.5rem 3rem;
   }
 
   .ocp-footer .footer-column {
-    flex: 0 1 auto;
+    grid-column: var(--footer-column-index, auto);
     min-width: 0;
   }
 
-  .ocp-footer .footer-newsletter {
-    flex: 1 1 16rem;
-    max-width: 26rem;
+  @media screen and (max-width: 989px) {
+    .ocp-footer__columns {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* The assigned columns only make sense at the full four-column width;
+       below that the blocks flow in their listed order instead. */
+    .ocp-footer .footer-column {
+      grid-column: auto;
+    }
+  }
+
+  @media screen and (max-width: 599px) {
+    .ocp-footer__columns {
+      grid-template-columns: 1fr;
+    }
   }
 
   .ocp-footer .footer-column__heading {
     margin: 0 0 1.5em;
     font: inherit;
+    font-weight: 700;
     text-transform: inherit;
   }
 
@@ -174,6 +191,13 @@
     flex-direction: column;
     margin: 0;
     padding: 0;
+    font-weight: 400;
+  }
+
+  .ocp-footer .footer-column__list--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2rem;
   }
 
   .ocp-footer .footer-column__link,
@@ -205,6 +229,7 @@
   .ocp-footer .footer-schedule__value {
     margin: 0;
     font: inherit;
+    font-weight: 400;
   }
 
   .ocp-footer .footer-schedule__spacer {
@@ -303,6 +328,7 @@
   .ocp-footer__copyright,
   .ocp-footer__credit {
     margin: 0;
+    font-weight: 400;
   }
 
   .ocp-footer__legal {

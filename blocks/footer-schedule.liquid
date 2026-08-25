@@ -10,6 +10,7 @@
 
 <div
   class="footer-column"
+  style="--footer-column-index: {{ block.settings.column }};"
   {{ block.shopify_attributes }}
 >
   {% if block.settings.heading != blank %}
@@ -52,6 +53,16 @@
       "label": "Rows",
       "info": "One per line, as: Name | Hours. Leave a line blank to add a gap.",
       "default": "OCP Crows Nest | 6:30-16:00\nOCP Artarmon | 6:30-16:00"
+    },
+    {
+      "type": "range",
+      "id": "column",
+      "label": "Column",
+      "info": "Which column this sits in. Blocks sharing a column stack in their listed order.",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 4
     }
   ]
 }

@@ -10,6 +10,7 @@
 
 <div
   class="footer-column"
+  style="--footer-column-index: {{ block.settings.column }};"
   {{ block.shopify_attributes }}
 >
   {% if block.settings.heading != blank %}
@@ -17,7 +18,7 @@
   {% endif %}
 
   <ul
-    class="footer-column__list list-unstyled"
+    class="footer-column__list list-unstyled{% if block.settings.layout == 'horizontal' %} footer-column__list--horizontal{% endif %}"
     role="list"
   >
     {% if block.settings.menu != blank %}
@@ -74,6 +75,26 @@
       "id": "links",
       "label": "Links",
       "info": "Used only when no menu is selected. One per line, as: Label | /url"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "vertical", "label": "Stacked" },
+        { "value": "horizontal", "label": "Side by side" }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "range",
+      "id": "column",
+      "label": "Column",
+      "info": "Which column this sits in. Blocks sharing a column stack in their listed order.",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 1
     }
   ]
 }

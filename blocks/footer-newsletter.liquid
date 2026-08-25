@@ -8,6 +8,7 @@
 
 <div
   class="footer-column footer-newsletter"
+  style="--footer-column-index: {{ block.settings.column }};"
   {{ block.shopify_attributes }}
 >
   {% if block.settings.heading != blank %}
@@ -86,6 +87,16 @@
       "id": "success_message",
       "label": "Success message",
       "default": "Thanks for subscribing."
+    },
+    {
+      "type": "range",
+      "id": "column",
+      "label": "Column",
+      "info": "Which column this sits in. Blocks sharing a column stack in their listed order.",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 1
     }
   ]
 }
