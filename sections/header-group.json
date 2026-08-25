@@ -73,6 +73,7 @@
         "localization_row": "top",
         "section_width": "full-width",
         "section_height": "compact",
+        "blend_with_page": true,
         "enable_sticky_header": "always",
         "divider_width": 0,
         "divider_size": "page-width",

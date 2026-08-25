@@ -336,6 +336,9 @@
   {% endif %}
   data-skip-node-update
   data-scroll-direction="none"
+  {% if section.settings.blend_with_page %}
+    data-blend
+  {% endif %}
   {% if section.settings.menu_row == 'top' and bottom_row_blocks.size > 0 %}
     data-submenu-overlap-bottom-row
   {% endif %}
@@ -616,6 +619,34 @@
   .header-section {
     position: relative;
     z-index: var(--layer-menu-drawer);
+  }
+
+  /* Difference blending inverts the header against whatever is behind it, so
+     it stays readable over both the pale hero video and dark sections
+     without anything having to track the section colours.
+
+     It has to sit on .header-section, not on #header-component: an element
+     blends with the backdrop of its *parent* stacking context, and
+     .header-section is one (position + z-index). Applied inside it, the
+     header would blend against an empty context and do nothing visible. */
+  .header-section:has(#header-component[data-blend]) {
+    mix-blend-mode: difference;
+  }
+
+  /* Difference is |backdrop - source|, so only a white source inverts
+     cleanly (255 - backdrop); a dark source barely shifts anything. The
+     transparent-header rules set this variable through a long chain of
+     :not()s that outweighs anything reasonable here, hence !important. */
+  .header-section:has(#header-component[data-blend]):not(:has(.menu-open)) .header__row {
+    --color-foreground: #ffffff !important; /* stylelint-disable-line declaration-no-important */
+    --color-foreground-rgb: 255 255 255 !important; /* stylelint-disable-line declaration-no-important */
+  }
+
+  /* Off while the menu panel is open — the panel is a descendant, so it
+     would blend too, and its own background/text colours are already
+     chosen to work together. */
+  .header-section:has(.menu-open) {
+    mix-blend-mode: normal;
   }
 
   /* need default values for non-flash transitions on first overflow menu open */
@@ -1458,6 +1489,13 @@
     {
       "type": "header",
       "content": "t:content.appearance"
+    },
+    {
+      "type": "checkbox",
+      "id": "blend_with_page",
+      "label": "Invert against the page",
+      "info": "Blends the header with whatever is behind it so it stays readable over both light and dark sections. Forces the header text to white, and turns itself off while the menu panel is open.",
+      "default": false
     },
     {
       "type": "select",
