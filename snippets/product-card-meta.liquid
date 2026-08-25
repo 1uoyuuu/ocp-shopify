@@ -17,6 +17,10 @@
   assign block_settings = block.settings
 
   assign roaster = product.metafields.custom.roaster_name.value
+  if roaster != blank
+    assign roaster = '(' | append: roaster | append: ')'
+  endif
+
   assign roast_date_value = product.metafields.custom.roast_date.value
 
   assign date_format = block_settings.card_meta_date_format | default: '%d %b %Y'
@@ -82,7 +86,7 @@
     font-weight: var(--font-subheading--weight);
     font-size: 0.75rem;
     line-height: 1.2;
-    letter-spacing: 0.04em;
+    letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
     color: var(--card-meta-color, #fff);
 
