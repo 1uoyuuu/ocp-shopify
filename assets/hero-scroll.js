@@ -339,21 +339,18 @@ class HeroScrollComponent extends HTMLElement {
   }
 
   /**
-   * Marks the intro as never-playing: reveals the elements that are hidden
-   * by default in CSS (the headings, and the site header) so they can't be
-   * stranded invisible when the animation is skipped.
+   * Marks the intro as never-playing, revealing the headings — they're
+   * hidden by default in CSS so they can't flash in before the timeline's
+   * "from" state applies, so something has to show them when the animation
+   * is skipped.
    */
   #skipIntro() {
     this.dataset.introStatic = '';
-    document.documentElement.classList.add('hero-intro-done');
   }
 
   #lock() {
     this.#locked = true;
     document.documentElement.classList.add('hero-intro-locked');
-    // Re-hides the header — scrolling back to the top replays the intro, so
-    // it should return to its opening state rather than keep the header up.
-    document.documentElement.classList.remove('hero-intro-done');
     this.#observer?.enable();
     scrollTo({ top: 0, behavior: 'instant' });
     this.#timeline.progress(this.#progress);
@@ -362,8 +359,6 @@ class HeroScrollComponent extends HTMLElement {
   #unlock() {
     this.#locked = false;
     document.documentElement.classList.remove('hero-intro-locked');
-    // Reveals the site header (hidden by CSS for the whole intro).
-    document.documentElement.classList.add('hero-intro-done');
     this.#observer?.disable();
   }
 
