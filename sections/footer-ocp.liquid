@@ -112,7 +112,12 @@
 </footer>
 
 {% stylesheet %}
+  /* Exactly one viewport tall, so scrolling to the end lands on it cleanly
+     with no leftover strip. `svh` rather than `vh` matches the hero and
+     avoids the gap mobile browsers leave when their chrome retracts. */
   .ocp-footer {
+    box-sizing: border-box;
+    height: 100svh;
     background-color: var(--ocp-footer-background);
     color: var(--ocp-footer-text);
     font-family: var(--ocp-footer-font);
@@ -124,17 +129,25 @@
   }
 
   .ocp-footer__inner {
+    box-sizing: border-box;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: clamp(3rem, 9vw, 8rem);
+    /* Scales with height rather than width — this layout is now bound by
+       how tall it can be, not how wide. */
+    gap: clamp(1.5rem, 4svh, 3.5rem);
     padding-inline: var(--ocp-footer-padding-inline);
-    padding-block: var(--padding-block-start) var(--padding-block-end);
+    /* Floored at the header's height: the header is sticky, so at the
+       bottom of the page it sits over the top of this section and would
+       otherwise cover the first row. */
+    padding-block: max(var(--padding-block-start), var(--header-height, 60px)) var(--padding-block-end);
   }
 
   /* The newsletter is given room to grow while the link columns stay at
      their natural width, so the row reads as one wide column followed by
      several narrow ones rather than an even split. */
   .ocp-footer__columns {
+    flex: 0 0 auto;
     display: flex;
     flex-wrap: wrap;
     gap: 2.5rem 3rem;
@@ -257,18 +270,30 @@
     margin: 1em 0 0;
   }
 
+  /* Takes whatever height is left once the columns and the legal bar have
+     taken theirs, which is what keeps the section to exactly one viewport
+     instead of overflowing it. */
   .ocp-footer__mark {
-    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    align-items: flex-end;
     width: 100%;
   }
 
+  /* Normally width-bound, but capped by the space left over. The viewBox
+     scales the glyphs to fit inside that cap rather than distorting them,
+     so a short viewport shrinks the mark instead of pushing the legal bar
+     off the bottom. */
   .ocp-footer__mark svg {
     display: block;
     width: 100%;
     height: auto;
+    max-height: 100%;
   }
 
   .ocp-footer__bottom {
+    flex: 0 0 auto;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
