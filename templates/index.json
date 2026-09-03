@@ -14,11 +14,31 @@
       "settings": {
         "video": "shopify://files/videos/A closer look at every cup.Only Coffee Project.mp4",
         "overlay_opacity": 20,
+        "stack_over": true,
         "mobile_badge_scale": 70,
         "heading_line_1": "THE BEST",
         "heading_line_2_left": "COFFEE",
         "heading_line_2_right": "SHOP",
         "heading_line_3": "IN AUSTRALIA"
+      }
+    },
+    "text_reveal": {
+      "type": "text-reveal",
+      "settings": {
+        "items": "Electrify\nMesmerising\nSensory\nExperiences",
+        "intro": "<p>OCP doesn't roast its own coffee. We spend our weeks tasting through other people's — here and overseas — and give the shelf only to what's worth passing on. Everything we stock is someone else's best work, chosen rather than made.</p>",
+        "background_color": "#0f80be",
+        "text_color": "#ffffff",
+        "font": "heading",
+        "text_size": 4.5,
+        "lines_rows": 5,
+        "content_gap": 0,
+        "intro_width": 42,
+        "gap": 30,
+        "start_rotation": -95,
+        "end_rotation": 45,
+        "perspective": 1000,
+        "scroll_distance": 120
       }
     },
     "product_list_7TKgXV": {
@@ -246,7 +266,7 @@
         "horizontal_alignment": "center",
         "gap": 32,
         "background_color": "#0f80be",
-        "padding-block-start": 48,
+        "padding-block-start": 0,
         "padding-block-end": 48
       }
     },
@@ -402,22 +422,6 @@
         "label_font": "subheading",
         "padding-block-start": 96,
         "padding-block-end": 96
-      }
-    },
-    "text_reveal": {
-      "type": "text-reveal",
-      "settings": {
-        "items": "Electrify\nMesmerising\nSensory\nExperiences",
-        "background_color": "#0f80be",
-        "text_color": "#ffffff",
-        "font": "heading",
-        "text_size": 5,
-        "gap": 22,
-        "start_rotation": -25,
-        "end_rotation": 80,
-        "perspective": 1000,
-        "scroll_distance": 120,
-        "intro": "<p>OCP doesn't roast its own coffee. We spend our weeks tasting through other people's — here and overseas — and give the shelf only to what's worth passing on. Everything we stock is someone else's best work, chosen rather than made.</p>"
       }
     }
   },
