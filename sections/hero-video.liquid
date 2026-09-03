@@ -24,11 +24,15 @@
   cross-element position matching and no "becomes part of the hero" DOM
   coupling to reason about.
 
-  The section is a plain 100svh block — no sticky/pin machinery and no
-  oversized scroll track, since the lock is enforced by Observer rather
-  than by scroll distance. That also keeps GSAP away from the DOM
-  structure entirely (pinning inserts a wrapper element, which fights the
-  theme's own DOM morphing on section re-render).
+  The section is a plain 100svh block with no oversized scroll track, since
+  the lock is enforced by Observer rather than by scroll distance. That
+  keeps GSAP away from the DOM structure entirely (pinning inserts a
+  wrapper element, which fights the theme's own DOM morphing on section
+  re-render).
+
+  Its own wrapper is made sticky in CSS so the sections after it rise over
+  it — see the [data-stack] rules below — but that is plain CSS layering,
+  not pinning, and inserts nothing.
 {% endcomment %}
 
 {% liquid
@@ -39,6 +43,9 @@
   class="hero-video"
   data-skip-node-update
   data-mobile-badge-scale="{{ section.settings.mobile_badge_scale | default: 70 }}"
+  {% if section.settings.stack_over %}
+    data-stack
+  {% endif %}
 >
     <div
       class="hero-video__stage"
@@ -162,6 +169,31 @@
     min-height: 480px;
     background: var(--color-background, #fff);
     overflow: clip;
+  }
+
+  /* The hero holds its place and the sections after it ride up to cover it,
+     rather than it scrolling away with them.
+
+     The section *wrapper* is what sticks, not .hero-video itself: a sticky
+     element is bounded by its containing block, and the hero's is its own
+     wrapper — exactly its own height, so it would have nowhere to travel.
+     The wrapper's containing block is <main>, which is the whole page, so
+     the hero stays put until <main> ends and then unsticks on its own.
+     Nothing has to be measured, and the footer (a sibling of <main>, not a
+     section within it) is untouched. */
+  .shopify-section:has(.hero-video[data-stack]) {
+    position: sticky;
+    top: 0;
+    z-index: var(--layer-base);
+  }
+
+  /* Whatever follows has to be opaque and above, or the pinned hero shows
+     straight through it. A section carrying its own background paints over
+     this one, so this only fills in for the sections that have none. */
+  .shopify-section:has(.hero-video[data-stack]) ~ .shopify-section {
+    position: relative;
+    z-index: var(--layer-flat);
+    background-color: var(--color-background);
   }
 
   /* Set on <html> by hero-scroll.js while the intro timeline is playing.
@@ -395,6 +427,13 @@
       "step": 5,
       "unit": "%",
       "default": 20
+    },
+    {
+      "type": "checkbox",
+      "id": "stack_over",
+      "label": "Let the next section rise over this one",
+      "info": "The hero stays in place while everything after it scrolls up to cover it, instead of scrolling away with the page.",
+      "default": true
     },
     {
       "type": "range",
