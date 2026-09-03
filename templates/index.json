@@ -12,8 +12,9 @@
     "hero_video": {
       "type": "hero-video",
       "settings": {
-        "video": "shopify://files/videos/7744417-uhd_4096_2160_25fps.mp4",
+        "video": "shopify://files/videos/A closer look at every cup.Only Coffee Project.mp4",
         "overlay_opacity": 20,
+        "mobile_badge_scale": 70,
         "heading_line_1": "THE BEST",
         "heading_line_2_left": "COFFEE",
         "heading_line_2_right": "SHOP",
@@ -343,21 +344,24 @@
           "settings": {
             "title": "Your coffee",
             "options": "Blend | Australian roaster\nRotation single origin | Australian roaster\nRotation single origin | International roaster"
-          }
+          },
+          "blocks": {}
         },
         "rhythm": {
           "type": "subscription-step",
           "settings": {
             "title": "Your rhythm",
             "options": "Weekly\nFortnightly\nMonthly"
-          }
+          },
+          "blocks": {}
         },
         "amount": {
           "type": "subscription-step",
           "settings": {
             "title": "Your amount",
             "options": "1 bag\n2 bags\n3 bags\n4 bags"
-          }
+          },
+          "blocks": {}
         }
       },
       "block_order": [
