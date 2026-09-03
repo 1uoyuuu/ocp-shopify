@@ -24,7 +24,6 @@
   data-gap="{{ gap }}"
   data-start-rotation="{{ section.settings.start_rotation }}"
   data-end-rotation="{{ section.settings.end_rotation }}"
-  data-perspective="{{ section.settings.perspective }}"
   style="
     --reveal-background: {{ section.settings.background_color }};
     --reveal-text: {{ section.settings.text_color }};
@@ -37,6 +36,9 @@
     --reveal-size: min({{ section.settings.text_size }}rem, 11vw);
     --reveal-perspective: {{ section.settings.perspective }}px;
     --reveal-scroll-distance: {{ section.settings.scroll_distance }}svh;
+    --reveal-rows: {{ section.settings.lines_rows }};
+    --reveal-content-gap: {{ section.settings.content_gap }}px;
+    --reveal-intro-width: {{ section.settings.intro_width }}rem;
   "
 >
   <div class="text-reveal__viewport">
@@ -118,14 +120,13 @@
     /* The cylinder is wider than the viewport at its edges; without this the
        lines swinging away would widen the page. */
     overflow: clip;
-    perspective: var(--reveal-perspective, 1000px);
   }
 
   .text-reveal__content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(1rem, 2.5vh, 1.75rem);
+    gap: var(--reveal-content-gap, 2rem);
     width: 100%;
   }
 
@@ -133,21 +134,33 @@
      the paragraph gets the sweep's full height reserved beneath it rather
      than being written over. --reveal-sweep is measured by the script; the
      fallback only has to be sane for the moment before it runs. */
+  /*
+   * The window the drum turns inside. Its height is stated in lines rather
+   * than worked out from the cylinder, so what the section occupies is what
+   * the editor asked for and nothing reserves space invisibly.
+   *
+   * `perspective` belongs here, on the drum's direct parent — it applies to
+   * an element's own children, so left further up it does nothing at all and
+   * the lines collapse into a flat stack.
+   */
   .text-reveal__sweep {
     display: grid;
     place-items: center;
     width: 100%;
-    min-height: var(--reveal-sweep, 24vh);
 
-    /* Only the neighbouring line is given room; the ones further round would
-       otherwise run into the paragraph. They fade out at the edges of this
-       window rather than being cut off at them, which also reads as the
-       cylinder receding. */
-    mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+    font-size: var(--reveal-size, 4rem);
+    line-height: 1.15;
+    min-height: calc(var(--reveal-rows, 2.5) * 1.15em);
+
+    perspective: var(--reveal-perspective, 1000px);
+
+    /* Lines turning past the window are cut at its edge rather than allowed
+       to run into the paragraph below. */
+    overflow: clip;
   }
 
   .text-reveal__intro {
-    max-width: 42rem;
+    max-width: var(--reveal-intro-width, 42rem);
     text-align: center;
     font-family: var(--font-body--family);
     font-size: clamp(1rem, 1.4vw, 1.25rem);
@@ -177,8 +190,6 @@
 
     font-family: var(--reveal-font);
     font-weight: 700;
-    font-size: var(--reveal-size, 4rem);
-    line-height: 1.15;
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
     text-align: center;
@@ -229,7 +240,8 @@
 
     .text-reveal .text-reveal__sweep {
       min-height: 0;
-      mask-image: none;
+      perspective: none;
+      overflow: visible;
     }
 
     .text-reveal .text-reveal__drum {
@@ -256,7 +268,8 @@
 
   text-reveal:not(:defined) .text-reveal__sweep {
     min-height: 0;
-    mask-image: none;
+    perspective: none;
+    overflow: visible;
   }
 
   text-reveal:not(:defined) .text-reveal__drum {
@@ -329,6 +342,40 @@
       "step": 0.5,
       "unit": "rem",
       "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "lines_rows",
+      "label": "Height of the lines area",
+      "info": "In lines. At 1 only the line facing you shows; higher leaves room for the ones turning past it, and anything beyond is cut off at the edge.",
+      "min": 1,
+      "max": 6,
+      "step": 0.5,
+      "default": 2.5
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "label": "Space below the lines",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "intro_width",
+      "label": "Paragraph width",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "rem",
+      "default": 42
     },
     {
       "type": "header",
