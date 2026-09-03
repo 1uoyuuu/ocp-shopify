@@ -47,25 +47,35 @@
       {% endif %}
     </header>
 
-    <div class="subscription__steps">
-      {% content_for 'blocks' %}
-    </div>
+    {%- comment -%}
+      With no steps added the section is just a statement and a link — which
+      is how it runs on the home page, the builder being for a subscription
+      page of its own later. Everything that only makes sense alongside the
+      steps is left out rather than rendered empty.
+    {%- endcomment -%}
+    {% if section.blocks.size > 0 %}
+      <div class="subscription__steps">
+        {% content_for 'blocks' %}
+      </div>
+    {% endif %}
 
     <div class="subscription__summary">
-      {% if section.settings.summary_label != blank %}
-        <p class="subscription__summary-label">{{ section.settings.summary_label }}</p>
-      {% endif %}
+      {% if section.blocks.size > 0 %}
+        {% if section.settings.summary_label != blank %}
+          <p class="subscription__summary-label">{{ section.settings.summary_label }}</p>
+        {% endif %}
 
-      {%- comment -%}
-        Filled in by subscription-steps.js. Hidden until the element is
-        defined so it can't sit empty if the module never loads — the steps
-        above still read correctly on their own.
-      {%- endcomment -%}
-      <p
-        class="subscription__summary-line"
-        ref="summary"
-        role="status"
-      ></p>
+        {%- comment -%}
+          Filled in by subscription-steps.js. Hidden until the element is
+          defined so it can't sit empty if the module never loads — the steps
+          above still read correctly on their own.
+        {%- endcomment -%}
+        <p
+          class="subscription__summary-line"
+          ref="summary"
+          role="status"
+        ></p>
+      {% endif %}
 
       {% if section.settings.cta_label != blank %}
         {% if section.settings.cta_link != blank %}
@@ -90,10 +100,16 @@
   </div>
 </subscription-steps>
 
-<script
-  src="{{ 'subscription-steps.js' | asset_url }}"
-  type="module"
-></script>
+{%- comment -%}
+  Only the step picking needs scripting, so a section without steps doesn't
+  pay for it.
+{%- endcomment -%}
+{% if section.blocks.size > 0 %}
+  <script
+    src="{{ 'subscription-steps.js' | asset_url }}"
+    type="module"
+  ></script>
+{% endif %}
 
 {% stylesheet %}
   .subscription {
@@ -308,7 +324,7 @@
       "type": "text",
       "id": "summary_label",
       "label": "Summary label",
-      "info": "Sits above the line that assembles the chosen options.",
+      "info": "Sits above the line that assembles the chosen options. Only shown when the section has steps.",
       "default": "(Your box)"
     },
     {

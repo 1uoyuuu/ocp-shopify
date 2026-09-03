@@ -293,41 +293,12 @@
     },
     "subscription_steps": {
       "type": "subscription-steps",
-      "blocks": {
-        "coffee": {
-          "type": "subscription-step",
-          "settings": {
-            "title": "Your coffee",
-            "options": "Blend | Australian roaster\nRotation single origin | Australian roaster\nRotation single origin | International roaster"
-          },
-          "blocks": {}
-        },
-        "rhythm": {
-          "type": "subscription-step",
-          "settings": {
-            "title": "Your rhythm",
-            "options": "Weekly\nFortnightly\nMonthly"
-          },
-          "blocks": {}
-        },
-        "amount": {
-          "type": "subscription-step",
-          "settings": {
-            "title": "Your amount",
-            "options": "1 bag\n2 bags\n3 bags\n4 bags"
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "coffee",
-        "rhythm",
-        "amount"
-      ],
+      "blocks": {},
+      "block_order": [],
       "settings": {
-        "eyebrow": "(How it works)",
-        "heading": "Build your subscription",
-        "intro": "",
+        "eyebrow": "(Subscriptions)",
+        "heading": "Coffee on repeat",
+        "intro": "<p>We spend our weeks tasting through roasters here and overseas, and keep only what's worth passing on. Choose a blend to come back to or a single origin that changes every delivery, tell us how often you drink it, and it arrives freshly roasted.</p>",
         "summary_label": "(Your box)",
         "cta_label": "Start a subscription",
         "cta_link": "",
