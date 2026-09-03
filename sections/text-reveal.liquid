@@ -192,7 +192,15 @@
     text-align: center;
 
     transform-style: preserve-3d;
-    transform: rotateX(var(--reveal-rotation, 0deg));
+
+    /* Pushed back by the cylinder's own radius so the line facing front
+       lands on the perspective origin plane rather than in front of it.
+       Each line is placed at translateZ(radius), which is nearer the viewer
+       — and perspective magnifies what is nearer, so without this the drum
+       rendered its lines up to 1.4x larger than the same font-size does
+       anywhere else on the page. The two ends cancel: translateZ(-r) then a
+       rotation of zero then translateZ(r) is the identity. */
+    transform: translateZ(calc(var(--reveal-radius, 0px) * -1)) rotateX(var(--reveal-rotation, 0deg));
     will-change: transform;
   }
 
