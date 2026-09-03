@@ -1,0 +1,426 @@
+{% comment %}
+  "How the subscription works", built as three choices rather than a block
+  of prose: pick a coffee, a rhythm and an amount, and a summary line
+  assembles what that adds up to.
+
+  It explains rather than sells. The store has no selling plans configured,
+  so nothing here can add to cart — the summary is a preview and the call to
+  action hands off to whichever page the merchant points it at.
+
+  Steps are blocks, so one can be renamed, reordered or added without
+  touching this file. Their numbers come from a CSS counter for the same
+  reason: `content_for 'blocks'` gives no loop index, and hardcoding them
+  would go stale the moment a step moved.
+{% endcomment %}
+
+{% liquid
+  assign heading_font = section.settings.heading_font | default: 'heading'
+  assign label_font = section.settings.label_font | default: 'subheading'
+%}
+
+<subscription-steps
+  class="subscription"
+  style="
+    --subscription-background: {{ section.settings.background_color }};
+    --subscription-text: {{ section.settings.text_color }};
+    --subscription-accent: {{ section.settings.accent_color }};
+    --subscription-heading-font: var(--font-{{ heading_font }}--family);
+    --subscription-heading-weight: var(--font-{{ heading_font }}--weight);
+    --subscription-label-font: var(--font-{{ label_font }}--family);
+    --subscription-label-weight: var(--font-{{ label_font }}--weight);
+    --subscription-padding-start: {{ section.settings.padding-block-start }}px;
+    --subscription-padding-end: {{ section.settings.padding-block-end }}px;
+  "
+>
+  <div class="subscription__inner">
+    <header class="subscription__header">
+      {% if section.settings.eyebrow != blank %}
+        <p class="subscription__eyebrow">{{ section.settings.eyebrow }}</p>
+      {% endif %}
+
+      {% if section.settings.heading != blank %}
+        <h2 class="subscription__heading">{{ section.settings.heading }}</h2>
+      {% endif %}
+
+      {% if section.settings.intro != blank %}
+        <div class="subscription__intro">{{ section.settings.intro }}</div>
+      {% endif %}
+    </header>
+
+    <div class="subscription__steps">
+      {% content_for 'blocks' %}
+    </div>
+
+    <div class="subscription__summary">
+      {% if section.settings.summary_label != blank %}
+        <p class="subscription__summary-label">{{ section.settings.summary_label }}</p>
+      {% endif %}
+
+      {%- comment -%}
+        Filled in by subscription-steps.js. Hidden until the element is
+        defined so it can't sit empty if the module never loads — the steps
+        above still read correctly on their own.
+      {%- endcomment -%}
+      <p
+        class="subscription__summary-line"
+        ref="summary"
+        role="status"
+      ></p>
+
+      {% if section.settings.cta_label != blank %}
+        {% if section.settings.cta_link != blank %}
+          <a
+            class="subscription__cta"
+            href="{{ section.settings.cta_link }}"
+          >
+            {{- section.settings.cta_label -}}
+          </a>
+        {% else %}
+          {%- comment -%}
+            No destination set yet, so this renders as plain text rather than
+            a link that would reload the page. The layout still reads as
+            finished in the editor.
+          {%- endcomment -%}
+          <span class="subscription__cta subscription__cta--inert">
+            {{- section.settings.cta_label -}}
+          </span>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</subscription-steps>
+
+<script
+  src="{{ 'subscription-steps.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  .subscription {
+    display: block;
+    background-color: var(--subscription-background, var(--color-background));
+    color: var(--subscription-text, var(--color-foreground));
+    padding-block: var(--subscription-padding-start, 96px) var(--subscription-padding-end, 96px);
+    padding-inline: var(--ocp-page-margin);
+  }
+
+  .subscription__inner {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 6vw, 5rem);
+  }
+
+  .subscription__eyebrow,
+  .subscription__summary-label {
+    margin: 0;
+    font-family: var(--subscription-label-font);
+    font-weight: var(--subscription-label-weight);
+    font-size: 0.875rem;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription__heading {
+    margin: 0.5em 0 0;
+    font-family: var(--subscription-heading-font);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 1;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription__intro {
+    margin-block-start: 1.5rem;
+    max-width: 42ch;
+    font-family: var(--font-body--family);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  /* The step numbers are drawn from this counter rather than written into
+     the blocks, so reordering or adding a step renumbers the rest. */
+  .subscription__steps {
+    counter-reset: subscription-step;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: clamp(2rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+
+  .subscription-step__index::before {
+    counter-increment: subscription-step;
+    content: counter(subscription-step, decimal-leading-zero);
+  }
+
+  .subscription-step__index {
+    display: block;
+    font-family: var(--subscription-label-font);
+    font-weight: var(--subscription-label-weight);
+    font-size: 0.875rem;
+    letter-spacing: var(--ocp-letter-spacing);
+    color: var(--subscription-accent);
+  }
+
+  .subscription-step__title {
+    margin: 0.75rem 0 0;
+    padding-block-end: 0.75rem;
+    border-block-end: 1px solid currentcolor;
+    font-family: var(--subscription-label-font);
+    font-weight: var(--subscription-label-weight);
+    font-size: 0.875rem;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-step__options {
+    margin: 1.25rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  .subscription-step__option {
+    /* Reset rather than inherit the theme's button chrome — these read as
+       lines of type, not as controls. */
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 0;
+    margin: 0;
+    text-align: start;
+    cursor: pointer;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4em;
+
+    font-family: var(--subscription-heading-font);
+    font-weight: var(--subscription-heading-weight);
+    font-size: clamp(1.125rem, 1.6vw, 1.5rem);
+    line-height: 1.15;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+
+    /* Unchosen options recede rather than disappear, so the full range of
+       what's on offer still reads at a glance. */
+    color: color-mix(in srgb, currentcolor 45%, transparent);
+    transition: color 0.2s ease;
+  }
+
+  .subscription-step__option[aria-pressed='true'] {
+    color: var(--subscription-accent);
+  }
+
+  .subscription-step__option:hover {
+    color: color-mix(in srgb, var(--subscription-accent) 70%, currentcolor);
+  }
+
+  .subscription-step__option-note {
+    font-family: var(--subscription-label-font);
+    font-weight: var(--subscription-label-weight);
+    font-size: 0.75rem;
+  }
+
+  .subscription__summary {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0.75rem;
+  }
+
+  .subscription__summary-line {
+    margin: 0;
+    font-family: var(--subscription-heading-font);
+    font-weight: 700;
+    font-size: clamp(1.25rem, 2.4vw, 2rem);
+    line-height: 1.2;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    color: var(--subscription-accent);
+  }
+
+  /* Nothing has filled it in yet — and if the module never loads, nothing
+     will. */
+  subscription-steps:not(:defined) .subscription__summary-line {
+    display: none;
+  }
+
+  .subscription__cta {
+    margin-block-start: 0.5rem;
+    font-family: var(--subscription-label-font);
+    font-weight: var(--subscription-label-weight);
+    font-size: 0.875rem;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--subscription-text, var(--color-foreground));
+    border-block-end: 1px solid currentcolor;
+    padding-block-end: 0.25rem;
+  }
+
+  .subscription__cta--inert {
+    opacity: 0.45;
+  }
+
+  @media screen and (max-width: 749px) {
+    .subscription__steps {
+      grid-template-columns: 1fr;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Subscription steps",
+  "tag": "section",
+  "blocks": [
+    {
+      "type": "subscription-step"
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Label above the heading",
+      "default": "(How it works)"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Build your subscription"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Intro"
+    },
+    {
+      "type": "header",
+      "content": "Summary"
+    },
+    {
+      "type": "text",
+      "id": "summary_label",
+      "label": "Summary label",
+      "info": "Sits above the line that assembles the chosen options.",
+      "default": "(Your box)"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "Start a subscription"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link",
+      "info": "Until this is set the label shows as plain text rather than a link."
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Selected option and numbers",
+      "default": "#0f80be"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Heading font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "select",
+      "id": "label_font",
+      "label": "Label font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "subheading"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    }
+  ],
+  "presets": [
+    {
+      "name": "Subscription steps",
+      "blocks": [
+        {
+          "type": "subscription-step",
+          "settings": {
+            "title": "Your coffee",
+            "options": "Blend | Australian roaster\nRotation single origin | Australian roaster\nRotation single origin | International roaster"
+          }
+        },
+        {
+          "type": "subscription-step",
+          "settings": {
+            "title": "Your rhythm",
+            "options": "Weekly\nFortnightly\nMonthly"
+          }
+        },
+        {
+          "type": "subscription-step",
+          "settings": {
+            "title": "Your amount",
+            "options": "1 bag\n2 bags\n3 bags\n4 bags"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

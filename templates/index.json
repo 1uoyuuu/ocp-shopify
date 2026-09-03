@@ -334,11 +334,58 @@
         "padding-block-start": 48,
         "padding-block-end": 48
       }
+    },
+    "subscription_steps": {
+      "type": "subscription-steps",
+      "blocks": {
+        "coffee": {
+          "type": "subscription-step",
+          "settings": {
+            "title": "Your coffee",
+            "options": "Blend | Australian roaster\nRotation single origin | Australian roaster\nRotation single origin | International roaster"
+          }
+        },
+        "rhythm": {
+          "type": "subscription-step",
+          "settings": {
+            "title": "Your rhythm",
+            "options": "Weekly\nFortnightly\nMonthly"
+          }
+        },
+        "amount": {
+          "type": "subscription-step",
+          "settings": {
+            "title": "Your amount",
+            "options": "1 bag\n2 bags\n3 bags\n4 bags"
+          }
+        }
+      },
+      "block_order": [
+        "coffee",
+        "rhythm",
+        "amount"
+      ],
+      "settings": {
+        "eyebrow": "(How it works)",
+        "heading": "Build your subscription",
+        "intro": "",
+        "summary_label": "(Your box)",
+        "cta_label": "Start a subscription",
+        "cta_link": "",
+        "background_color": "#ffffff",
+        "text_color": "#111111",
+        "accent_color": "#0f80be",
+        "heading_font": "heading",
+        "label_font": "subheading",
+        "padding-block-start": 96,
+        "padding-block-end": 96
+      }
     }
   },
   "order": [
     "hero_video",
     "brand_intro",
-    "product_list_7TKgXV"
+    "product_list_7TKgXV",
+    "subscription_steps"
   ]
 }

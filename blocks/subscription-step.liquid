@@ -1,0 +1,100 @@
+{% comment %}
+  One choice in the subscription builder: a heading over the options that
+  can be picked for it.
+
+  Options come from a single textarea, one per line, split on a pipe into a
+  name and an optional qualifier — "Blend | Australian roaster". The
+  qualifier is set in parentheses, the same treatment the product cards give
+  a roaster, so the two read as the same kind of aside.
+
+  The first option carries `aria-pressed="true"` from the server, so with no
+  JavaScript the section still reads as a filled-in example rather than an
+  empty form.
+{% endcomment %}
+
+<div
+  class="subscription-step"
+  data-step
+  {{ block.shopify_attributes }}
+>
+  <span
+    class="subscription-step__index"
+    aria-hidden="true"
+  ></span>
+
+  {% if block.settings.title != blank %}
+    <h3 class="subscription-step__title">{{ block.settings.title }}</h3>
+  {% endif %}
+
+  {% if block.settings.options != blank %}
+    <ul
+      class="subscription-step__options list-unstyled"
+      role="list"
+    >
+      {% assign lines = block.settings.options | newline_to_br | split: '<br />' %}
+      {% for line in lines %}
+        {% assign trimmed = line | strip %}
+        {% if trimmed == blank %}
+          {% continue %}
+        {% endif %}
+
+        {% liquid
+          assign parts = trimmed | split: '|'
+          assign name = parts[0] | strip
+          assign note = parts[1] | strip
+
+          # The summary needs to tell two options with the same name apart —
+          # "rotation single origin" appears twice, differing only by roaster
+          # — so the qualifier travels with the label rather than being
+          # dropped as decoration.
+          assign label = name
+          if note != blank
+            assign label = name | append: ' (' | append: note | append: ')'
+          endif
+        %}
+
+        <li>
+          <button
+            class="subscription-step__option"
+            type="button"
+            data-option
+            data-label="{{ label | escape }}"
+            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+          >
+            <span class="subscription-step__option-name">{{ name }}</span>
+            {% if note != blank %}
+              <span class="subscription-step__option-note">({{ note }})</span>
+            {% endif %}
+          </button>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Subscription step",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Step title",
+      "default": "Your coffee"
+    },
+    {
+      "type": "textarea",
+      "id": "options",
+      "label": "Options",
+      "info": "One per line. Add a qualifier after a pipe to set it in brackets, as: Blend | Australian roaster",
+      "default": "Blend | Australian roaster\nRotation single origin | Australian roaster\nRotation single origin | International roaster"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Subscription step"
+    }
+  ]
+}
+{% endschema %}
