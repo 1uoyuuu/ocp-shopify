@@ -24,6 +24,24 @@ const DOCKED_CENTER_Y = 33;
 const GESTURE_DISTANCE = 1200;
 const TOUCH_GESTURE_DISTANCE = 700;
 
+/** Fraction of the distance to the gesture's target closed per 60fps frame.
+ * The playhead trails the finger instead of being pinned to it, which is
+ * what smooths out touch deltas — they arrive in irregular jumps, and
+ * writing each one straight to the timeline is what made the intro judder
+ * on a phone while every section below it glided. */
+const EASE = 0.12;
+
+/** Frame duration the EASE constant is expressed against. */
+const BASE_FRAME_MS = 1000 / 60;
+
+/** Below this much remaining progress there is nothing left to see. */
+const SETTLE = 0.0005;
+
+/** How long a flick keeps carrying the intro after the finger lifts, in
+ * seconds of its parting velocity. Without this the sequence stops dead on
+ * release, which is the one thing a native scroll never does. */
+const MOMENTUM_SECONDS = 0.14;
+
 /** Below this the hero stacks: the video leaves the middle row and takes a
  * line of its own. Must stay in step with the matching media query in
  * sections/hero-video.liquid — the two describe the same layout. */
@@ -123,9 +141,21 @@ class HeroScrollComponent extends HTMLElement {
         const distance = isWheel ? GESTURE_DISTANCE : TOUCH_GESTURE_DISTANCE;
         const delta = isWheel ? self.deltaY : -self.deltaY;
 
-        this.#progress = gsap.utils.clamp(0, 1, this.#progress + delta / distance);
-        this.#timeline.progress(this.#progress);
-        if (this.#progress >= 1) this.#unlock();
+        // Only the destination is moved here. The playhead is walked towards
+        // it a frame at a time, so several touchmoves landing inside one
+        // frame cost one render rather than one apiece.
+        this.#target = gsap.utils.clamp(0, 1, this.#target + delta / distance);
+        this.#startEasing();
+      },
+      onDragEnd: (self) => {
+        if (!this.#locked) return;
+
+        // Let the flick run on, the way lifting a finger off a scrolling
+        // page does. Same sign correction as above.
+        const carry = (-self.velocityY * MOMENTUM_SECONDS) / TOUCH_GESTURE_DISTANCE;
+
+        this.#target = gsap.utils.clamp(0, 1, this.#target + carry);
+        this.#startEasing();
       },
       preventDefault: true,
     });
@@ -172,6 +202,7 @@ class HeroScrollComponent extends HTMLElement {
   #scrollListener = () => {
     if (this.#locked || getScrollTop() > 0) return;
     this.#progress = 1;
+    this.#target = 1;
     this.#lock();
   };
 
@@ -444,8 +475,47 @@ class HeroScrollComponent extends HTMLElement {
     this.dataset.introStatic = '';
   }
 
+  #startEasing() {
+    if (this.#frame) return;
+    this.#lastTime = performance.now();
+    this.#frame = requestAnimationFrame(this.#ease);
+  }
+
+  /**
+   * Walks the playhead towards wherever the gesture has put the target,
+   * closing a share of what is left each frame. The lag is the point: touch
+   * deltas arrive in uneven jumps, and this absorbs them.
+   *
+   * @param {number} now
+   */
+  #ease = (now) => {
+    const delta = this.#target - this.#progress;
+
+    // Frame-rate independent: closing EASE of the gap every 16.7ms means
+    // closing this much over however long the frame actually took.
+    const elapsed = now - this.#lastTime;
+    this.#lastTime = now;
+    const factor = 1 - Math.pow(1 - EASE, elapsed / BASE_FRAME_MS);
+
+    this.#progress = Math.abs(delta) < SETTLE ? this.#target : this.#progress + delta * factor;
+    this.#timeline.progress(this.#progress);
+
+    if (Math.abs(this.#target - this.#progress) < SETTLE) {
+      this.#frame = 0;
+
+      // Released only once the playhead itself has arrived, not when the
+      // gesture said it should — otherwise scrolling is handed back with
+      // the last of the intro still catching up.
+      if (this.#progress >= 1) this.#unlock();
+      return;
+    }
+
+    this.#frame = requestAnimationFrame(this.#ease);
+  };
+
   #lock() {
     this.#locked = true;
+    this.#target = this.#progress;
     document.documentElement.classList.add('hero-intro-locked');
     this.#observer?.enable();
     scrollTo({ top: 0, behavior: 'instant' });
@@ -454,6 +524,8 @@ class HeroScrollComponent extends HTMLElement {
 
   #unlock() {
     this.#locked = false;
+    cancelAnimationFrame(this.#frame);
+    this.#frame = 0;
     document.documentElement.classList.remove('hero-intro-locked');
     this.#observer?.disable();
   }
@@ -482,6 +554,12 @@ class HeroScrollComponent extends HTMLElement {
   #locked = false;
 
   #progress = 0;
+
+  /** Where the gesture has asked the playhead to be; #progress follows it. */
+  #target = 0;
+
+  #frame = 0;
+  #lastTime = 0;
 }
 
 if (!customElements.get('hero-scroll-component')) {
