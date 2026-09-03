@@ -1,0 +1,134 @@
+{% comment %}
+  One coffee bag floating behind the subscription copy.
+
+  Position is the card's *centre* as a percentage of the section, not its top
+  left corner — placing a scatter by eye means thinking about where a bag
+  sits, not where its corner lands, and it keeps a card centred on the same
+  spot as it is resized.
+
+  The image comes from a product, so the scatter is the real roasters on the
+  shelf rather than a separate set of uploads to keep in sync. An explicit
+  image overrides it when a particular shot is wanted.
+{% endcomment %}
+
+{% liquid
+  assign image = block.settings.image
+  if image == blank
+    assign image = block.settings.product.featured_image
+  endif
+%}
+
+<div
+  class="subscription-card"
+  data-card
+  data-depth="{{ block.settings.depth }}"
+  aria-hidden="true"
+  style="
+    --card-x: {{ block.settings.x }}%;
+    --card-y: {{ block.settings.y }}%;
+    --card-width: {{ block.settings.width }}%;
+    --card-rotation: {{ block.settings.rotation }}deg;
+  "
+  {{ block.shopify_attributes }}
+>
+  {% if image != blank %}
+    {{
+      image
+      | image_url: width: 800
+      | image_tag:
+        class: 'subscription-card__image',
+        loading: 'lazy',
+        sizes: '(min-width: 750px) 20vw, 40vw',
+        widths: '200,400,600,800'
+    }}
+  {% else %}
+    {%- comment -%}
+      Renders as a plain block so the scatter can be arranged in the editor
+      before the products are chosen.
+    {%- endcomment -%}
+    <div class="subscription-card__placeholder"></div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Subscription card",
+  "tag": null,
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product",
+      "info": "Its featured image is used, so the scatter follows what you actually stock."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image override",
+      "info": "Optional. Use this instead of the product's own image."
+    },
+    {
+      "type": "header",
+      "content": "Placement"
+    },
+    {
+      "type": "range",
+      "id": "x",
+      "label": "Across",
+      "info": "The centre of the card, measured from the left edge.",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "y",
+      "label": "Down",
+      "info": "The centre of the card, measured from the top.",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "width",
+      "label": "Size",
+      "info": "Share of the section's width. Varying this a lot between cards is what stops the scatter reading as a grid.",
+      "min": 4,
+      "max": 30,
+      "step": 1,
+      "unit": "%",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "rotation",
+      "label": "Tilt",
+      "min": -15,
+      "max": 15,
+      "step": 1,
+      "unit": "°",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "depth",
+      "label": "Depth",
+      "info": "How far the card drifts with the cursor. Higher reads as nearer the viewer — give the larger cards more.",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 5
+    }
+  ],
+  "presets": [
+    {
+      "name": "Subscription card"
+    }
+  ]
+}
+{% endschema %}

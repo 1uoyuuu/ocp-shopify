@@ -16,6 +16,18 @@
 {% liquid
   assign heading_font = section.settings.heading_font | default: 'heading'
   assign label_font = section.settings.label_font | default: 'subheading'
+
+  # `content_for 'block'` only takes literal strings, so the two kinds can't
+  # be rendered in separate passes — they come out together and are
+  # separated by CSS instead: cards position themselves absolutely and leave
+  # the flow, steps stay in it.
+  assign step_blocks = section.blocks | where: 'type', 'subscription-step'
+
+  assign align = section.settings.text_alignment | default: 'center'
+  assign items = 'center'
+  if align == 'left'
+    assign items = 'start'
+  endif
 %}
 
 <subscription-steps
@@ -30,6 +42,9 @@
     --subscription-label-weight: var(--font-{{ label_font }}--weight);
     --subscription-padding-start: {{ section.settings.padding-block-start }}px;
     --subscription-padding-end: {{ section.settings.padding-block-end }}px;
+    --subscription-min-height: {{ section.settings.min_height }}svh;
+    --subscription-align: {{ align }};
+    --subscription-items: {{ items }};
   "
 >
   <div class="subscription__inner">
@@ -53,14 +68,19 @@
       page of its own later. Everything that only makes sense alongside the
       steps is left out rather than rendered empty.
     {%- endcomment -%}
+    {%- comment -%}
+      Holds both kinds. With no steps among them it is `display: contents`,
+      so it adds neither a row nor a gap to the column and the cards inside
+      still resolve their position against the section.
+    {%- endcomment -%}
     {% if section.blocks.size > 0 %}
-      <div class="subscription__steps">
+      <div class="subscription__blocks{% if step_blocks.size > 0 %} subscription__steps{% endif %}">
         {% content_for 'blocks' %}
       </div>
     {% endif %}
 
     <div class="subscription__summary">
-      {% if section.blocks.size > 0 %}
+      {% if step_blocks.size > 0 %}
         {% if section.settings.summary_label != blank %}
           <p class="subscription__summary-label">{{ section.settings.summary_label }}</p>
         {% endif %}
@@ -101,8 +121,8 @@
 </subscription-steps>
 
 {%- comment -%}
-  Only the step picking needs scripting, so a section without steps doesn't
-  pay for it.
+  Drives the step picking and the cards' drift, so a section with neither
+  doesn't pay for it.
 {%- endcomment -%}
 {% if section.blocks.size > 0 %}
   <script
@@ -113,17 +133,80 @@
 
 {% stylesheet %}
   .subscription {
-    display: block;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: var(--subscription-min-height, 100svh);
     background-color: var(--subscription-background, var(--color-background));
     color: var(--subscription-text, var(--color-foreground));
     padding-block: var(--subscription-padding-start, 96px) var(--subscription-padding-end, 96px);
     padding-inline: var(--ocp-page-margin);
+
+    /* Cards are placed by their centre, so one near an edge hangs past it.
+       Clipping here keeps that from widening the page. */
+    overflow: clip;
   }
 
   .subscription__inner {
     display: flex;
     flex-direction: column;
+    align-items: var(--subscription-items, center);
     gap: clamp(2.5rem, 6vw, 5rem);
+    width: 100%;
+    text-align: var(--subscription-align, center);
+  }
+
+  /* Lifted over the cards. Done on the copy itself rather than on
+     .subscription__inner, which has to stay unpositioned so the cards
+     resolve against the section and can spread across all of it. */
+  .subscription__header,
+  .subscription__summary {
+    position: relative;
+    z-index: 1;
+  }
+
+  .subscription__header {
+    max-width: 46rem;
+  }
+
+  /* ---- The scatter ---------------------------------------------------- */
+
+  /* Adds nothing to the column when it holds only cards, which are out of
+     flow anyway. The steps modifier below overrides it on two classes, so it
+     wins on specificity rather than on order. */
+  .subscription__blocks {
+    display: contents;
+  }
+
+  .subscription-card {
+    position: absolute;
+    left: var(--card-x, 50%);
+    top: var(--card-y, 50%);
+    width: var(--card-width, 12%);
+
+    /* The -50% pair is what makes --card-x/--card-y address the card's
+       centre; the drift and the tilt compose after it. --card-shift-* are
+       written by subscription-steps.js and default to nothing, so the
+       resting arrangement stands on its own without the script. */
+    transform: translate(-50%, -50%) translate3d(var(--card-shift-x, 0px), var(--card-shift-y, 0px), 0)
+      rotate(var(--card-rotation, 0deg));
+    will-change: transform;
+
+    /* Decoration only — the call to action has to stay clickable wherever a
+       card happens to land over it. */
+    pointer-events: none;
+  }
+
+  .subscription-card__image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .subscription-card__placeholder {
+    aspect-ratio: 4 / 5;
+    background-color: color-mix(in srgb, currentcolor 8%, transparent);
   }
 
   .subscription__eyebrow,
@@ -156,7 +239,7 @@
 
   /* The step numbers are drawn from this counter rather than written into
      the blocks, so reordering or adding a step renumbers the rest. */
-  .subscription__steps {
+  .subscription__blocks.subscription__steps {
     counter-reset: subscription-step;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
@@ -283,7 +366,7 @@
   }
 
   @media screen and (max-width: 749px) {
-    .subscription__steps {
+    .subscription__blocks.subscription__steps {
       grid-template-columns: 1fr;
     }
   }
@@ -294,6 +377,9 @@
   "name": "Subscription steps",
   "tag": "section",
   "blocks": [
+    {
+      "type": "subscription-card"
+    },
     {
       "type": "subscription-step"
     }
@@ -342,6 +428,27 @@
     {
       "type": "header",
       "content": "Appearance"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "center", "label": "Centred" },
+        { "value": "left", "label": "Left" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "min_height",
+      "label": "Minimum height",
+      "info": "The scatter needs room to spread out.",
+      "min": 60,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
     },
     {
       "type": "color",
