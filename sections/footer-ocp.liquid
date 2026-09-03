@@ -117,6 +117,8 @@
      avoids the gap mobile browsers leave when their chrome retracts. */
   .ocp-footer {
     box-sizing: border-box;
+
+    /* Exactly one screen — no more — while the columns sit side by side. */
     height: 100svh;
     background-color: var(--ocp-footer-background);
     color: var(--ocp-footer-text);
@@ -169,6 +171,13 @@
   }
 
   @media screen and (max-width: 989px) {
+    /* Once the columns stack there is more of them than a screen holds, and
+       a fixed height would cut the last ones off. It becomes a floor. */
+    .ocp-footer {
+      height: auto;
+      min-height: 100svh;
+    }
+
     .ocp-footer__columns {
       grid-template-columns: 1fr 1fr;
     }

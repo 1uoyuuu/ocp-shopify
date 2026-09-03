@@ -223,7 +223,7 @@
     margin: 0.5em 0 0;
     font-family: var(--subscription-heading-font);
     font-weight: 700;
-    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-size: var(--ocp-heading-size);
     line-height: 1;
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
@@ -368,6 +368,30 @@
   @media screen and (max-width: 749px) {
     .subscription__blocks.subscription__steps {
       grid-template-columns: 1fr;
+    }
+
+  }
+
+  /*
+   * The cards are laid out around a clear band through the middle of the
+   * section — but that band is a share of the width, while the copy has a
+   * fixed maximum. Below about 1300px the copy is the wider of the two and
+   * the scatter starts landing on it.
+   *
+   * So above that the copy is held inside the band, and below 990px, where
+   * doing that would leave it too narrow to read, the cards step aside
+   * instead. Rearranging them would mean a second set of positions to keep
+   * in step with the first, for decoration.
+   */
+  @media screen and (min-width: 990px) {
+    .subscription .subscription__header {
+      max-width: min(46rem, 52vw);
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    .subscription .subscription-card {
+      display: none;
     }
   }
 {% endstylesheet %}

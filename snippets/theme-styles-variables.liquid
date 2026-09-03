@@ -215,6 +215,12 @@
 
     /* Letter-spacing / Tracking */
 
+    /* One size for every section heading below the hero. The hero has its
+       own scale — it is the one place on the page where a larger heading is
+       deliberate — and everything after it shares this, so the page doesn't
+       drift through three near-identical sizes. */
+    --ocp-heading-size: clamp(2rem, 5.5vw, 5rem);
+
     /* The house tracking. Every piece of OCP's own type — hero, header,
        footer, product cards — sets this rather than its own value, so the
        whole site tightens or loosens together from one place. */

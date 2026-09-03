@@ -29,11 +29,6 @@
     --reveal-text: {{ section.settings.text_color }};
     --reveal-font: var(--font-{{ font }}--family);
     --reveal-weight: var(--font-{{ font }}--weight);
-    {%- comment -%}
-      The lines never wrap, so on a narrow screen the chosen size has to
-      give way — 'Mesmerising' at 5rem is wider than a phone.
-    {%- endcomment -%}
-    --reveal-size: min({{ section.settings.text_size }}rem, 11vw);
     --reveal-perspective: {{ section.settings.perspective }}px;
     --reveal-scroll-distance: {{ section.settings.scroll_distance }}svh;
     --reveal-rows: {{ section.settings.lines_rows }};
@@ -148,7 +143,9 @@
     place-items: center;
     width: 100%;
 
-    font-size: var(--reveal-size, 4rem);
+    /* The shared heading size. Its own vw term already keeps the lines,
+       which never wrap, inside a narrow screen. */
+    font-size: var(--ocp-heading-size);
     line-height: 1.15;
     min-height: calc(var(--reveal-rows, 2.5) * 1.15em);
 
@@ -332,16 +329,6 @@
         { "value": "accent", "label": "Accent" }
       ],
       "default": "heading"
-    },
-    {
-      "type": "range",
-      "id": "text_size",
-      "label": "Text size",
-      "min": 2,
-      "max": 10,
-      "step": 0.5,
-      "unit": "rem",
-      "default": 5
     },
     {
       "type": "header",
