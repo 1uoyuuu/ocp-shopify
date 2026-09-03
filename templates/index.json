@@ -30,15 +30,14 @@
         "background_color": "#0f80be",
         "text_color": "#ffffff",
         "font": "heading",
-        "text_size": 4.5,
         "lines_rows": 5,
         "content_gap": 0,
         "intro_width": 42,
-        "gap": 30,
-        "start_rotation": -95,
-        "end_rotation": 110,
-        "perspective": 1000,
-        "scroll_distance": 120
+        "gap": 15,
+        "start_rotation": -60,
+        "end_rotation": 30,
+        "perspective": 1500,
+        "scroll_distance": 100
       }
     },
     "product_list_7TKgXV": {
