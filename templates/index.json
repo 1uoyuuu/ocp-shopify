@@ -412,9 +412,9 @@
         "text_color": "#ffffff",
         "font": "heading",
         "text_size": 5,
-        "gap": 15,
-        "start_rotation": -30,
-        "end_rotation": 75,
+        "gap": 22,
+        "start_rotation": -25,
+        "end_rotation": 80,
         "perspective": 1000,
         "scroll_distance": 120
       }
