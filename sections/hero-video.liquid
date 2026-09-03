@@ -171,6 +171,15 @@
   html.hero-intro-locked body,
   html.hero-intro-locked .page-wrapper {
     overflow: clip;
+
+    /* `overflow` alone does not hold a touch device. The browser decides a
+       pan is happening at touchstart, before Observer's preventDefault on
+       the first move gets a say, so a swipe could carry the page into the
+       next section with the intro still unfinished. `touch-action` refuses
+       the gesture outright, and `overscroll-behavior` stops a rubber-band
+       at either end from handing the scroll on to the page behind. */
+    touch-action: none;
+    overscroll-behavior: none;
   }
 
   .hero-video__stage {

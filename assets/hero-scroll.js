@@ -249,7 +249,7 @@ class HeroScrollComponent extends HTMLElement {
    * fixed number — it then tracks whatever `--hero-heading-size` resolves to
    * at the current viewport, along with the transform that gets it there.
    *
-   * @returns {{scaleX: number, scaleY: number, mediaScaleX: number, mediaScaleY: number}}
+   * @returns {{scaleX: number, scaleY: number}}
    */
   #sizeVideoSlot() {
     const reference = this.headingLine2Left ?? this.headingLine1;
@@ -259,7 +259,7 @@ class HeroScrollComponent extends HTMLElement {
 
     // Fall back to the previous fixed scale if anything is unmeasurable.
     if (!fontSize || !viewportHeight || !viewportWidth) {
-      return { scaleX: 0.15, scaleY: 0.15, mediaScaleX: 1, mediaScaleY: 1 };
+      return { scaleX: 0.15, scaleY: 0.15 };
     }
 
     // Stacked, the badge spans a share of the screen's width; inline, its
@@ -276,25 +276,11 @@ class HeroScrollComponent extends HTMLElement {
       this.videoSlot.style.height = `${height}px`;
     }
 
-    const scaleX = width / viewportWidth;
-    const scaleY = height / viewportHeight;
-
     // Scaling a full-bleed stage unevenly is what frees the badge from the
-    // viewport's aspect ratio — but on its own it would stretch the video
-    // with it, since a transform scales what has already been laid out and
-    // object-fit can't undo that. So the media inside is scaled by the
-    // inverse, leaving the video's own net scale uniform and undistorted;
-    // the stage's `overflow: hidden` then crops it to the badge. Taking the
-    // larger axis makes the video cover the frame rather than fall short of
-    // it, so the crop is off the long side and never leaves a gap.
-    const cover = Math.max(scaleX, scaleY);
-
-    return {
-      scaleX,
-      scaleY,
-      mediaScaleX: cover / scaleX,
-      mediaScaleY: cover / scaleY,
-    };
+    // viewport's aspect ratio. On its own it would stretch the video with
+    // it — a transform scales what has already been laid out, and
+    // object-fit can't undo that — so #syncMediaScale corrects for it.
+    return { scaleX: width / viewportWidth, scaleY: height / viewportHeight };
   }
 
   /**
@@ -325,7 +311,7 @@ class HeroScrollComponent extends HTMLElement {
    * section-relative delta and stays correct whatever the page's scroll
    * position is when this runs.
    *
-   * @returns {{scaleX: number, scaleY: number, mediaScaleX: number, mediaScaleY: number, x: number, y: number}}
+   * @returns {{scaleX: number, scaleY: number, x: number, y: number}}
    */
   #computeStageTarget() {
     const size = this.#sizeVideoSlot();
@@ -340,6 +326,34 @@ class HeroScrollComponent extends HTMLElement {
       y: slot.top + slot.height / 2 - (section.top + section.height / 2),
     };
   }
+
+  /**
+   * Keeps the video's own scale uniform while the stage's deliberately is
+   * not.
+   *
+   * This cannot be a tween of its own. Multiplying two linear tweens does
+   * not give a linear result, so a separately animated counter-scale landed
+   * on the right value at both ends while stretching the video by as much
+   * as 1.6x in between. Deriving it from whatever the stage is actually at,
+   * every frame, holds the ratio at every point instead.
+   *
+   * The larger axis is the one that has to be covered; matching it leaves
+   * the video overflowing the shorter one, which the stage's
+   * `overflow: hidden` then crops — so the badge is never left with a gap.
+   */
+  #syncMediaScale = () => {
+    if (!this.media || !this.stage) return;
+
+    const gsap = window.gsap;
+    const scaleX = Number(gsap.getProperty(this.stage, 'scaleX'));
+    const scaleY = Number(gsap.getProperty(this.stage, 'scaleY'));
+
+    if (!scaleX || !scaleY) return;
+
+    const cover = Math.max(scaleX, scaleY);
+
+    gsap.set(this.media, { scaleX: cover / scaleX, scaleY: cover / scaleY });
+  };
 
   #buildTimeline() {
     const gsap = window.gsap;
@@ -362,20 +376,21 @@ class HeroScrollComponent extends HTMLElement {
       .fromTo(
         this.stage,
         { scaleX: 1, scaleY: 1, x: 0, y: 0 },
-        { scaleX: stage.scaleX, scaleY: stage.scaleY, x: stage.x, y: stage.y, ease: 'none', duration: 0.6 },
+        {
+          scaleX: stage.scaleX,
+          scaleY: stage.scaleY,
+          x: stage.x,
+          y: stage.y,
+          ease: 'none',
+          duration: 0.6,
+          onUpdate: this.#syncMediaScale,
+        },
         0
       );
 
-    // Runs in lockstep with the stage's own squash so the video's net scale
-    // stays uniform the whole way down, not just once it has landed.
-    if (this.media) {
-      tl.fromTo(
-        this.media,
-        { scaleX: 1, scaleY: 1 },
-        { scaleX: stage.mediaScaleX, scaleY: stage.mediaScaleY, ease: 'none', duration: 0.6 },
-        0
-      );
-    }
+    // The from-state is rendered without firing onUpdate, so square the
+    // media away before the first frame is seen.
+    this.#syncMediaScale();
 
     // Each character resolves on its own — blurred, lower and transparent →
     // sharp, in place, opaque — rippling left to right across the line, and
