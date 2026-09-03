@@ -259,21 +259,21 @@
       "type": "range",
       "id": "start_rotation",
       "label": "Start angle",
-      "info": "How far below the front the first line begins.",
+      "info": "How far below the front the first line begins. Most of the scroll is spent on whatever this and the end angle add beyond the lines' own span, so keep both close to it.",
       "min": -180,
       "max": 0,
       "step": 5,
-      "default": -70
+      "default": -30
     },
     {
       "type": "range",
       "id": "end_rotation",
       "label": "End angle",
-      "info": "Set this past the last line's own angle — lines multiplied by the angle between them — or the drum stops before they have all gone by.",
+      "info": "Set this a little past the last line's own angle — lines multiplied by the angle between them — or the drum either stops before they have all gone by, or spends the rest of the scroll turning through nothing.",
       "min": 0,
       "max": 360,
       "step": 5,
-      "default": 130
+      "default": 75
     },
     {
       "type": "range",
@@ -295,7 +295,7 @@
       "max": 500,
       "step": 25,
       "unit": "%",
-      "default": 300
+      "default": 200
     }
   ],
   "presets": [
