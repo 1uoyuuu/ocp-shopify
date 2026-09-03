@@ -1,0 +1,307 @@
+{% comment %}
+  Lines of type standing around a 3D cylinder, turned by scroll position —
+  each one rises, faces the viewer, and rolls away over the top.
+
+  The section is taller than the viewport and its frame is sticky, so the
+  turn is scrubbed across that extra height rather than played once on
+  entry. "Scroll distance" is what that height is.
+
+  Built natively rather than on ScrollTrigger: this theme scrolls
+  `.page-wrapper` above 990px and the document below it, so a scroll-linked
+  library would need its scroller reconfigured on every breakpoint change.
+  Reading the section's own viewport rect avoids the question — a rect is
+  measured against the viewport whichever element is doing the scrolling.
+{% endcomment %}
+
+{% liquid
+  assign font = section.settings.font | default: 'heading'
+  assign gap = section.settings.gap
+  assign lines = section.settings.items | newline_to_br | split: '<br />'
+%}
+
+<text-reveal
+  class="text-reveal"
+  data-gap="{{ gap }}"
+  data-start-rotation="{{ section.settings.start_rotation }}"
+  data-end-rotation="{{ section.settings.end_rotation }}"
+  style="
+    --reveal-background: {{ section.settings.background_color }};
+    --reveal-text: {{ section.settings.text_color }};
+    --reveal-font: var(--font-{{ font }}--family);
+    --reveal-weight: var(--font-{{ font }}--weight);
+    --reveal-size: {{ section.settings.text_size }}rem;
+    --reveal-perspective: {{ section.settings.perspective }}px;
+    --reveal-scroll-distance: {{ section.settings.scroll_distance }}svh;
+  "
+>
+  <div class="text-reveal__viewport">
+    <div
+      class="text-reveal__drum"
+      ref="drum"
+    >
+      {% assign index = 0 %}
+      {% for line in lines %}
+        {% assign trimmed = line | strip %}
+        {% if trimmed == blank %}
+          {% continue %}
+        {% endif %}
+
+        {%- comment -%}
+          Negative, so the drum turning forwards brings the lines round in
+          the order they're written rather than back to front.
+        {%- endcomment -%}
+        {% assign angle = index | times: gap | times: -1 %}
+
+        <div
+          class="text-reveal__item"
+          style="--item-angle: {{ angle }}deg;"
+        >
+          {{ trimmed }}
+        </div>
+
+        {% assign index = index | plus: 1 %}
+      {% endfor %}
+    </div>
+  </div>
+</text-reveal>
+
+<script
+  src="{{ 'text-reveal.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  .text-reveal {
+    display: block;
+    position: relative;
+    height: var(--reveal-scroll-distance, 300svh);
+    background-color: var(--reveal-background, var(--color-background));
+    color: var(--reveal-text, var(--color-foreground));
+  }
+
+  .text-reveal__viewport {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: grid;
+    place-items: center;
+    padding-inline: var(--ocp-page-margin);
+
+    /* The cylinder is wider than the viewport at its edges; without this the
+       lines swinging away would widen the page. */
+    overflow: clip;
+    perspective: var(--reveal-perspective, 1000px);
+  }
+
+  .text-reveal__drum {
+    position: relative;
+    width: 100%;
+
+    /* The drum is one line tall — every line is stacked on it and pushed out
+       to the cylinder's surface, so this height is what sets the radius. */
+    height: 1.15em;
+
+    font-family: var(--reveal-font);
+    font-weight: 700;
+    font-size: var(--reveal-size, 4rem);
+    line-height: 1.15;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    text-align: center;
+
+    transform-style: preserve-3d;
+    transform: rotateX(var(--reveal-rotation, 0deg));
+    will-change: transform;
+  }
+
+  .text-reveal__item {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    white-space: nowrap;
+
+    transform: rotateX(var(--item-angle, 0deg)) translateZ(var(--reveal-radius, 0px));
+
+    /* Lines on the far side of the drum would otherwise show through it,
+       mirrored. */
+    backface-visibility: hidden;
+  }
+
+  /*
+   * Without the module the radius is never measured, so every line would sit
+   * stacked on the axis on top of the others. Reduced motion has no business
+   * turning a drum either. Both fall back to the lines simply set out one
+   * under another.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .text-reveal,
+    .text-reveal:not(:defined) {
+      height: auto;
+    }
+  }
+
+  text-reveal:not(:defined) {
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .text-reveal .text-reveal__viewport {
+      position: static;
+      height: auto;
+      padding-block: clamp(4rem, 12vh, 8rem);
+      perspective: none;
+    }
+
+    .text-reveal .text-reveal__drum {
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1em;
+      transform: none;
+      transform-style: flat;
+    }
+
+    .text-reveal .text-reveal__item {
+      position: static;
+      transform: none;
+    }
+  }
+
+  text-reveal:not(:defined) .text-reveal__viewport {
+    position: static;
+    height: auto;
+    padding-block: clamp(4rem, 12vh, 8rem);
+    perspective: none;
+  }
+
+  text-reveal:not(:defined) .text-reveal__drum {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1em;
+    transform: none;
+    transform-style: flat;
+  }
+
+  text-reveal:not(:defined) .text-reveal__item {
+    position: static;
+    transform: none;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "3D text reveal",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "items",
+      "label": "Lines",
+      "info": "One per line. Each gets its own place on the cylinder, so keep them short enough not to wrap.",
+      "default": "No side menu\nNo distractions\nJust coffee\nFrom the world's\nBest roasters"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#0f80be"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 2,
+      "max": 10,
+      "step": 0.5,
+      "unit": "rem",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Angle between lines",
+      "info": "Wider spacing puts the lines further apart on a larger cylinder, so each one holds the front for longer.",
+      "min": 5,
+      "max": 40,
+      "step": 1,
+      "unit": "°",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "start_rotation",
+      "label": "Start angle",
+      "info": "How far below the front the first line begins.",
+      "min": -180,
+      "max": 0,
+      "step": 5,
+      "default": -70
+    },
+    {
+      "type": "range",
+      "id": "end_rotation",
+      "label": "End angle",
+      "info": "Set this past the last line's own angle — lines multiplied by the angle between them — or the drum stops before they have all gone by.",
+      "min": 0,
+      "max": 360,
+      "step": 5,
+      "default": 130
+    },
+    {
+      "type": "range",
+      "id": "perspective",
+      "label": "Perspective",
+      "info": "Lower is a stronger sense of depth.",
+      "min": 400,
+      "max": 2000,
+      "step": 100,
+      "unit": "px",
+      "default": 1000
+    },
+    {
+      "type": "range",
+      "id": "scroll_distance",
+      "label": "Scroll distance",
+      "info": "How much scrolling the whole turn is spread across.",
+      "min": 150,
+      "max": 500,
+      "step": 25,
+      "unit": "%",
+      "default": 300
+    }
+  ],
+  "presets": [
+    {
+      "name": "3D text reveal"
+    }
+  ]
+}
+{% endschema %}

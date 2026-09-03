@@ -21,47 +21,6 @@
         "heading_line_3": "IN AUSTRALIA"
       }
     },
-    "marquee_cbRKFb": {
-      "type": "marquee",
-      "blocks": {
-        "text_4Tt6aG": {
-          "type": "text",
-          "settings": {
-            "text": "<h3>ELECTRIFY MESMERISING SENSORY EXPERIENCES</h3>",
-            "width": "fit-content",
-            "max_width": "none",
-            "alignment": "left",
-            "type_preset": "custom",
-            "font": "var(--font-body--family)",
-            "font_size": "5.5rem",
-            "line_height": "tight",
-            "letter_spacing": "loose",
-            "case": "uppercase",
-            "wrap": "balance",
-            "text_color": "{{ settings.color_palette.background }}",
-            "background": true,
-            "background_color": "{{ settings.color_palette.foreground }}",
-            "corner_radius": 0,
-            "padding-block-start": 48,
-            "padding-block-end": 48,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "text_4Tt6aG"
-      ],
-      "name": "t:names.marquee_section",
-      "settings": {
-        "movement_direction": "normal",
-        "background_color": "",
-        "padding-block-start": 24,
-        "padding-block-end": 24,
-        "gap_between_elements": 24
-      }
-    },
     "product_list_7TKgXV": {
       "type": "product-list",
       "blocks": {
@@ -444,11 +403,26 @@
         "padding-block-start": 96,
         "padding-block-end": 96
       }
+    },
+    "text_reveal": {
+      "type": "text-reveal",
+      "settings": {
+        "items": "No side menu\nNo distractions\nJust coffee\nFrom the world's\nBest roasters",
+        "background_color": "#0f80be",
+        "text_color": "#ffffff",
+        "font": "heading",
+        "text_size": 5,
+        "gap": 15,
+        "start_rotation": -70,
+        "end_rotation": 130,
+        "perspective": 1000,
+        "scroll_distance": 300
+      }
     }
   },
   "order": [
     "hero_video",
-    "marquee_cbRKFb",
+    "text_reveal",
     "product_list_7TKgXV",
     "subscription_steps"
   ]
