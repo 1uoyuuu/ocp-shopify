@@ -24,6 +24,7 @@
   data-gap="{{ gap }}"
   data-start-rotation="{{ section.settings.start_rotation }}"
   data-end-rotation="{{ section.settings.end_rotation }}"
+  data-perspective="{{ section.settings.perspective }}"
   style="
     --reveal-background: {{ section.settings.background_color }};
     --reveal-text: {{ section.settings.text_color }};
@@ -124,7 +125,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(2rem, 5vh, 3.5rem);
+    gap: clamp(1rem, 2.5vh, 1.75rem);
     width: 100%;
   }
 
@@ -136,7 +137,13 @@
     display: grid;
     place-items: center;
     width: 100%;
-    min-height: var(--reveal-sweep, 40vh);
+    min-height: var(--reveal-sweep, 24vh);
+
+    /* Only the neighbouring line is given room; the ones further round would
+       otherwise run into the paragraph. They fade out at the edges of this
+       window rather than being cut off at them, which also reads as the
+       cylinder receding. */
+    mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
   }
 
   .text-reveal__intro {
@@ -222,6 +229,7 @@
 
     .text-reveal .text-reveal__sweep {
       min-height: 0;
+      mask-image: none;
     }
 
     .text-reveal .text-reveal__drum {
@@ -248,6 +256,7 @@
 
   text-reveal:not(:defined) .text-reveal__sweep {
     min-height: 0;
+    mask-image: none;
   }
 
   text-reveal:not(:defined) .text-reveal__drum {

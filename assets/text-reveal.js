@@ -104,13 +104,21 @@ class TextReveal extends HTMLElement {
     const radius = height / 2 / Math.tan((gap / 2) * (Math.PI / 180));
     this.#drum.style.setProperty('--reveal-radius', `${radius}px`);
 
-    // How far the lines actually swing above and below centre: the last one
-    // sits (lines - 1) x gap round the cylinder, and its height off the axis
-    // is the radius times the sine of that. Past a quarter turn a line is
-    // edge-on and contributes nothing further, so the angle is capped.
-    const lastAngle = Math.min((this.#drum.children.length - 1) * gap, 90);
-    const sweep = 2 * radius * Math.sin(lastAngle * (Math.PI / 180)) + height;
-    this.style.setProperty('--reveal-sweep', `${sweep}px`);
+    // Room for the line either side of the one facing front, rather than for
+    // the furthest line on the cylinder — reserving the full swing left a
+    // gap the height of the drum itself before the paragraph. Anything
+    // beyond this is faded out by the mask instead of being made room for.
+    //
+    // Measured where it lands on screen, not on the cylinder: a line at an
+    // angle is also nearer the viewer, and perspective pushes it further
+    // from centre than its height off the axis alone would suggest.
+    const perspective = Number(this.dataset.perspective ?? 1000);
+    const radians = gap * (Math.PI / 180);
+    const offAxis = radius * Math.sin(radians);
+    const towardViewer = radius * Math.cos(radians);
+    const onScreen = offAxis * (perspective / Math.max(perspective - towardViewer, 1));
+
+    this.style.setProperty('--reveal-sweep', `${2 * onScreen + height}px`);
   }
 
   /**
