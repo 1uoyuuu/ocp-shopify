@@ -24,11 +24,19 @@ const BASE_FRAME_MS = 1000 / 60;
 /** Below this many degrees of remaining travel there is nothing to see. */
 const SETTLE = 0.01;
 
+/** Where in the turn the paragraph starts and finishes resolving in. The
+ * lines have gone by well before the end, so this fills the stretch after
+ * them rather than leaving it as scroll with nothing happening. */
+const INTRO_FADE_FROM = 0.7;
+const INTRO_FADE_TO = 0.92;
+
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 class TextReveal extends HTMLElement {
   /** @type {HTMLElement | null} */
   #drum = null;
+  /** @type {HTMLElement | null} */
+  #intro = null;
   /** @type {EventTarget | null} */
   #scrollTarget = null;
   #frame = 0;
@@ -41,6 +49,8 @@ class TextReveal extends HTMLElement {
   connectedCallback() {
     this.#drum = this.querySelector('[ref="drum"]');
     if (!this.#drum) return;
+
+    this.#intro = this.querySelector('[ref="intro"]');
 
     this.#start = Number(this.dataset.startRotation ?? 0);
     this.#end = Number(this.dataset.endRotation ?? 0);
@@ -93,6 +103,14 @@ class TextReveal extends HTMLElement {
 
     const radius = height / 2 / Math.tan((gap / 2) * (Math.PI / 180));
     this.#drum.style.setProperty('--reveal-radius', `${radius}px`);
+
+    // How far the lines actually swing above and below centre: the last one
+    // sits (lines - 1) x gap round the cylinder, and its height off the axis
+    // is the radius times the sine of that. Past a quarter turn a line is
+    // edge-on and contributes nothing further, so the angle is capped.
+    const lastAngle = Math.min((this.#drum.children.length - 1) * gap, 90);
+    const sweep = 2 * radius * Math.sin(lastAngle * (Math.PI / 180)) + height;
+    this.style.setProperty('--reveal-sweep', `${sweep}px`);
   }
 
   /**
@@ -156,6 +174,20 @@ class TextReveal extends HTMLElement {
 
   #apply() {
     this.#drum?.style.setProperty('--reveal-rotation', `${this.#current}deg`);
+
+    if (!this.#intro) return;
+
+    // Taken from the eased angle rather than raw scroll, so the paragraph
+    // arrives in step with the lines it is following.
+    const span = this.#end - this.#start;
+    const progress = span ? (this.#current - this.#start) / span : 0;
+    const opacity = clamp(
+      (progress - INTRO_FADE_FROM) / (INTRO_FADE_TO - INTRO_FADE_FROM),
+      0,
+      1
+    );
+
+    this.#intro.style.setProperty('--reveal-intro-opacity', `${opacity}`);
   }
 }
 

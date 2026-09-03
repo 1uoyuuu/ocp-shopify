@@ -389,7 +389,7 @@
       "settings": {
         "eyebrow": "(Subscriptions)",
         "heading": "Coffee on repeat",
-        "intro": "<p>At OCP, we spend our weeks tasting through roasters here and overseas, and keep only what's worth passing on. Choose a blend to come back to or a single origin that changes every delivery, tell us how often you drink it, and it arrives freshly roasted.</p>",
+        "intro": "<p>Choose a blend to come back to or a single origin that changes every delivery, tell us how often you drink it, and it arrives freshly roasted.</p>",
         "summary_label": "(Your box)",
         "cta_label": "Subscribe now",
         "cta_link": "",
@@ -416,7 +416,8 @@
         "start_rotation": -25,
         "end_rotation": 80,
         "perspective": 1000,
-        "scroll_distance": 120
+        "scroll_distance": 120,
+        "intro": "<p>OCP doesn't roast its own coffee. We spend our weeks tasting through other people's — here and overseas — and give the shelf only to what's worth passing on. Everything we stock is someone else's best work, chosen rather than made.</p>"
       }
     }
   },

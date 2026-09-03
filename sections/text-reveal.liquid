@@ -29,16 +29,27 @@
     --reveal-text: {{ section.settings.text_color }};
     --reveal-font: var(--font-{{ font }}--family);
     --reveal-weight: var(--font-{{ font }}--weight);
-    --reveal-size: {{ section.settings.text_size }}rem;
+    {%- comment -%}
+      The lines never wrap, so on a narrow screen the chosen size has to
+      give way — 'Mesmerising' at 5rem is wider than a phone.
+    {%- endcomment -%}
+    --reveal-size: min({{ section.settings.text_size }}rem, 11vw);
     --reveal-perspective: {{ section.settings.perspective }}px;
     --reveal-scroll-distance: {{ section.settings.scroll_distance }}svh;
   "
 >
   <div class="text-reveal__viewport">
-    <div
-      class="text-reveal__drum"
-      ref="drum"
-    >
+    <div class="text-reveal__content">
+      {%- comment -%}
+        Reserves the height the turning lines sweep through, so the
+        paragraph below is never swung over. The script measures it — it
+        follows from the cylinder's radius and the angle of the last line.
+      {%- endcomment -%}
+      <div class="text-reveal__sweep">
+        <div
+          class="text-reveal__drum"
+          ref="drum"
+        >
       {% assign index = 0 %}
       {% for line in lines %}
         {% assign trimmed = line | strip %}
@@ -59,8 +70,24 @@
           {{ trimmed }}
         </div>
 
-        {% assign index = index | plus: 1 %}
-      {% endfor %}
+          {% assign index = index | plus: 1 %}
+        {% endfor %}
+        </div>
+      </div>
+
+      {% if section.settings.intro != blank %}
+        {%- comment -%}
+          Resolves in as the last line rolls away, so the turn ends on a
+          statement rather than on an empty cylinder — and the scroll after
+          the lines have gone is doing something.
+        {%- endcomment -%}
+        <div
+          class="text-reveal__intro"
+          ref="intro"
+        >
+          {{ section.settings.intro }}
+        </div>
+      {% endif %}
     </div>
   </div>
 </text-reveal>
@@ -91,6 +118,46 @@
        lines swinging away would widen the page. */
     overflow: clip;
     perspective: var(--reveal-perspective, 1000px);
+  }
+
+  .text-reveal__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(2rem, 5vh, 3.5rem);
+    width: 100%;
+  }
+
+  /* The lines swing well above and below the drum's own one-line box, so
+     the paragraph gets the sweep's full height reserved beneath it rather
+     than being written over. --reveal-sweep is measured by the script; the
+     fallback only has to be sane for the moment before it runs. */
+  .text-reveal__sweep {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: var(--reveal-sweep, 40vh);
+  }
+
+  .text-reveal__intro {
+    max-width: 42rem;
+    text-align: center;
+    font-family: var(--font-body--family);
+    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    line-height: 1.5;
+    text-wrap: pretty;
+
+    /* Written by the script as the turn ends. Full by default, so the
+       paragraph is simply there if the module never runs. */
+    opacity: var(--reveal-intro-opacity, 1);
+  }
+
+  .text-reveal__intro > :first-child {
+    margin-block-start: 0;
+  }
+
+  .text-reveal__intro > :last-child {
+    margin-block-end: 0;
   }
 
   .text-reveal__drum {
@@ -153,6 +220,10 @@
       perspective: none;
     }
 
+    .text-reveal .text-reveal__sweep {
+      min-height: 0;
+    }
+
     .text-reveal .text-reveal__drum {
       height: auto;
       display: flex;
@@ -173,6 +244,10 @@
     height: auto;
     padding-block: clamp(4rem, 12vh, 8rem);
     perspective: none;
+  }
+
+  text-reveal:not(:defined) .text-reveal__sweep {
+    min-height: 0;
   }
 
   text-reveal:not(:defined) .text-reveal__drum {
@@ -201,6 +276,12 @@
       "label": "Lines",
       "info": "One per line. Each gets its own place on the cylinder, so keep them short enough not to wrap.",
       "default": "No side menu\nNo distractions\nJust coffee\nFrom the world's\nBest roasters"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Paragraph",
+      "info": "Sits under the lines and resolves in as the last of them rolls away."
     },
     {
       "type": "header",
