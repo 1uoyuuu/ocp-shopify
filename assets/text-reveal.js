@@ -95,12 +95,23 @@ class TextReveal extends HTMLElement {
     this.#drum.style.setProperty('--reveal-radius', `${radius}px`);
   }
 
+  /**
+   * Progress runs from the moment the section's top edge appears at the
+   * bottom of the screen to the moment its bottom edge reaches there —
+   * a range of exactly the section's own height.
+   *
+   * Measuring only the sticky travel instead (from the section reaching the
+   * top of the screen) meant the drum stood still for the whole of its rise
+   * over the section before it, and then turned once it had already
+   * arrived. Starting at first sight puts the turn into the rise, where the
+   * movement is, and leaves whatever height is left over as a hold at the
+   * end rather than as dead scroll at the start.
+   */
   #readProgress() {
     const rect = this.getBoundingClientRect();
-    const travel = rect.height - window.innerHeight;
+    if (!rect.height) return;
 
-    // A section no taller than the viewport has nothing to scrub across.
-    const progress = travel > 0 ? clamp(-rect.top / travel, 0, 1) : 0;
+    const progress = clamp((window.innerHeight - rect.top) / rect.height, 0, 1);
 
     this.#target = this.#start + progress * (this.#end - this.#start);
   }

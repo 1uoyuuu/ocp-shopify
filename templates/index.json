@@ -416,7 +416,7 @@
         "start_rotation": -30,
         "end_rotation": 75,
         "perspective": 1000,
-        "scroll_distance": 150
+        "scroll_distance": 120
       }
     }
   },

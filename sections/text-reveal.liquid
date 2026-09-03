@@ -290,12 +290,12 @@
       "type": "range",
       "id": "scroll_distance",
       "label": "Scroll distance",
-      "info": "The section's height, as a share of the screen. The frame that holds the drum is one screen tall and sticks in place, so whatever is left over is the scroll the turn is spread across — at 100% there is nothing left over and the drum never moves.",
-      "min": 120,
+      "info": "The section's height, as a share of the screen. The turn is spread across the whole of it, beginning as the section comes into view. At 100% the turn finishes exactly as the section lands; anything above that is held in place at the end.",
+      "min": 100,
       "max": 500,
       "step": 10,
       "unit": "%",
-      "default": 200
+      "default": 120
     }
   ],
   "presets": [
