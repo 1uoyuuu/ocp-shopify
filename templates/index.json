@@ -263,7 +263,7 @@
         "icons_shape": "none",
         "section_width": "page-width",
         "horizontal_alignment": "center",
-        "gap": 32,
+        "gap": 0,
         "background_color": "#0f80be",
         "padding-block-start": 100,
         "padding-block-end": 100
