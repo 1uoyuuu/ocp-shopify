@@ -30,7 +30,7 @@
         "background_color": "#0f80be",
         "text_color": "#ffffff",
         "font": "heading",
-        "lines_rows": 5,
+        "lines_rows": 3.5,
         "content_gap": 120,
         "intro_width": 42,
         "gap": 15,
