@@ -38,13 +38,16 @@
 <hero-scroll-component
   class="hero-video"
   data-skip-node-update
-  data-mobile-badge-scale="{{ section.settings.mobile_badge_scale | default: 38 }}"
+  data-mobile-badge-scale="{{ section.settings.mobile_badge_scale | default: 70 }}"
 >
     <div
       class="hero-video__stage"
       ref="stage"
     >
-      <div class="hero-video__media">
+      <div
+        class="hero-video__media"
+        ref="media"
+      >
         {% if section.settings.video != blank %}
           {{
             section.settings.video
@@ -185,6 +188,14 @@
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  /* hero-scroll.js counter-scales this against the stage's uneven squash so
+     the video keeps its own proportions inside a badge that doesn't share
+     the viewport's. Centred, so the crop comes off both edges equally. */
+  .hero-video__media {
+    transform-origin: 50% 50%;
+    will-change: transform;
   }
 
   .hero-video__placeholder {
@@ -380,12 +391,12 @@
       "type": "range",
       "id": "mobile_badge_scale",
       "label": "Video size on mobile",
-      "info": "How much of the screen the video fills once it settles, on phones only. On wider screens it matches the height of the heading instead.",
-      "min": 20,
-      "max": 60,
-      "step": 2,
+      "info": "How much of the screen's width the video spans once it settles, on phones only. On wider screens its height matches the heading instead. The shape stays the same either way.",
+      "min": 30,
+      "max": 100,
+      "step": 5,
       "unit": "%",
-      "default": 38
+      "default": 70
     },
     {
       "type": "header",

@@ -29,9 +29,14 @@ const TOUCH_GESTURE_DISTANCE = 700;
  * sections/hero-video.liquid — the two describe the same layout. */
 const STACKED_LAYOUT = '(max-width: 749px)';
 
-/** Fallback share of the viewport the badge occupies when stacked, used if
- * the section's own setting is missing or unparseable. */
-const DEFAULT_MOBILE_BADGE_SCALE = 0.38;
+/** The badge's shape once it settles. Held at this ratio on every screen
+ * rather than being allowed to inherit the viewport's, which is what turned
+ * it into a tall sliver on phones. */
+const BADGE_ASPECT = 1.6;
+
+/** Fallback share of the screen's *width* the badge spans when stacked,
+ * used if the section's own setting is missing or unparseable. */
+const DEFAULT_MOBILE_BADGE_SCALE = 0.7;
 
 /**
  * Drives the hero-video intro, which is a *locked* sequence rather than a
@@ -70,6 +75,7 @@ class HeroScrollComponent extends HTMLElement {
     this.headingLine2Right = this.querySelector('[ref="headingLine2Right"]');
     this.headingLine3 = this.querySelector('[ref="headingLine3"]');
     this.videoSlot = this.querySelector('[ref="videoSlot"]');
+    this.media = this.querySelector('[ref="media"]');
 
     // The headings and the site header are hidden by default in CSS so they
     // can't flash in before the timeline's "from" state applies — any path
@@ -241,44 +247,59 @@ class HeroScrollComponent extends HTMLElement {
    * The video's final height is meant to match the heading's font size, so
    * the scale is derived from the measured font size rather than being a
    * fixed number — it then tracks whatever `--hero-heading-size` resolves to
-   * at the current viewport. The stage starts full-bleed, so scaling it by
-   * `fontSize / viewportHeight` lands it at exactly that height, and the
-   * slot takes the matching width (the scale is uniform).
+   * at the current viewport, along with the transform that gets it there.
    *
-   * @returns {number} the stage's final scale
+   * @returns {{scaleX: number, scaleY: number, mediaScaleX: number, mediaScaleY: number}}
    */
   #sizeVideoSlot() {
     const reference = this.headingLine2Left ?? this.headingLine1;
     const fontSize = reference ? parseFloat(getComputedStyle(reference).fontSize) : 0;
+    const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
     // Fall back to the previous fixed scale if anything is unmeasurable.
-    if (!fontSize || !viewportHeight) return 0.15;
-
-    // The stage is full-bleed and scaled uniformly, so the badge's aspect
-    // ratio is always the viewport's. Matching it to the cap height of the
-    // type works on a wide screen but collapses on a tall narrow one: at
-    // 390x844 it resolves to a 17px-wide sliver. Stacked, the badge is
-    // sized as a share of the viewport instead, which keeps it a usable
-    // portrait card.
-    const scale = matchMedia(STACKED_LAYOUT).matches
-      ? this.#mobileBadgeScale()
-      : fontSize / viewportHeight;
-
-    if (this.videoSlot) {
-      // Both axes come from the scale so the slot matches the scaled stage
-      // exactly. (On the wide layout `viewportHeight * scale` is just
-      // `fontSize` again, by construction.)
-      this.videoSlot.style.height = `${viewportHeight * scale}px`;
-      this.videoSlot.style.width = `${window.innerWidth * scale}px`;
+    if (!fontSize || !viewportHeight || !viewportWidth) {
+      return { scaleX: 0.15, scaleY: 0.15, mediaScaleX: 1, mediaScaleY: 1 };
     }
 
-    return scale;
+    // Stacked, the badge spans a share of the screen's width; inline, its
+    // height matches the cap height of the type it sits between. Either way
+    // the other side follows from BADGE_ASPECT, so the shape is the same
+    // everywhere.
+    const width = matchMedia(STACKED_LAYOUT).matches
+      ? viewportWidth * this.#mobileBadgeScale()
+      : fontSize * BADGE_ASPECT;
+    const height = width / BADGE_ASPECT;
+
+    if (this.videoSlot) {
+      this.videoSlot.style.width = `${width}px`;
+      this.videoSlot.style.height = `${height}px`;
+    }
+
+    const scaleX = width / viewportWidth;
+    const scaleY = height / viewportHeight;
+
+    // Scaling a full-bleed stage unevenly is what frees the badge from the
+    // viewport's aspect ratio — but on its own it would stretch the video
+    // with it, since a transform scales what has already been laid out and
+    // object-fit can't undo that. So the media inside is scaled by the
+    // inverse, leaving the video's own net scale uniform and undistorted;
+    // the stage's `overflow: hidden` then crops it to the badge. Taking the
+    // larger axis makes the video cover the frame rather than fall short of
+    // it, so the crop is off the long side and never leaves a gap.
+    const cover = Math.max(scaleX, scaleY);
+
+    return {
+      scaleX,
+      scaleY,
+      mediaScaleX: cover / scaleX,
+      mediaScaleY: cover / scaleY,
+    };
   }
 
   /**
-   * The stacked badge's share of the viewport, from the section's "Video
-   * size on mobile" setting.
+   * The stacked badge's share of the screen's width, from the section's
+   * "Video size on mobile" setting.
    *
    * @returns {number}
    */
@@ -304,17 +325,17 @@ class HeroScrollComponent extends HTMLElement {
    * section-relative delta and stays correct whatever the page's scroll
    * position is when this runs.
    *
-   * @returns {{scale: number, x: number, y: number}}
+   * @returns {{scaleX: number, scaleY: number, mediaScaleX: number, mediaScaleY: number, x: number, y: number}}
    */
   #computeStageTarget() {
-    const scale = this.#sizeVideoSlot();
-    if (!this.videoSlot) return { scale, x: 0, y: 0 };
+    const size = this.#sizeVideoSlot();
+    if (!this.videoSlot) return { ...size, x: 0, y: 0 };
 
     const slot = this.videoSlot.getBoundingClientRect();
     const section = this.getBoundingClientRect();
 
     return {
-      scale,
+      ...size,
       x: slot.left + slot.width / 2 - (section.left + section.width / 2),
       y: slot.top + slot.height / 2 - (section.top + section.height / 2),
     };
@@ -340,10 +361,21 @@ class HeroScrollComponent extends HTMLElement {
       // shrinking in place — the slot is not at the section's centre.
       .fromTo(
         this.stage,
-        { scale: 1, x: 0, y: 0 },
-        { scale: stage.scale, x: stage.x, y: stage.y, ease: 'none', duration: 0.6 },
+        { scaleX: 1, scaleY: 1, x: 0, y: 0 },
+        { scaleX: stage.scaleX, scaleY: stage.scaleY, x: stage.x, y: stage.y, ease: 'none', duration: 0.6 },
         0
       );
+
+    // Runs in lockstep with the stage's own squash so the video's net scale
+    // stays uniform the whole way down, not just once it has landed.
+    if (this.media) {
+      tl.fromTo(
+        this.media,
+        { scaleX: 1, scaleY: 1 },
+        { scaleX: stage.mediaScaleX, scaleY: stage.mediaScaleY, ease: 'none', duration: 0.6 },
+        0
+      );
+    }
 
     // Each character resolves on its own — blurred, lower and transparent →
     // sharp, in place, opaque — rippling left to right across the line, and
