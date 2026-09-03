@@ -29,15 +29,15 @@
           "settings": {
             "text": "<h3>ELECTRIFY MESMERISING SENSORY EXPERIENCES</h3>",
             "width": "fit-content",
-            "max_width": "normal",
+            "max_width": "none",
             "alignment": "left",
             "type_preset": "custom",
             "font": "var(--font-body--family)",
             "font_size": "5.5rem",
             "line_height": "tight",
-            "letter_spacing": "tight",
-            "case": "none",
-            "wrap": "nowrap",
+            "letter_spacing": "loose",
+            "case": "uppercase",
+            "wrap": "balance",
             "text_color": "{{ settings.color_palette.background }}",
             "background": true,
             "background_color": "{{ settings.color_palette.foreground }}",
@@ -60,92 +60,6 @@
         "padding-block-start": 24,
         "padding-block-end": 24,
         "gap_between_elements": 24
-      }
-    },
-    "brand_intro": {
-      "type": "section",
-      "blocks": {
-        "image_XXqh7p": {
-          "type": "image",
-          "name": "t:names.image",
-          "settings": {
-            "image": "shopify://shop_images/a03a71b6e494330149a127dced29363f.jpg",
-            "link": "",
-            "image_ratio": "square",
-            "width": "fill",
-            "custom_width": 100,
-            "width_mobile": "fill",
-            "custom_width_mobile": 100,
-            "height": "fit",
-            "border": "none",
-            "border_width": 1,
-            "border_opacity": 100,
-            "border_color": "",
-            "border_radius": 0,
-            "padding-block-start": 32,
-            "padding-block-end": 32,
-            "padding-inline-start": 32,
-            "padding-inline-end": 32
-          },
-          "blocks": {}
-        },
-        "intro_text": {
-          "type": "text",
-          "settings": {
-            "text": "<p>Only Coffee Project started with one idea: strip away everything a coffee shop doesn't need, and focus entirely on the one thing that matters — the coffee itself. No side menu, no distractions. Just great coffee, sourced from a rotating lineup of the world's best roasters, served by people who care about getting it right.</p>",
-            "width": "100%",
-            "max_width": "normal",
-            "alignment": "left",
-            "type_preset": "h2",
-            "font": "var(--font-body--family)",
-            "font_size": "1rem",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "text_color": "",
-            "background": false,
-            "background_color": "#00000026",
-            "corner_radius": 0,
-            "padding-block-start": 32,
-            "padding-block-end": 32,
-            "padding-inline-start": 32,
-            "padding-inline-end": 32
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "image_XXqh7p",
-        "intro_text"
-      ],
-      "settings": {
-        "content_direction": "row",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "center",
-        "vertical_alignment": "center",
-        "align_baseline": false,
-        "horizontal_alignment_flex_direction_column": "center",
-        "vertical_alignment_flex_direction_column": "center",
-        "gap": 16,
-        "section_width": "full-width",
-        "section_height": "small",
-        "section_height_custom": 50,
-        "background_media": "none",
-        "background_color": "",
-        "video_position": "cover",
-        "background_image_position": "cover",
-        "toggle_overlay": false,
-        "overlay_color": "#00000026",
-        "overlay_style": "solid",
-        "gradient_direction": "to top",
-        "border": "none",
-        "border_width": 1,
-        "border_opacity": 100,
-        "border_color": "",
-        "border_radius": 0,
-        "padding-block-start": 64,
-        "padding-block-end": 64
       }
     },
     "product_list_7TKgXV": {
@@ -430,7 +344,6 @@
   "order": [
     "hero_video",
     "marquee_cbRKFb",
-    "brand_intro",
     "product_list_7TKgXV",
     "subscription_steps"
   ]
