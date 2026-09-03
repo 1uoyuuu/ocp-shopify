@@ -36,7 +36,7 @@
         "intro_width": 42,
         "gap": 30,
         "start_rotation": -95,
-        "end_rotation": 45,
+        "end_rotation": 110,
         "perspective": 1000,
         "scroll_distance": 120
       }

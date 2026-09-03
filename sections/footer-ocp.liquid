@@ -19,7 +19,6 @@
     --ocp-footer-font: var(--font-{{ font }}--family);
     --ocp-footer-font-weight: var(--font-{{ font }}--weight);
     --ocp-footer-size: {{ section.settings.font_size }};
-    --ocp-footer-padding-inline: {{ section.settings.padding_inline }}px;
     --padding-block-start: {{ section.settings.padding-block-start }}px;
     --padding-block-end: {{ section.settings.padding-block-end }}px;
   "
@@ -140,7 +139,10 @@
        which is what keeps the section to exactly one viewport. */
     gap: clamp(1rem, 2.5svh, 2.5rem);
     justify-content: space-between;
-    padding-inline: var(--ocp-footer-padding-inline);
+    /* The house gutter, so the footer's edge lines up with every section
+       above it — including on a phone, where its own setting stayed at the
+       desktop 32px while the rest of the page moved in to 16px. */
+    padding-inline: var(--ocp-page-margin);
     /* Floored at the header's height: the header is sticky, so at the
        bottom of the page it sits over the top of this section and would
        otherwise cover the first row. */
@@ -458,16 +460,6 @@
     {
       "type": "header",
       "content": "Spacing"
-    },
-    {
-      "type": "range",
-      "id": "padding_inline",
-      "label": "Horizontal padding",
-      "min": 0,
-      "max": 100,
-      "step": 2,
-      "unit": "px",
-      "default": 32
     },
     {
       "type": "range",
