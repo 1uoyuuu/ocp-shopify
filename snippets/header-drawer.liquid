@@ -64,7 +64,7 @@
 
 <header-drawer
   class="header-drawer {{ class }}"
-  style="--menu-image-border-radius: {{ image_border_radius }}px; --resource-card-corner-radius: {{ image_border_radius }}px; --drawer-link-size: {{ block_settings.drawer_link_size | default: '3rem' }};"
+  style="--menu-image-border-radius: {{ image_border_radius }}px; --resource-card-corner-radius: {{ image_border_radius }}px;"
 >
   <details
     id="Details-menu-drawer-container"
@@ -1014,10 +1014,11 @@
      chevron) would otherwise win this tie by being later in the stylesheet
      and push every link to the left edge. */
   .menu-drawer .menu-drawer__menu-item--mainlist {
-    /* Redeclared here (rather than inherited from menu-font-styles) so the
-       panel's links can be sized independently of the compact mobile-drawer
-       preset — see the menu block's "Panel link size" setting. */
-    --menu-top-level-font-size: var(--drawer-link-size, 1.75rem);
+    /* Redeclared here rather than inherited from menu-font-styles, whose
+       preset is sized for a compact side drawer. This panel fills the
+       viewport, so its links are one of the site's two sizes like
+       everything else. */
+    --menu-top-level-font-size: var(--ocp-display-size);
 
     justify-content: center;
     text-align: center;
@@ -1304,11 +1305,14 @@
     }
   }
 
+  /* Submenu levels. Nothing in the current menu is nested, so these are
+     dormant — sized from the tokens regardless, so adding a submenu later
+     can't quietly introduce a third size. */
   .menu-drawer__menu-item--parent {
     font-family: var(--menu-parent-font-family);
     font-style: var(--menu-parent-font-style);
     font-weight: var(--menu-parent-font-weight);
-    font-size: var(--menu-parent-font-size);
+    font-size: var(--ocp-display-size);
     line-height: var(--menu-parent-font-line-height);
     text-transform: var(--menu-parent-font-case);
     color: var(--menu-parent-font-color);
@@ -1322,7 +1326,7 @@
     font-family: var(--menu-child-font-family);
     font-style: var(--menu-child-font-style);
     font-weight: var(--menu-child-font-weight);
-    font-size: var(--menu-child-font-size);
+    font-size: var(--ocp-display-size);
     line-height: var(--menu-child-font-line-height);
     text-transform: var(--menu-child-font-case);
     color: var(--menu-child-font-color);
@@ -1521,7 +1525,7 @@
     gap: var(--gap-xs);
     text-decoration: none;
     height: 44px;
-    font-size: 1.4rem;
+    font-size: var(--ocp-text-size);
     color: rgb(var(--color-foreground));
   }
 
@@ -1616,7 +1620,7 @@
 
   .menu-drawer__localization:not(drawer-localization-component) .language-selector {
     font-family: var(--menu-localization-font);
-    font-size: var(--menu-localization-font-size);
+    font-size: var(--ocp-text-size);
   }
 
   .menu-drawer__localization .language-selector.h5 {

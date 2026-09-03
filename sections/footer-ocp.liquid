@@ -18,7 +18,7 @@
     --ocp-footer-text: {{ section.settings.text_color }};
     --ocp-footer-font: var(--font-{{ font }}--family);
     --ocp-footer-font-weight: var(--font-{{ font }}--weight);
-    --ocp-footer-size: {{ section.settings.font_size }};
+    --ocp-footer-size: var(--ocp-text-size);
     --padding-block-start: {{ section.settings.padding-block-start }}px;
     --padding-block-end: {{ section.settings.padding-block-end }}px;
   "
@@ -403,19 +403,7 @@
       ],
       "default": "subheading"
     },
-    {
-      "type": "select",
-      "id": "font_size",
-      "label": "Size",
-      "options": [
-        { "value": "0.75rem", "label": "12px" },
-        { "value": "0.875rem", "label": "14px" },
-        { "value": "1rem", "label": "16px" },
-        { "value": "1.125rem", "label": "18px" }
-      ],
-      "default": "0.875rem"
-    },
-    {
+{
       "type": "header",
       "content": "Wordmark"
     },

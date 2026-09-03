@@ -143,9 +143,9 @@
     place-items: center;
     width: 100%;
 
-    /* The shared heading size. Its own vw term already keeps the lines,
-       which never wrap, inside a narrow screen. */
-    font-size: var(--ocp-heading-size);
+    /* The display size. Its own vw term already keeps the lines, which
+       never wrap, inside a narrow screen. */
+    font-size: var(--ocp-display-size);
     line-height: 1.15;
     min-height: calc(var(--reveal-rows, 2.5) * 1.15em);
 
@@ -160,7 +160,7 @@
     max-width: var(--reveal-intro-width, 42rem);
     text-align: center;
     font-family: var(--font-body--family);
-    font-size: clamp(1rem, 1.4vw, 1.25rem);
+    font-size: var(--ocp-text-size);
     line-height: 1.5;
     text-wrap: pretty;
 

@@ -362,7 +362,7 @@
       menu drawer's text trigger can share them — that keeps MENU and CART
       on one set of theme-editor controls instead of hardcoded CSS.
     {% endcomment %}
-    --header-actions-font-size: {{ section.settings.actions_font_size | default: '1rem' }};
+    --header-actions-font-size: var(--ocp-text-size);
     --header-actions-font-family: var(--font-{{ section.settings.actions_font | default: 'heading' }}--family);
     --header-actions-font-weight: var(--font-{{ section.settings.actions_font | default: 'heading' }}--weight);
     --header-actions-text-case: {{ section.settings.actions_text_case | default: 'none' }};
@@ -1647,32 +1647,7 @@
       ],
       "default": "icon"
     },
-    {
-      "type": "select",
-      "id": "actions_font_size",
-      "label": "t:settings.size",
-      "options": [
-        {
-          "value": "0.75rem",
-          "label": "12px"
-        },
-        {
-          "value": "0.875rem",
-          "label": "14px"
-        },
-        {
-          "value": "1rem",
-          "label": "16px"
-        },
-        {
-          "value": "1.125rem",
-          "label": "18px"
-        }
-      ],
-      "default": "0.875rem",
-      "visible_if": "{{ section.settings.actions_display_style == 'text' }}"
-    },
-    {
+{
       "type": "select",
       "id": "actions_font",
       "label": "t:settings.font",

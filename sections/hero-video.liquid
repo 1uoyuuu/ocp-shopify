@@ -157,10 +157,11 @@
 
 {% stylesheet %}
   .hero-video {
-    /* Caps at 8rem, but falls back to a viewport-relative size below roughly
-       1350px wide — at a fixed 8rem the middle row ("COFFEE" + video +
-       "SHOP", none of which wrap) outgrows the viewport and overflows. */
-    --hero-heading-size: min(8rem, 9.5vw);
+    /* The site's display size. The hero set this scale and the rest of the
+       page now shares it, so it reads the token rather than restating the
+       value — the middle row ("COFFEE" + video + "SHOP", none of which
+       wrap) depends on the viewport-relative fallback inside it. */
+    --hero-heading-size: var(--ocp-display-size);
     --hero-heading-gap: 1rem;
 
     display: block;
@@ -311,14 +312,6 @@
      Keep the breakpoint in step with STACKED_LAYOUT in hero-scroll.js — the
      script sizes the badge differently on each side of it. */
   @media screen and (max-width: 749px) {
-    /* Both of these repeat a class purely for weight: inside a media query
-       the selector keeps its original specificity, so at these widths they
-       would tie with the base rules above and win only by sitting later in
-       the file. */
-    .hero-video.hero-video {
-      --hero-heading-size: min(8rem, 12vw);
-    }
-
     /* Grid rather than wrapping: the two words need to stay together on the
        first row with the slot spanning beneath them, and DOM order puts the
        slot between them. Explicit placement reorders it without touching

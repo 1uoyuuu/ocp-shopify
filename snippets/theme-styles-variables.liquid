@@ -215,11 +215,23 @@
 
     /* Letter-spacing / Tracking */
 
-    /* One size for every section heading below the hero. The hero has its
-       own scale — it is the one place on the page where a larger heading is
-       deliberate — and everything after it shares this, so the page doesn't
-       drift through three near-identical sizes. */
-    --ocp-heading-size: clamp(2rem, 5.5vw, 5rem);
+    /* The site runs on two sizes and no others: a display size for the
+       lines that carry a section, and a text size for everything else.
+       Hierarchy below that comes from weight, case and colour rather than
+       from more steps in a scale — which is what the footer already does,
+       its headings and links being the same size at different weights.
+
+       Display falls back to a viewport-relative size on narrower screens:
+       several of the places it is used never wrap, so a fixed 8rem would
+       run off the side. */
+    --ocp-display-size: min(8rem, 9.5vw);
+    --ocp-text-size: 0.875rem;
+
+    @media screen and (max-width: 749px) {
+      /* The hero stacks here and gives its lines the full width, so they
+         can afford to be a larger share of it. */
+      --ocp-display-size: min(8rem, 12vw);
+    }
 
     /* The house tracking. Every piece of OCP's own type — hero, header,
        footer, product cards — sets this rather than its own value, so the
