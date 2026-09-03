@@ -297,7 +297,7 @@
         "card_1": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107010593132",
+            "product": "ethiopia-alo-bombe-zfwa-copy-copy",
             "x": 8,
             "y": 20,
             "width": 9,
@@ -309,7 +309,7 @@
         "card_2": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15258271646060",
+            "product": "ethiopia-alo-bombe-zfwa-copy",
             "x": 17,
             "y": 64,
             "width": 12,
@@ -321,7 +321,7 @@
         "card_3": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107359506796",
+            "product": "kenya-kamavindi-estate-washed",
             "x": 33,
             "y": 10,
             "width": 11,
@@ -333,7 +333,7 @@
         "card_4": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107359572332",
+            "product": "gid://shopify/product/15107359572332",
             "x": 46,
             "y": 86,
             "width": 8,
@@ -345,7 +345,7 @@
         "card_5": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107359605100",
+            "product": "gid://shopify/product/15107359605100",
             "x": 64,
             "y": 13,
             "width": 12,
@@ -357,7 +357,7 @@
         "card_6": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107359637868",
+            "product": "gid://shopify/product/15107359637868",
             "x": 86,
             "y": 36,
             "width": 15,
@@ -369,7 +369,7 @@
         "card_7": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107359670636",
+            "product": "gid://shopify/product/15107359670636",
             "x": 94,
             "y": 74,
             "width": 7,
@@ -381,7 +381,7 @@
         "card_8": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107359736172",
+            "product": "gid://shopify/product/15107359736172",
             "x": 12,
             "y": 84,
             "width": 6,
@@ -393,7 +393,7 @@
         "card_9": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107359768940",
+            "product": "gid://shopify/product/15107359768940",
             "x": 89,
             "y": 10,
             "width": 8,
@@ -405,7 +405,7 @@
         "card_10": {
           "type": "subscription-card",
           "settings": {
-            "product": "gid://shopify/Product/15107359867244",
+            "product": "gid://shopify/product/15107359867244",
             "x": 70,
             "y": 88,
             "width": 11,
@@ -434,15 +434,15 @@
         "summary_label": "(Your box)",
         "cta_label": "Subscribe now",
         "cta_link": "",
+        "text_alignment": "center",
+        "min_height": 100,
         "background_color": "#ffffff",
         "text_color": "#0f80be",
         "accent_color": "#0f80be",
         "heading_font": "heading",
         "label_font": "subheading",
         "padding-block-start": 96,
-        "padding-block-end": 96,
-        "text_alignment": "center",
-        "min_height": 100
+        "padding-block-end": 96
       }
     }
   },
