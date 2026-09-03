@@ -172,6 +172,43 @@ which is fine, since the merchant can change it.
 that redefines `--color-foreground`/`--color-background` for a subtree. That's
 how the menu panel gets its own color scheme.
 
+### The `--ocp-*` house tokens
+
+All four live in `snippets/theme-styles-variables.liquid`'s `:root`. They are
+the single source for the values below — nothing else may state one.
+
+| Token | Value | Covers |
+|---|---|---|
+| `--ocp-display-size` | `min(8rem, 9.5vw)`, `12vw` ≤749px | Hero headings, drum lines, subscription heading, menu panel links |
+| `--ocp-text-size` | `0.875rem` | Everything else, without exception |
+| `--ocp-letter-spacing` | `-0.02em` | All of our own type |
+| `--ocp-page-margin` | `16px`, `32px` ≥750px | Every section's inline gutter, header and footer included |
+
+**The type scale is two sizes and only two.** No third size, no `clamp()`, no
+`1rem` "just for this label" — hierarchy is weight, case and colour. The
+footer is the model: its headings and links are the same size at different
+weights. The site reached ten sizes once by adding one reasonable-looking
+exception at a time, and undoing that touched fifteen files.
+
+The same rule killed three settings — the header's `actions_font_size`, the
+footer's `font_size`, the menu's `drawer_link_size` — along with the drum's
+`text_size` and the footer's `padding_inline`. Each was a second control over
+something a token already owned, and that is precisely how the values drifted
+apart. **Do not add a per-section size or gutter control.** If a value needs
+to change, change the token.
+
+Watch for these, which are not obvious:
+
+- Dormant stock paths count. The drawer's submenu, account and localization
+  rules each carried their own size while rendering nothing; they would have
+  reintroduced a third the moment a submenu or account link was switched on.
+- Theme type presets are sizes too. `h3` is 14px and `h6` is 12px
+  (`config/settings_data.json`), so a block on the `h6` preset is off-scale
+  even though nothing in our CSS mentions a size.
+- A token referenced inside `@media` keeps its original specificity, and
+  repeating a class for weight is the fix — not moving the rule later in the
+  file.
+
 ## CSS system — and its biggest trap
 
 Section/block/snippet files carry their styles in a `{% stylesheet %}` block.
