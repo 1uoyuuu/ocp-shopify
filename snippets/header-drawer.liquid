@@ -44,13 +44,14 @@
 %}
 
 {% comment %}
-  Set on the header rather than on <header-drawer>: the header row needs to
-  read this to recolor CLOSE / CART while the panel is open, and the drawer
-  element is a descendant of that row — custom properties only inherit
-  downward, so declaring it there leaves the row unable to see it.
+  Declared on the page wrapper rather than on <header-drawer> or the header:
+  custom properties only inherit downward, and two things need to read this
+  — the header row, to recolour CLOSE / CART while the panel is open, and
+  the site logo, which is a sibling of the header rather than inside it.
+  The wrapper is the nearest element that is an ancestor of both.
 {% endcomment %}
 {% style %}
-  #header-component {
+  .page-wrapper {
     --drawer-text-color: {{ block_settings.text_color | default: settings.page_background_color }};
   }
 {% endstyle %}
