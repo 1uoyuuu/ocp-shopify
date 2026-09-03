@@ -43,6 +43,7 @@
     "type_case_h6": "uppercase",
     "page_background_color": "{{ settings.color_palette.background }}",
     "page_width": "normal",
+    "add_to_cart_animation": false,
     "card_hover_effect": "subtle-zoom",
     "badge_corner_radius": 0,
     "badge_sale_background_color": "{{ settings.color_palette.color1 }}",

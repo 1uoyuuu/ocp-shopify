@@ -31,7 +31,7 @@
         "text_color": "#ffffff",
         "font": "heading",
         "lines_rows": 5,
-        "content_gap": 0,
+        "content_gap": 120,
         "intro_width": 42,
         "gap": 15,
         "start_rotation": -60,
@@ -265,7 +265,7 @@
         "horizontal_alignment": "center",
         "gap": 32,
         "background_color": "#0f80be",
-        "padding-block-start": 0,
+        "padding-block-start": 100,
         "padding-block-end": 100
       }
     },
