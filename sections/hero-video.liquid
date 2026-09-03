@@ -38,6 +38,7 @@
 <hero-scroll-component
   class="hero-video"
   data-skip-node-update
+  data-mobile-badge-scale="{{ section.settings.mobile_badge_scale | default: 38 }}"
 >
     <div
       class="hero-video__stage"
@@ -250,6 +251,53 @@
     gap: var(--hero-heading-gap);
   }
 
+  /* Below this width the inline composition stops working: at 390px the two
+     middle words plus their gap already need ~348px of a 390px screen, so
+     nothing readable fits alongside them. The video therefore drops onto a
+     row of its own and the type is free to grow.
+
+     Keep the breakpoint in step with STACKED_LAYOUT in hero-scroll.js — the
+     script sizes the badge differently on each side of it. */
+  @media screen and (max-width: 749px) {
+    /* Both of these repeat a class purely for weight: inside a media query
+       the selector keeps its original specificity, so at these widths they
+       would tie with the base rules above and win only by sitting later in
+       the file. */
+    .hero-video.hero-video {
+      --hero-heading-size: min(8rem, 12vw);
+    }
+
+    /* Grid rather than wrapping: the two words need to stay together on the
+       first row with the slot spanning beneath them, and DOM order puts the
+       slot between them. Explicit placement reorders it without touching
+       the markup the timeline measures. */
+    .hero-video .hero-video__row--mid {
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: center;
+      align-items: center;
+      gap: var(--hero-heading-gap);
+    }
+
+    .hero-video__row--mid > .hero-video__heading:first-child {
+      grid-row: 1;
+      grid-column: 1;
+    }
+
+    .hero-video__row--mid > .hero-video__heading:last-child {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    /* `justify-self: center` keeps the slot at the width the script gives
+       it rather than stretching it across both columns. */
+    .hero-video__row--mid > .hero-video__video-slot {
+      grid-row: 2;
+      grid-column: 1 / -1;
+      justify-self: center;
+    }
+  }
+
   /* Sized by hero-scroll.js to the video's final footprint. */
   .hero-video__video-slot {
     flex: 0 0 auto;
@@ -258,7 +306,7 @@
   .hero-video__heading {
     display: block;
     font-family: var(--font-heading--family);
-    font-weight: 500;
+    font-weight: 700;
     font-size: var(--hero-heading-size);
     line-height: 1;
     letter-spacing: var(--ocp-letter-spacing);
@@ -327,6 +375,17 @@
       "step": 5,
       "unit": "%",
       "default": 20
+    },
+    {
+      "type": "range",
+      "id": "mobile_badge_scale",
+      "label": "Video size on mobile",
+      "info": "How much of the screen the video fills once it settles, on phones only. On wider screens it matches the height of the heading instead.",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "%",
+      "default": 38
     },
     {
       "type": "header",

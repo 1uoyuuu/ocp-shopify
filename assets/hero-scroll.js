@@ -13,9 +13,25 @@ const LOGO_NATIVE_WIDTH = 2000;
 const DOCKED_SCALE = 0.1;
 const DOCKED_CENTER_Y = 33;
 
-/** How much accumulated gesture distance (px of wheel/swipe) plays the
- * intro from start to finish. Higher = the intro takes more scrolling. */
+/** How much accumulated gesture distance plays the intro from start to
+ * finish. Higher = the intro takes more scrolling.
+ *
+ * Wheel and touch need separate numbers because they aren't the same unit:
+ * a wheel notch reports roughly 100px, while a drag reports the raw pixels
+ * the finger actually travelled. Sharing the wheel figure would demand
+ * about one and a half full swipes of a phone screen to get through the
+ * intro. */
 const GESTURE_DISTANCE = 1200;
+const TOUCH_GESTURE_DISTANCE = 700;
+
+/** Below this the hero stacks: the video leaves the middle row and takes a
+ * line of its own. Must stay in step with the matching media query in
+ * sections/hero-video.liquid — the two describe the same layout. */
+const STACKED_LAYOUT = '(max-width: 749px)';
+
+/** Fallback share of the viewport the badge occupies when stacked, used if
+ * the section's own setting is missing or unparseable. */
+const DEFAULT_MOBILE_BADGE_SCALE = 0.38;
 
 /**
  * Drives the hero-video intro, which is a *locked* sequence rather than a
@@ -90,10 +106,18 @@ class HeroScrollComponent extends HTMLElement {
       type: 'wheel,touch',
       onChangeY: (self) => {
         if (!this.#locked) return;
-        // Observer normalizes wheel and touch so a downward scroll/swipe is
-        // a positive deltaY — i.e. the same direction that would carry the
-        // page forward — so it advances the intro.
-        this.#progress = gsap.utils.clamp(0, 1, this.#progress + self.deltaY / GESTURE_DISTANCE);
+
+        // Observer does *not* reconcile the two input types: its drag
+        // handler reports `clientY - previousClientY`, so a finger moving
+        // down is positive, while a wheel's native deltaY is positive
+        // scrolling down. Those are opposite intentions — you swipe *up* to
+        // go forward — so a drag has to be negated to mean "onward" like a
+        // wheel does. Left alone, touch devices play the intro backwards.
+        const isWheel = self.event?.type === 'wheel';
+        const distance = isWheel ? GESTURE_DISTANCE : TOUCH_GESTURE_DISTANCE;
+        const delta = isWheel ? self.deltaY : -self.deltaY;
+
+        this.#progress = gsap.utils.clamp(0, 1, this.#progress + delta / distance);
         this.#timeline.progress(this.#progress);
         if (this.#progress >= 1) this.#unlock();
       },
@@ -231,14 +255,39 @@ class HeroScrollComponent extends HTMLElement {
     // Fall back to the previous fixed scale if anything is unmeasurable.
     if (!fontSize || !viewportHeight) return 0.15;
 
-    const scale = fontSize / viewportHeight;
+    // The stage is full-bleed and scaled uniformly, so the badge's aspect
+    // ratio is always the viewport's. Matching it to the cap height of the
+    // type works on a wide screen but collapses on a tall narrow one: at
+    // 390x844 it resolves to a 17px-wide sliver. Stacked, the badge is
+    // sized as a share of the viewport instead, which keeps it a usable
+    // portrait card.
+    const scale = matchMedia(STACKED_LAYOUT).matches
+      ? this.#mobileBadgeScale()
+      : fontSize / viewportHeight;
 
     if (this.videoSlot) {
-      this.videoSlot.style.height = `${fontSize}px`;
+      // Both axes come from the scale so the slot matches the scaled stage
+      // exactly. (On the wide layout `viewportHeight * scale` is just
+      // `fontSize` again, by construction.)
+      this.videoSlot.style.height = `${viewportHeight * scale}px`;
       this.videoSlot.style.width = `${window.innerWidth * scale}px`;
     }
 
     return scale;
+  }
+
+  /**
+   * The stacked badge's share of the viewport, from the section's "Video
+   * size on mobile" setting.
+   *
+   * @returns {number}
+   */
+  #mobileBadgeScale() {
+    const percent = parseFloat(this.dataset.mobileBadgeScale ?? '');
+
+    if (!Number.isFinite(percent) || percent <= 0) return DEFAULT_MOBILE_BADGE_SCALE;
+
+    return percent / 100;
   }
 
   /**
