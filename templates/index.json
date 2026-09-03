@@ -21,6 +21,47 @@
         "heading_line_3": "IN AUSTRALIA"
       }
     },
+    "marquee_cbRKFb": {
+      "type": "marquee",
+      "blocks": {
+        "text_4Tt6aG": {
+          "type": "text",
+          "settings": {
+            "text": "<h3>ELECTRIFY MESMERISING SENSORY EXPERIENCES</h3>",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "font_size": "5.5rem",
+            "line_height": "tight",
+            "letter_spacing": "tight",
+            "case": "none",
+            "wrap": "nowrap",
+            "text_color": "{{ settings.color_palette.background }}",
+            "background": true,
+            "background_color": "{{ settings.color_palette.foreground }}",
+            "corner_radius": 0,
+            "padding-block-start": 48,
+            "padding-block-end": 48,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_4Tt6aG"
+      ],
+      "name": "t:names.marquee_section",
+      "settings": {
+        "movement_direction": "normal",
+        "background_color": "",
+        "padding-block-start": 24,
+        "padding-block-end": 24,
+        "gap_between_elements": 24
+      }
+    },
     "brand_intro": {
       "type": "section",
       "blocks": {
@@ -388,6 +429,7 @@
   },
   "order": [
     "hero_video",
+    "marquee_cbRKFb",
     "brand_intro",
     "product_list_7TKgXV",
     "subscription_steps"
