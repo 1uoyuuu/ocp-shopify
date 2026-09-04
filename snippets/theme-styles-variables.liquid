@@ -225,6 +225,12 @@
        several of the places it is used never wrap, so a fixed 8rem would
        run off the side. */
     --ocp-display-size: min(8rem, 9.5vw);
+
+    /* Half the display size, for display lines too long to sit at the full
+       one — derived rather than written out, so the two cannot drift and
+       the small one keeps whatever responsive behaviour the large one has. */
+    --ocp-display-size-sm: calc(var(--ocp-display-size) / 2);
+
     --ocp-text-size: 0.875rem;
 
     @media screen and (max-width: 749px) {

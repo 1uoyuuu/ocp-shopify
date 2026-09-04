@@ -179,16 +179,23 @@ the single source for the values below — nothing else may state one.
 
 | Token | Value | Covers |
 |---|---|---|
-| `--ocp-display-size` | `min(8rem, 9.5vw)`, `12vw` ≤749px | Hero headings, drum lines, subscription heading, menu panel links |
+| `--ocp-display-size` | `min(8rem, 9.5vw)`, `12vw` ≤749px | Hero headings, subscription heading, menu panel links |
+| `--ocp-display-size-sm` | `calc(--ocp-display-size / 2)` | Display lines too long to sit at the full size — the panel-reveal slogan |
 | `--ocp-text-size` | `0.875rem` | Everything else, without exception |
 | `--ocp-letter-spacing` | `-0.02em` | All of our own type |
 | `--ocp-page-margin` | `16px`, `32px` ≥750px | Every section's inline gutter, header and footer included |
 
-**The type scale is two sizes and only two.** No third size, no `clamp()`, no
-`1rem` "just for this label" — hierarchy is weight, case and colour. The
-footer is the model: its headings and links are the same size at different
-weights. The site reached ten sizes once by adding one reasonable-looking
-exception at a time, and undoing that touched fifteen files.
+**The type scale is these three and no others.** No fourth size, no
+`clamp()`, no `1rem` "just for this label" — hierarchy below them is weight,
+case and colour. The footer is the model: its headings and links are the same
+size at different weights. The site reached ten sizes once by adding one
+reasonable-looking exception at a time, and undoing that touched fifteen
+files.
+
+The small display size is *derived* from the large one rather than written
+out, which is the only reason a third step is safe: it cannot drift, and it
+inherits the large one's responsive behaviour for free. A fourth step should
+be derived the same way or not added.
 
 The same rule killed three settings — the header's `actions_font_size`, the
 footer's `font_size`, the menu's `drawer_link_size` — along with the drum's
