@@ -356,6 +356,9 @@ until a menu is created in Shopify admin and selected.
   omit.
 - Padding `range` settings max out at **100**; larger values are rejected on
   push.
+- A `range` `step` must be divisible by **0.1** — anything finer is rejected.
+  For hundredths or thousandths, make the setting a whole number and scale it
+  in Liquid (`| divided_by: 100.0`), as `sections/warp-text.liquid` does.
 - `{% doc %}` is only valid in snippets and blocks — **not sections**. Use
   `{% comment %}`.
 - Classic `<script src>` tags need `defer` or theme check flags them as

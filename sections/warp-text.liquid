@@ -1,0 +1,242 @@
+{% comment %}
+  A headline rasterised into a texture and pushed through a glass-like
+  distortion — an ambient undulation everywhere, and a lens that follows the
+  cursor. Ported from React Bits' WarpText onto plain WebGL2; see
+  assets/warp-text.js for why the library it leans on isn't vendored.
+
+  The heading is real text in the markup. The canvas only takes over once a
+  context is actually running, so no WebGL, a lost context or a blocked
+  module each leave the words readable, selectable and announced.
+{% endcomment %}
+
+{% liquid
+  assign font = section.settings.font | default: 'heading'
+
+  # Shopify rejects a range step finer than 0.1, but these want hundredths
+  # and thousandths — so they are whole numbers in the editor and scaled to
+  # the shader's units here.
+  assign warp_strength = section.settings.warp_strength | divided_by: 100.0
+  assign warp_scale = section.settings.warp_scale | divided_by: 10.0
+  assign speed = section.settings.speed | divided_by: 100.0
+  assign pointer_influence = section.settings.pointer_influence | divided_by: 100.0
+  assign pointer_strength = section.settings.pointer_strength | divided_by: 100.0
+  assign refraction = section.settings.refraction | divided_by: 1000.0
+%}
+
+<warp-text
+  class="warp-text"
+  data-warp-strength="{{ warp_strength }}"
+  data-warp-scale="{{ warp_scale }}"
+  data-speed="{{ speed }}"
+  data-pointer-influence="{{ pointer_influence }}"
+  data-pointer-strength="{{ pointer_strength }}"
+  data-refraction="{{ refraction }}"
+  data-ripple="{{ section.settings.ripple }}"
+  style="
+    --warp-background: {{ section.settings.background_color }};
+    --warp-text: {{ section.settings.text_color }};
+    --warp-font: var(--font-{{ font }}--family);
+    --warp-height: {{ section.settings.height }}svh;
+  "
+>
+  {%- comment -%}
+    Measured by the script for the raster, so the type on the canvas is the
+    type the stylesheet describes rather than a second set of numbers.
+  {%- endcomment -%}
+  <h2
+    class="warp-text__label"
+    ref="label"
+  >
+    {{- section.settings.text | newline_to_br | strip_newlines | replace: '<br />', '
+' -}}
+  </h2>
+</warp-text>
+
+<script
+  src="{{ 'warp-text.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  .warp-text {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: var(--warp-height, 60svh);
+    padding-inline: var(--ocp-page-margin);
+    background-color: var(--warp-background, var(--color-background));
+
+    /* The lens pushes glyphs past their own box near the edges. */
+    overflow: clip;
+  }
+
+  .warp-text__label {
+    margin: 0;
+
+    /* The site's display size — the raster reads its metrics off this
+       element, so the canvas cannot drift onto a size of its own. */
+    font-family: var(--warp-font);
+    font-weight: 700;
+    font-size: var(--ocp-display-size);
+    line-height: 1.05;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--warp-text, var(--color-foreground));
+
+    /* Each line on its own row, matching how the raster splits them. */
+    white-space: pre-line;
+  }
+
+  .warp-text canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /*
+   * Set by the script only once a context is live, so the words are what
+   * shows until then — and again if the context is ever lost. Kept in the
+   * accessibility tree either way; it is the heading, and the canvas is
+   * aria-hidden.
+   */
+  warp-text[data-warp-active] .warp-text__label {
+    visibility: hidden;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Warp text",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "info": "One line per row.",
+      "default": "Electrify\nMesmerising\nSensory\nExperiences"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "default": "#0f80be"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "label": "Height",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Distortion"
+    },
+    {
+      "type": "range",
+      "id": "warp_strength",
+      "label": "Ambient warp",
+      "info": "How much the type moves when nothing is near it.",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "%",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "warp_scale",
+      "label": "Warp scale",
+      "info": "Size of the moving cells. Lower is broader and slower-looking.",
+      "min": 4,
+      "max": 40,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Speed",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "%",
+      "default": 55
+    },
+    {
+      "type": "header",
+      "content": "Cursor lens"
+    },
+    {
+      "type": "range",
+      "id": "pointer_influence",
+      "label": "Lens size",
+      "min": 5,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 42
+    },
+    {
+      "type": "range",
+      "id": "pointer_strength",
+      "label": "Lens strength",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 38
+    },
+    {
+      "type": "range",
+      "id": "refraction",
+      "label": "Colour split",
+      "info": "Splits the channels slightly at the glass edge.",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "checkbox",
+      "id": "ripple",
+      "label": "Ripple",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Warp text"
+    }
+  ]
+}
+{% endschema %}
