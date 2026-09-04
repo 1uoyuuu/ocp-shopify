@@ -85,7 +85,7 @@
         "text_color": "#ffffff",
         "font": "heading",
         "scrim": 20,
-        "scroll_distance": 400,
+        "scroll_distance": 530,
         "split_direction": "horizontal",
         "part_distance": 100,
         "snap": true
@@ -483,7 +483,8 @@
         "font": "heading",
         "max_width": 46,
         "dim": 22,
-        "scroll_distance": 180
+        "scroll_distance": 180,
+        "overlap": 100
       }
     }
   },

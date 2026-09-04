@@ -45,6 +45,17 @@ const SLIDES_FROM = 0.36;
 const CROSSFADE = 0.32;
 
 /**
+ * Where the sequence finishes, as a share of the section's scroll. The rest
+ * is a hold: the last location stays pinned in the frame while the section
+ * below rises over it.
+ *
+ * Without it the sequence ends at the exact scroll position where the
+ * sticky frame lets go, so the last photo starts moving away at the very
+ * moment the next section arrives — and there is nothing left to rise over.
+ */
+const SEQUENCE_END = 0.75;
+
+/**
  * Share of a span a name takes to change. Short enough to read as the name
  * simply changing rather than as an effect of its own.
  *
@@ -144,7 +155,9 @@ class PanelReveal extends HTMLElement {
     const rect = this.getBoundingClientRect();
     if (!rect.height) return;
 
-    this.#target = clamp((window.innerHeight - rect.top) / rect.height, 0, 1);
+    const scrolled = (window.innerHeight - rect.top) / rect.height;
+
+    this.#target = clamp(scrolled / SEQUENCE_END, 0, 1);
   }
 
   #onScroll = () => {
@@ -246,7 +259,9 @@ class PanelReveal extends HTMLElement {
       // Where that location has fully arrived — image swapped, name up.
       const settled = index === 0 ? BEATS.media[1] + nameFade : from + fade + nameFade;
 
-      point.style.top = `${settled * height - window.innerHeight}px`;
+      // `settled` is a point in the sequence; the section's own scroll runs
+      // SEQUENCE_END times longer than that.
+      point.style.top = `${settled * SEQUENCE_END * height - window.innerHeight}px`;
     });
   }
 

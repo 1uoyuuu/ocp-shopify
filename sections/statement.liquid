@@ -23,6 +23,7 @@
     --statement-distance: {{ section.settings.scroll_distance }}svh;
     --statement-dim: {{ section.settings.dim | divided_by: 100.0 }};
     --statement-width: {{ section.settings.max_width }}rem;
+    --statement-overlap: {{ section.settings.overlap }}svh;
   "
 >
   <div class="statement__viewport">
@@ -61,6 +62,13 @@
     display: block;
     position: relative;
     height: var(--statement-distance, 180svh);
+
+    /* Pulled up into the hold at the end of the section above, so the block
+       rises while that section's frame is still pinned — the picture behind
+       stays put and this slides over it. Without the overlap this would
+       begin exactly as that frame let go, and the two would move together
+       rather than one over the other. */
+    margin-block-start: calc(var(--statement-overlap, 0svh) * -1);
   }
 
   /*
@@ -201,6 +209,17 @@
     {
       "type": "header",
       "content": "Motion"
+    },
+    {
+      "type": "range",
+      "id": "overlap",
+      "label": "Overlap the section above",
+      "info": "Rises into the section above rather than after it, so whatever is pinned there stays put while this slides over it. Match it to that section's hold.",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "unit": "%",
+      "default": 100
     },
     {
       "type": "range",
