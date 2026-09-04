@@ -215,21 +215,71 @@
   /* One column below the breakpoint: side by side there is not enough width
      for a readable paragraph and a card, so the products fall under it and
      the column stops travelling — the page's own scroll carries them. */
+  /*
+   * Narrow, the column turns on its side: paragraph above, cards running off
+   * the right edge as a strip you swipe. A tall column beside a readable line
+   * does not fit, and a tall column stacked under one would need a second
+   * screen of scroll to get past — turning it flat costs neither.
+   */
   @media screen and (max-width: 989px) {
-    .statement .statement__panel {
-      grid-template-columns: minmax(0, 1fr);
-      gap: clamp(1.5rem, 5vh, 3rem);
-    }
-
-    /* Stacked, the page's own scroll carries the cards, so the section
-       needs no extra length and the column no transform. */
+    /* No column to carry means no extra length to carry it through, and the
+       page's own scroll is the only movement the strip needs. */
     .statement.statement {
       height: var(--statement-distance, 180svh);
+    }
+
+    .statement .statement__panel {
+      grid-template-columns: minmax(0, 1fr);
+      grid-auto-rows: min-content;
+      gap: clamp(1.5rem, 4vh, 2.5rem);
+      align-content: center;
+    }
+
+    .statement .statement__products {
+      align-self: start;
+
+      /* Out through the panel's gutter, so the strip runs to the screen edge
+         and the card at the end is visibly cut rather than sitting in a box
+         with room to spare. */
+      margin-inline: calc(var(--ocp-page-margin) * -1);
     }
 
     .statement .statement__track {
       position: static;
       transform: none;
+
+      flex-direction: row;
+      gap: 1rem;
+
+      /* The gutter comes back as padding, so the first card lines up with
+         the paragraph above it while the strip itself is full width. */
+      padding-inline: var(--ocp-page-margin);
+
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      scroll-snap-type: x proximity;
+
+      /* A scrollbar under the cards reads as a second page scroll. */
+      scrollbar-width: none;
+    }
+
+    .statement .statement__track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .statement .statement__product {
+      flex: 0 0 var(--statement-card-width, min(56vw, 16rem));
+      scroll-snap-align: start;
+    }
+
+    /*
+     * The panel is one screen and holds the paragraph too, so a portrait
+     * card sized purely off its own width can push the pair past the bottom
+     * on a short phone. Capping the image against the viewport crops it
+     * instead — the card keeps its width and the paragraph keeps its room.
+     */
+    .statement .statement__product .card-gallery {
+      max-height: 40svh;
     }
   }
 

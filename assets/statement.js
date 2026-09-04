@@ -33,11 +33,12 @@ const BEATS = {
   // travelling.
   fill: [0.32, 0.9],
 
-  // The column climbs into place from below while the last quarter of the
-  // paragraph is still filling: 0.32 + 0.75 × (0.9 − 0.32). Arriving under
-  // its own beat rather than after the read means the eye is already moving
-  // right by the time the scroll hands over to it.
-  enter: [0.755, 0.98],
+  // The column climbs into place from below once the paragraph is half
+  // filled: 0.32 + 0.5 × (0.9 − 0.32). Arriving under its own beat rather
+  // than after the read means the eye is already moving right by the time
+  // the scroll hands over to it, and starting at the halfway mark leaves it
+  // settled well before the last words land.
+  enter: [0.61, 0.96],
 };
 
 /**
