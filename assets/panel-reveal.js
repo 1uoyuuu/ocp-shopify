@@ -22,11 +22,23 @@ import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-c
  * and the image starts opening while the lines are still parting.
  */
 const BEATS = {
-  panel: [0.0, 0.25],
-  reveal: [0.25, 0.55],
-  split: [0.58, 0.78],
-  media: [0.62, 1.0],
+  panel: [0.0, 0.09],
+  reveal: [0.09, 0.24],
+  split: [0.26, 0.34],
+  // Just the frame opening. What plays inside it runs from SLIDES_FROM to
+  // the end, so adding a location lengthens the sequence rather than
+  // squeezing the ones already there into the same span.
+  media: [0.3, 0.42],
 };
+
+/** Where the frame starts opening, and so where the first location is
+ * already behind it. Everything from here to the end belongs to the
+ * locations, split evenly between them. */
+const SLIDES_FROM = 0.3;
+
+/** Share of a location's own span spent cross-fading into it. Low enough to
+ * read as a change rather than a dissolve, high enough not to snap. */
+const CROSSFADE = 0.32;
 
 /**
  * How much of the reveal is spent staggering, against how much each word
@@ -62,9 +74,12 @@ class PanelReveal extends HTMLElement {
 
   /** @type {HTMLElement[]} */
   #words = [];
+  /** @type {HTMLElement[]} */
+  #slides = [];
 
   connectedCallback() {
     this.#words = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-word]')]);
+    this.#slides = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-slide]')]);
 
     // The static composition the stylesheet already describes is the right
     // one to leave in place here.
@@ -163,6 +178,39 @@ class PanelReveal extends HTMLElement {
     this.#words.forEach((word, index) => {
       const local = rise > 0 ? clamp((reveal - index * step) / rise, 0, 1) : reveal;
       word.style.setProperty('--word', `${smooth(local)}`);
+    });
+
+    this.#applySlides(progress);
+  }
+
+  /**
+   * Each location holds the frame for an equal share of the scroll after it
+   * opens, and the next fades in over the one before it.
+   *
+   * Only fading in is needed: they are stacked, later ones paint over
+   * earlier ones, so the one underneath is covered as its successor
+   * arrives. Fading both would show the panel through them at the halfway
+   * point of every change.
+   *
+   * @param {number} progress
+   */
+  #applySlides(progress) {
+    const count = this.#slides.length;
+    if (!count) return;
+
+    const span = (1 - SLIDES_FROM) / count;
+    const fade = span * CROSSFADE;
+
+    this.#slides.forEach((slide, index) => {
+      // The first is simply there as the frame opens — the clip is what
+      // reveals it, so fading it as well would wash the opening out.
+      if (index === 0) {
+        slide.style.setProperty('--slide', '1');
+        return;
+      }
+
+      const from = SLIDES_FROM + index * span;
+      slide.style.setProperty('--slide', `${smooth(clamp((progress - from) / fade, 0, 1))}`);
     });
   }
 }

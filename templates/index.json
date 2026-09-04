@@ -27,14 +27,63 @@
       "settings": {
         "line_1": "Electrify Mesmerising",
         "line_2": "Sensory Experience",
-        "image": "shopify://shop_images/images_2.jpg",
         "background_color": "#0f80be",
         "text_color": "#ffffff",
         "font": "heading",
-        "scroll_distance": 250,
+        "scroll_distance": 400,
         "split_direction": "horizontal",
-        "part_distance": 100
-      }
+        "part_distance": 100,
+        "scrim": 20
+      },
+      "blocks": {
+        "location_1": {
+          "type": "panel-reveal-slide",
+          "settings": {
+            "image": "shopify://shop_images/images_2.jpg",
+            "caption": "OCP Crows Nest"
+          },
+          "blocks": {}
+        },
+        "location_2": {
+          "type": "panel-reveal-slide",
+          "settings": {
+            "image": "",
+            "caption": "OCP Artarmon"
+          },
+          "blocks": {}
+        },
+        "location_3": {
+          "type": "panel-reveal-slide",
+          "settings": {
+            "image": "",
+            "caption": "OCP Victoria Cross"
+          },
+          "blocks": {}
+        },
+        "location_4": {
+          "type": "panel-reveal-slide",
+          "settings": {
+            "image": "",
+            "caption": "OCP George St"
+          },
+          "blocks": {}
+        },
+        "location_5": {
+          "type": "panel-reveal-slide",
+          "settings": {
+            "image": "",
+            "caption": "OCP Docklands"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "location_1",
+        "location_2",
+        "location_3",
+        "location_4",
+        "location_5"
+      ]
     },
     "product_list_7TKgXV": {
       "type": "product-list",

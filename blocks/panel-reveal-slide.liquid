@@ -1,0 +1,61 @@
+{% comment %}
+  One frame of the sequence: a full-bleed image with its name over the
+  middle. The first of them opens as the slogan parts; the rest cross-fade
+  in over it as the scroll continues, so they stack in the order listed.
+{% endcomment %}
+
+<div
+  class="panel-reveal__slide"
+  data-slide
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.image != blank %}
+    {{
+      block.settings.image
+      | image_url: width: 2400
+      | image_tag:
+        class: 'panel-reveal__image',
+        loading: 'lazy',
+        sizes: '100vw',
+        widths: '750,1100,1500,1920,2400'
+    }}
+  {% else %}
+    {%- comment -%}
+      So the sequence can be timed and reviewed before the photography
+      exists.
+    {%- endcomment -%}
+    <div class="panel-reveal__placeholder">
+      {{ 'lifestyle-1' | placeholder_svg_tag: 'panel-reveal__placeholder-svg' }}
+    </div>
+  {% endif %}
+
+  {% if block.settings.caption != blank %}
+    <p class="panel-reveal__caption">{{ block.settings.caption }}</p>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Location",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Fills the screen. A placeholder stands in until one is chosen."
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Name",
+      "default": "OCP Crows Nest"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Location"
+    }
+  ]
+}
+{% endschema %}

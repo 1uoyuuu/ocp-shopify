@@ -21,6 +21,7 @@
     --reveal-font: var(--font-{{ font }}--family);
     --reveal-distance: {{ section.settings.scroll_distance }}svh;
     --reveal-part: {{ section.settings.part_distance }}svh;
+    --reveal-scrim: {{ section.settings.scrim | divided_by: 100.0 }};
   "
   data-part="{{ section.settings.split_direction }}"
 >
@@ -58,17 +59,13 @@
       {% endfor %}
     </h2>
 
-    {% if section.settings.image != blank %}
+    {% if section.blocks.size > 0 %}
+      {%- comment -%}
+        The frame opens once; the locations stack inside it and cross-fade
+        as the scroll carries on, so the opening is not repeated for each.
+      {%- endcomment -%}
       <div class="panel-reveal__media">
-        {{
-          section.settings.image
-          | image_url: width: 2400
-          | image_tag:
-            class: 'panel-reveal__image',
-            loading: 'lazy',
-            sizes: '100vw',
-            widths: '750,1100,1500,1920,2400'
-        }}
+        {% content_for 'blocks' %}
       </div>
     {% endif %}
   </div>
@@ -193,11 +190,56 @@
     will-change: clip-path, opacity;
   }
 
-  .panel-reveal__image {
+  .panel-reveal__slide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: var(--slide, 1);
+  }
+
+  .panel-reveal__image,
+  .panel-reveal__placeholder,
+  .panel-reveal__placeholder-svg {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .panel-reveal__placeholder {
+    background-color: color-mix(in srgb, var(--reveal-text, #fff) 12%, var(--reveal-background, #000));
+  }
+
+  .panel-reveal__caption {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding-inline: var(--ocp-page-margin);
+
+    font-family: var(--reveal-font);
+    font-weight: 700;
+
+    /* The same step as the slogan — the scale has three sizes and this is
+       not a fourth. */
+    font-size: var(--ocp-display-size-sm);
+    line-height: 1.05;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--reveal-text, #fff);
+  }
+
+  /* Photography is arbitrary, so the name needs something to sit against.
+     Dimming the whole frame keeps it reading as one image rather than
+     boxing the text. */
+  .panel-reveal__slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / var(--reveal-scrim, 0.2));
   }
 
   /*
@@ -219,6 +261,11 @@
 {
   "name": "Panel reveal",
   "tag": "section",
+  "blocks": [
+    {
+      "type": "panel-reveal-slide"
+    }
+  ],
   "settings": [
     {
       "type": "text",
@@ -232,12 +279,7 @@
       "label": "Second line",
       "default": "Sensory Experience"
     },
-    {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Image",
-      "info": "Opens between the lines once they have parted, and fills the screen."
-    },
+
     {
       "type": "header",
       "content": "Appearance"
@@ -267,6 +309,17 @@
       "default": "heading"
     },
     {
+      "type": "range",
+      "id": "scrim",
+      "label": "Image dimming",
+      "info": "Darkens each image so its name stays readable over it.",
+      "min": 0,
+      "max": 70,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
       "type": "header",
       "content": "Motion"
     },
@@ -274,12 +327,12 @@
       "type": "range",
       "id": "scroll_distance",
       "label": "Scroll distance",
-      "info": "The section's height, as a share of the screen. The whole sequence is spread across it.",
+      "info": "The section's height, as a share of the screen. The whole sequence is spread across it, so add to this when you add a location or they all get less room.",
       "min": 150,
-      "max": 400,
+      "max": 800,
       "step": 10,
       "unit": "%",
-      "default": 250
+      "default": 400
     },
     {
       "type": "select",
