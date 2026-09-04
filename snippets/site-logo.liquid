@@ -38,7 +38,12 @@
 {% stylesheet %}
   .site-logo {
     position: fixed;
-    top: 33px;
+
+    /* Half the header's height, so the mark's centre lands on the row's
+       centre and lines up with MENU and CART. header.js measures the row
+       and publishes --header-height on <body>; a fixed number here was a
+       guess at it, and the two did not agree. */
+    top: calc(var(--header-height, 60px) / 2);
     left: 50%;
     translate: -50% -50%;
     width: 2000px;

@@ -11,7 +11,24 @@ const LOGO_ARRIVE_PROGRESS = 0.65;
  * rasterized small and then stretched up, which is blurry. */
 const LOGO_NATIVE_WIDTH = 2000;
 const DOCKED_SCALE = 0.1;
-const DOCKED_CENTER_Y = 33;
+
+/** Used only if the header has not published its height yet — matches the
+ * CSS fallback in site-logo.liquid. */
+const DOCKED_CENTER_FALLBACK = 30;
+
+/**
+ * Where the docked logo's centre sits: half the header's height, which is
+ * what site-logo.liquid positions it at. Read rather than restated, so the
+ * two cannot drift — the intro travels between this and the viewport's
+ * centre, and a wrong figure here lands the logo off its resting place.
+ *
+ * @returns {number}
+ */
+function dockedCenterY() {
+  const height = parseFloat(getComputedStyle(document.body).getPropertyValue('--header-height'));
+
+  return Number.isFinite(height) && height > 0 ? height / 2 : DOCKED_CENTER_FALLBACK;
+}
 
 /** How much accumulated gesture distance plays the intro from start to
  * finish. Higher = the intro takes more scrolling.
@@ -217,7 +234,7 @@ class HeroScrollComponent extends HTMLElement {
    */
   #computeOpeningTarget() {
     return {
-      y: window.innerHeight / 2 - DOCKED_CENTER_Y,
+      y: window.innerHeight / 2 - dockedCenterY(),
       scale: (window.innerWidth * 0.7) / LOGO_NATIVE_WIDTH,
     };
   }
