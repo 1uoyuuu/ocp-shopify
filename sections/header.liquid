@@ -346,6 +346,12 @@
     data-transparent-background="{{ background_transparent_color_value }}"
   {% endif %}
   style="
+    {%- comment -%}
+      Used where the blend is switched off over a light section — see the
+      [data-over-light] rules below. Declared in the element's one style
+      attribute; a second would simply be dropped.
+    {%- endcomment -%}
+    --header-light-color: {{ section.settings.blend_light_color | default: '#0f80be' }};
     --color-background-top-row: rgba({{ section.settings.background_color_top.rgba | default: settings.page_background_color.rgba }});
     --color-background-bottom-row: rgba({{ section.settings.background_color_bottom.rgba | default: settings.page_background_color.rgba }});
     {% if transparent and text_color_transparent != blank %}
@@ -468,12 +474,27 @@
       {{ navigation_bar }}
     </div>
   {% endif %}
+{%- comment -%}
+    A marker with no box of its own: it reads the header's rect and flags
+    the header when what is behind it is light. Only needed while the blend
+    is on, since it exists to switch the blend off.
+  {%- endcomment -%}
+  {% if section.settings.blend_with_page %}
+    <header-tone hidden></header-tone>
+  {% endif %}
 </header-component>
 
 <script
   src="{{ 'header.js' | asset_url }}"
   type="module"
 ></script>
+{% if section.settings.blend_with_page %}
+  <script
+    src="{{ 'header-tone.js' | asset_url }}"
+    type="module"
+    fetchpriority="low"
+  ></script>
+{% endif %}
 
 {% stylesheet %}
   body {
@@ -650,6 +671,32 @@
     --color-rgb: 255 255 255 !important;
     --color-foreground: #ffffff !important;
     --color-foreground-rgb: 255 255 255 !important;
+    /* stylelint-enable declaration-no-important */
+  }
+
+  /* Over a light section, difference resolves the header's white to
+     |255 - 255| = 0 — black. No blend can be asked for something else
+     there: landing on the brand blue over white would need a source of
+     rgb(240,127,65), and that same source shows as orange over a dark
+     section. One source colour cannot do both, because a blend has no
+     knowledge of what it sits over.
+
+     So header-tone.js measures the backdrop and flags it, and here the
+     blend is simply turned off and a colour set outright. The extra
+     attribute in the :has() takes this to (1,3,0) against the rule turning
+     difference on at (1,2,0) — and leaves it below the drawer-open rule at
+     (1,4,0), which still has the last word. */
+  .header-section:has(#header-component[data-blend][data-over-light]) {
+    mix-blend-mode: normal;
+  }
+
+  .header-section:has(#header-component[data-blend][data-over-light]):not(
+      :has(.menu-drawer-container[open])
+    )
+    .header__row {
+    /* stylelint-disable declaration-no-important */
+    --color: var(--header-light-color) !important;
+    --color-foreground: var(--header-light-color) !important;
     /* stylelint-enable declaration-no-important */
   }
 
@@ -1509,6 +1556,14 @@
     {
       "type": "header",
       "content": "t:content.appearance"
+    },
+    {
+      "type": "color",
+      "id": "blend_light_color",
+      "label": "Header colour over light sections",
+      "info": "Blending turns the header black over a white section, since it inverts what is behind it. This colour is used there instead.",
+      "default": "#0f80be",
+      "visible_if": "{{ section.settings.blend_with_page }}"
     },
     {
       "type": "checkbox",
