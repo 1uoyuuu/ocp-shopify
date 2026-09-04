@@ -1,0 +1,218 @@
+{% comment %}
+  A panel that rises into the viewport carrying one paragraph, which fills
+  in word by word as the scroll carries on — dim ahead of the reading, full
+  behind it.
+
+  statement.js writes each beat out as a number between 0 and 1 and decides
+  nothing about appearance. What the stylesheet describes with no script
+  running — panel up, every word filled — is the readable composition, so
+  the paragraph is never left half-legible.
+{% endcomment %}
+
+{% liquid
+  assign font = section.settings.font | default: 'heading'
+  assign words = section.settings.text | strip | split: ' '
+%}
+
+<scroll-statement
+  class="statement"
+  style="
+    --statement-background: {{ section.settings.background_color }};
+    --statement-text: {{ section.settings.text_color }};
+    --statement-font: var(--font-{{ font }}--family);
+    --statement-distance: {{ section.settings.scroll_distance }}svh;
+    --statement-dim: {{ section.settings.dim | divided_by: 100.0 }};
+    --statement-width: {{ section.settings.max_width }}rem;
+  "
+>
+  <div class="statement__viewport">
+    <div
+      class="statement__panel"
+      aria-hidden="true"
+    ></div>
+
+    {%- comment -%}
+      Split to words so the fill can run across the paragraph. Each carries
+      its own trailing space inside the span, so the line breaks where it
+      would have anyway.
+    {%- endcomment -%}
+    <p class="statement__text">
+      {%- for word in words -%}
+        {%- if word != blank -%}
+          <span
+            class="statement__word"
+            data-word
+          >{{ word }} </span>
+        {%- endif -%}
+      {%- endfor -%}
+    </p>
+  </div>
+</scroll-statement>
+
+<script
+  src="{{ 'statement.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  .statement {
+    display: block;
+    position: relative;
+    height: var(--statement-distance, 180svh);
+  }
+
+  /*
+   * The panel rises over whatever precedes it, so this section's wrapper is
+   * left see-through. The hero's stacking rule paints every section after it
+   * opaque so the pinned hero cannot show through; here the rise is the
+   * point, and the first selector repeats the hero's to outweigh it.
+   */
+  .shopify-section:has(.hero-video[data-stack]) ~ .shopify-section:has(.statement),
+  .shopify-section:has(.statement) {
+    background-color: transparent;
+  }
+
+  .statement__viewport {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: grid;
+    align-content: center;
+    padding-inline: var(--ocp-page-margin);
+    overflow: clip;
+  }
+
+  /* Rises from below the fold into place, over whatever is behind it. */
+  .statement__panel {
+    position: absolute;
+    inset: 0;
+    background-color: var(--statement-background, var(--color-background));
+    transform: translateY(calc((1 - var(--panel, 1)) * 100%));
+    will-change: transform;
+  }
+
+  .statement__text {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    max-width: var(--statement-width, 46rem);
+
+    font-family: var(--statement-font);
+    font-weight: 700;
+
+    /* The middle step of the site's three sizes. */
+    font-size: var(--ocp-display-size-sm);
+    line-height: 1.15;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-wrap: pretty;
+    color: var(--statement-text, var(--color-foreground));
+  }
+
+  /* Dim ahead of the reading and full behind it. Opacity rather than a
+     second colour, so it works against any panel colour without a second
+     setting to keep in step. */
+  .statement__word {
+    opacity: calc(var(--statement-dim, 0.22) + var(--fill, 1) * (1 - var(--statement-dim, 0.22)));
+  }
+
+  /*
+   * Nothing writes those numbers without the script, so the defaults stand:
+   * the panel up and every word filled. The section has no scroll to drive
+   * it either, so it collapses to one screen rather than leaving more of
+   * empty colour below.
+   */
+  scroll-statement:not([data-driven]) {
+    height: auto;
+  }
+
+  scroll-statement:not([data-driven]) .statement__viewport {
+    position: static;
+    padding-block: clamp(4rem, 14vh, 9rem);
+    height: auto;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Statement",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Paragraph",
+      "info": "Fills in word by word as the section is scrolled.",
+      "default": "We don't roast. We choose. Every week we taste through what other roasters have made, here and half a world away, and only what earns it reaches the shelf."
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Panel",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#111111"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Paragraph width",
+      "min": 20,
+      "max": 70,
+      "step": 2,
+      "unit": "rem",
+      "default": 46
+    },
+    {
+      "type": "range",
+      "id": "dim",
+      "label": "Unread text",
+      "info": "How visible a word is before the fill reaches it.",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "%",
+      "default": 22
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "range",
+      "id": "scroll_distance",
+      "label": "Scroll distance",
+      "info": "The section's height, as a share of the screen. The rise and the fill are spread across it.",
+      "min": 120,
+      "max": 400,
+      "step": 10,
+      "unit": "%",
+      "default": 180
+    }
+  ],
+  "presets": [
+    {
+      "name": "Statement"
+    }
+  ]
+}
+{% endschema %}

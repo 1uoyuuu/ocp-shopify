@@ -315,7 +315,7 @@
         "section_width": "page-width",
         "horizontal_alignment": "center",
         "gap": 0,
-        "background_color": "#0f80be",
+        "background_color": "#ffffff",
         "padding-block-start": 100,
         "padding-block-end": 100
       }
@@ -473,11 +473,24 @@
         "padding-block-start": 100,
         "padding-block-end": 96
       }
+    },
+    "statement": {
+      "type": "statement",
+      "settings": {
+        "text": "We don't roast. We choose. Every week we taste through what other roasters have made, here and half a world away, and only what earns it reaches the shelf.",
+        "background_color": "#ffffff",
+        "text_color": "#111111",
+        "font": "heading",
+        "max_width": 46,
+        "dim": 22,
+        "scroll_distance": 180
+      }
     }
   },
   "order": [
     "hero_video",
     "panel_reveal",
+    "statement",
     "product_list_7TKgXV",
     "subscription_steps"
   ]
