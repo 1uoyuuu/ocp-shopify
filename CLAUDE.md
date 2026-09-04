@@ -172,6 +172,20 @@ which is fine, since the merchant can change it.
 that redefines `--color-foreground`/`--color-background` for a subtree. That's
 how the menu panel gets its own color scheme.
 
+### Viewport units: `lvh` to cover, `svh` to fit
+
+Mobile browsers change the viewport height as the address bar hides. `100svh`
+is the *smallest* it gets, so a full-screen sticky frame sized in `svh` leaves
+a strip of the section behind showing the moment the bar retracts. Every
+full-screen frame here (`hero-video`, `panel-reveal`, `statement`) is `100lvh`
+— the largest — so it always covers. So are the scroll-length and overlap
+settings those sections emit, so "100" keeps meaning "one screen".
+
+`svh` is still right for anything that has to *fit* rather than cover: the
+statement's card cap is `40svh`, because it must not overflow at the point the
+screen is shortest. On desktop all three units are equal, so this only ever
+changes mobile.
+
 ### The `--ocp-*` house tokens
 
 All four live in `snippets/theme-styles-variables.liquid`'s `:root`. They are
@@ -382,6 +396,18 @@ until a menu is created in Shopify admin and selected.
   them as shared state; fetch before editing.
 
 **JS**
+- **Never let `requestAnimationFrame` be the only thing that advances a
+  scroll animation.** The usual shape —
+  ```js
+  #onScroll = () => { this.#read(); if (this.#frame) return; this.#frame = rAF(this.#tick); }
+  ```
+  latches shut permanently if a frame is ever starved: `#frame` is only
+  cleared inside the callback, so once it is set and no frame arrives, every
+  later scroll returns immediately and nothing moves again. iOS throttles rAF
+  through momentum scrolling, which is exactly when this bites. Advance the
+  animation from the scroll handler too — extract a `#step(now)` that moves by
+  real elapsed time and call it from both. Both `statement.js` and
+  `panel-reveal.js` had this.
 - Duplicate `#private` class fields are a **syntax error**, not a warning —
   easy to introduce when refactoring a placeholder field into a real method.
   Quick check:

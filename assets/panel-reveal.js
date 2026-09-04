@@ -123,6 +123,10 @@ class PanelReveal extends HTMLElement {
     this.#buildSnapPoints();
     this.#placeSnapPoints();
 
+    // The clock starts here, not at zero: the first step is a scroll away
+    // and would otherwise be handed the whole time since the page loaded.
+    this.#lastTime = performance.now();
+
     this.#bindScroll();
     // Which element scrolls flips at the desktop breakpoint, and scroll
     // events don't bubble to window.
@@ -163,8 +167,14 @@ class PanelReveal extends HTMLElement {
   #onScroll = () => {
     this.#read();
 
+    // Advanced here as well as on the frame, so movement never depends on a
+    // frame arriving. On iOS the callbacks can be starved through a momentum
+    // scroll — and since a frame is what clears #frame, waiting on one would
+    // latch this shut for good: every later scroll would see the flag still
+    // raised and return without doing anything.
+    this.#step(performance.now());
+
     if (this.#frame) return;
-    this.#lastTime = performance.now();
     this.#frame = requestAnimationFrame(this.#tick);
   };
 
@@ -175,25 +185,35 @@ class PanelReveal extends HTMLElement {
     this.#apply();
   };
 
-  /** @param {number} now */
-  #tick = (now) => {
+  /**
+   * One move toward the target, by however much real time has passed.
+   *
+   * Called from the frame loop and from the scroll handler alike, so the two
+   * can interleave freely: each advances by the time actually elapsed, so
+   * doing it twice in one frame is not doing it twice as fast.
+   *
+   * @param {number} now
+   * @returns {boolean} whether there is still ground to cover
+   */
+  #step(now) {
     const delta = this.#target - this.#current;
 
     // Frame-rate independent: closing EASE of the gap every 16.7ms means
-    // closing this much over however long the frame actually took.
-    const elapsed = now - this.#lastTime;
+    // closing this much over however long it actually took. Capped, so a
+    // long gap between calls cannot close the whole distance at once.
+    const elapsed = Math.min(Math.max(now - this.#lastTime, 0), 100);
     this.#lastTime = now;
     const factor = 1 - Math.pow(1 - EASE, elapsed / BASE_FRAME_MS);
 
     this.#current = Math.abs(delta) < SETTLE ? this.#target : this.#current + delta * factor;
     this.#apply();
 
-    if (Math.abs(this.#target - this.#current) < SETTLE) {
-      this.#frame = 0;
-      return;
-    }
+    return Math.abs(this.#target - this.#current) >= SETTLE;
+  }
 
-    this.#frame = requestAnimationFrame(this.#tick);
+  /** @param {number} now */
+  #tick = (now) => {
+    this.#frame = this.#step(now) ? requestAnimationFrame(this.#tick) : 0;
   };
 
   #apply() {

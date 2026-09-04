@@ -19,8 +19,8 @@
     --reveal-background: {{ section.settings.background_color }};
     --reveal-text: {{ section.settings.text_color }};
     --reveal-font: var(--font-{{ font }}--family);
-    --reveal-distance: {{ section.settings.scroll_distance }}svh;
-    --reveal-part: {{ section.settings.part_distance }}svh;
+    --reveal-distance: {{ section.settings.scroll_distance }}lvh;
+    --reveal-part: {{ section.settings.part_distance }}lvh;
     --reveal-scrim: {{ section.settings.scrim | divided_by: 100.0 }};
   "
   data-part="{{ section.settings.split_direction }}"
@@ -83,7 +83,7 @@
   .panel-reveal {
     display: block;
     position: relative;
-    height: var(--reveal-distance, 250svh);
+    height: var(--reveal-distance, 250lvh);
   }
 
   /*
@@ -101,7 +101,7 @@
   .panel-reveal__viewport {
     position: sticky;
     top: 0;
-    height: 100svh;
+    height: 100lvh;
     display: grid;
     place-items: center;
     padding-inline: var(--ocp-page-margin);
@@ -166,19 +166,19 @@
      two stacked rows, moving them up and down opens the gap the image grows
      into, where sliding them sideways would leave it to open across them. */
   .panel-reveal__line:first-child {
-    transform: translateY(calc(var(--split, 0) * var(--reveal-part, 60svh) * -1));
+    transform: translateY(calc(var(--split, 0) * var(--reveal-part, 60lvh) * -1));
   }
 
   .panel-reveal__line:last-child {
-    transform: translateY(calc(var(--split, 0) * var(--reveal-part, 60svh)));
+    transform: translateY(calc(var(--split, 0) * var(--reveal-part, 60lvh)));
   }
 
   .panel-reveal[data-part='horizontal'] .panel-reveal__line:first-child {
-    transform: translateX(calc(var(--split, 0) * var(--reveal-part, 60svh) * -1));
+    transform: translateX(calc(var(--split, 0) * var(--reveal-part, 60lvh) * -1));
   }
 
   .panel-reveal[data-part='horizontal'] .panel-reveal__line:last-child {
-    transform: translateX(calc(var(--split, 0) * var(--reveal-part, 60svh)));
+    transform: translateX(calc(var(--split, 0) * var(--reveal-part, 60lvh)));
   }
 
   /* Opens from a small rectangle at the centre out to the full frame. The

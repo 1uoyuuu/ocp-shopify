@@ -24,7 +24,7 @@
   cross-element position matching and no "becomes part of the hero" DOM
   coupling to reason about.
 
-  The section is a plain 100svh block with no oversized scroll track, since
+  The section is a plain 100lvh block with no oversized scroll track, since
   the lock is enforced by Observer rather than by scroll distance. That
   keeps GSAP away from the DOM structure entirely (pinning inserts a
   wrapper element, which fights the theme's own DOM morphing on section
@@ -166,7 +166,7 @@
 
     display: block;
     position: relative;
-    height: 100svh;
+    height: 100lvh;
     min-height: 480px;
     background: var(--color-background, #fff);
     overflow: clip;

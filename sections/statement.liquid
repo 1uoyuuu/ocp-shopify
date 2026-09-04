@@ -20,9 +20,9 @@
     --statement-background: {{ section.settings.background_color }};
     --statement-text: {{ section.settings.text_color }};
     --statement-font: var(--font-{{ font }}--family);
-    --statement-distance: {{ section.settings.scroll_distance }}svh;
+    --statement-distance: {{ section.settings.scroll_distance }}lvh;
     --statement-dim: {{ section.settings.dim | divided_by: 100.0 }};
-    --statement-overlap: {{ section.settings.overlap }}svh;
+    --statement-overlap: {{ section.settings.overlap }}lvh;
     --statement-products-width: {{ section.settings.products_width }}rem;
   "
 >
@@ -111,14 +111,14 @@
        section has to be long enough for both. statement.js measures how far
        the column has to travel and writes it here; the travel maps 1:1 onto
        scroll, so a card moves a pixel for a pixel. */
-    height: calc(var(--statement-distance, 180svh) + var(--products-travel, 0px));
+    height: calc(var(--statement-distance, 180lvh) + var(--products-travel, 0px));
 
     /* Pulled up into the hold at the end of the section above, so the block
        rises while that section's frame is still pinned — the picture behind
        stays put and this slides over it. Without the overlap this would
        begin exactly as that frame let go, and the two would move together
        rather than one over the other. */
-    margin-block-start: calc(var(--statement-overlap, 0svh) * -1);
+    margin-block-start: calc(var(--statement-overlap, 0lvh) * -1);
   }
 
   /*
@@ -135,7 +135,7 @@
   .statement__viewport {
     position: sticky;
     top: 0;
-    height: 100svh;
+    height: 100lvh;
     overflow: clip;
   }
 
@@ -266,6 +266,10 @@
      * instead — the card keeps its width and the paragraph keeps its room.
      */
     .statement .statement__product .card-gallery {
+      /* svh, not lvh: this one has to *fit* the screen at its smallest —
+         when the address bar is showing — whereas the frames above have to
+         *cover* it at its largest. Using one unit for both leaves either a
+         strip of the section behind showing, or a card cut off. */
       max-height: 40svh;
     }
   }
