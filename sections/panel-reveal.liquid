@@ -217,6 +217,9 @@
     position: relative;
     z-index: 1;
     margin: 0;
+
+    /* Timed apart from the image beneath it, so no two names overlap. */
+    opacity: var(--name, 1);
     padding-inline: var(--ocp-page-margin);
 
     font-family: var(--reveal-font);
@@ -240,6 +243,10 @@
     position: absolute;
     inset: 0;
     background: rgb(0 0 0 / var(--reveal-scrim, 0.2));
+
+    /* Follows the name rather than the image: it exists to make the name
+       readable, so it has no business dimming a frame with no name on it. */
+    opacity: var(--name, 1);
   }
 
   /*

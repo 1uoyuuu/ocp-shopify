@@ -25,20 +25,35 @@ const BEATS = {
   panel: [0.0, 0.09],
   reveal: [0.09, 0.24],
   split: [0.26, 0.34],
-  // Just the frame opening. What plays inside it runs from SLIDES_FROM to
-  // the end, so adding a location lengthens the sequence rather than
-  // squeezing the ones already there into the same span.
-  media: [0.3, 0.42],
+  // The frame opening, overlapping the parting lines it opens between.
+  media: [0.28, 0.36],
 };
 
-/** Where the frame starts opening, and so where the first location is
- * already behind it. Everything from here to the end belongs to the
- * locations, split evenly between them. */
-const SLIDES_FROM = 0.3;
+/**
+ * Where the locations begin, which is where the frame has finished opening
+ * — not where it started. Sharing the opening with the first location's
+ * span left that one only a sliver of scroll to show its name in, while
+ * every other location had a full share.
+ *
+ * Everything from here to the end belongs to them, split evenly, so adding
+ * one lengthens the sequence rather than squeezing the rest.
+ */
+const SLIDES_FROM = 0.36;
 
 /** Share of a location's own span spent cross-fading into it. Low enough to
  * read as a change rather than a dissolve, high enough not to snap. */
 const CROSSFADE = 0.32;
+
+/**
+ * Share of a span the name takes to arrive or leave. The names are timed
+ * separately from the images they sit on: the images are stacked and cross-
+ * fade through one another, so a name sharing that timing would be legible
+ * over the previous one and two shops would be readable at once.
+ *
+ * A name instead waits for its image to have finished arriving, and is gone
+ * again before the next one starts — so only ever one is on screen.
+ */
+const NAME_FADE = 0.16;
 
 /**
  * How much of the reveal is spent staggering, against how much each word
@@ -201,16 +216,32 @@ class PanelReveal extends HTMLElement {
     const span = (1 - SLIDES_FROM) / count;
     const fade = span * CROSSFADE;
 
+    const nameFade = span * NAME_FADE;
+
     this.#slides.forEach((slide, index) => {
+      const from = SLIDES_FROM + index * span;
+
       // The first is simply there as the frame opens — the clip is what
       // reveals it, so fading it as well would wash the opening out.
-      if (index === 0) {
-        slide.style.setProperty('--slide', '1');
-        return;
-      }
+      slide.style.setProperty(
+        '--slide',
+        index === 0 ? '1' : `${smooth(clamp((progress - from) / fade, 0, 1))}`
+      );
 
-      const from = SLIDES_FROM + index * span;
-      slide.style.setProperty('--slide', `${smooth(clamp((progress - from) / fade, 0, 1))}`);
+      // Its name waits until the image it belongs to has fully arrived —
+      // for the first, until the frame has finished opening, since the clip
+      // would otherwise cut the name in half on its way out.
+      const nameFrom = index === 0 ? BEATS.media[1] : from + fade;
+      const arriving = smooth(clamp((progress - nameFrom) / nameFade, 0, 1));
+
+      // ...and is gone before the next one begins. The last has nothing
+      // following it, so it stays for the rest of the section.
+      const last = index === count - 1;
+      const leaving = last
+        ? 0
+        : smooth(clamp((progress - (from + span - nameFade)) / nameFade, 0, 1));
+
+      slide.style.setProperty('--name', `${arriving * (1 - leaving)}`);
     });
   }
 }
