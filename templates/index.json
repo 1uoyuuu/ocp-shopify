@@ -24,54 +24,48 @@
     },
     "panel_reveal": {
       "type": "panel-reveal",
-      "settings": {
-        "line_1": "Electrify Mesmerising",
-        "line_2": "Sensory Experience",
-        "background_color": "#0f80be",
-        "text_color": "#ffffff",
-        "font": "heading",
-        "scroll_distance": 400,
-        "split_direction": "horizontal",
-        "part_distance": 100,
-        "scrim": 20
-      },
       "blocks": {
         "location_1": {
           "type": "panel-reveal-slide",
+          "name": "ocp-crow-nest",
           "settings": {
-            "image": "shopify://shop_images/images_2.jpg",
+            "image": "shopify://shop_images/ocp-crow.jpg",
             "caption": "OCP Crows Nest"
           },
           "blocks": {}
         },
         "location_2": {
           "type": "panel-reveal-slide",
+          "name": "ocp-artarmon",
           "settings": {
-            "image": "",
+            "image": "shopify://shop_images/ocp-artarmon.jpg",
             "caption": "OCP Artarmon"
           },
           "blocks": {}
         },
         "location_3": {
           "type": "panel-reveal-slide",
+          "name": "ocp-vc",
           "settings": {
-            "image": "",
+            "image": "shopify://shop_images/ocp-vc.jpg",
             "caption": "OCP Victoria Cross"
           },
           "blocks": {}
         },
         "location_4": {
           "type": "panel-reveal-slide",
+          "name": "ocp-george",
           "settings": {
-            "image": "",
+            "image": "shopify://shop_images/ocp-george.jpg",
             "caption": "OCP George St"
           },
           "blocks": {}
         },
         "location_5": {
           "type": "panel-reveal-slide",
+          "name": "ocp-docklands",
           "settings": {
-            "image": "",
+            "image": "shopify://shop_images/ocp-mel.jpg",
             "caption": "OCP Docklands"
           },
           "blocks": {}
@@ -83,7 +77,18 @@
         "location_3",
         "location_4",
         "location_5"
-      ]
+      ],
+      "settings": {
+        "line_1": "Electrify Mesmerising",
+        "line_2": "Sensory Experience",
+        "background_color": "#0f80be",
+        "text_color": "#ffffff",
+        "font": "heading",
+        "scrim": 20,
+        "scroll_distance": 400,
+        "split_direction": "horizontal",
+        "part_distance": 100
+      }
     },
     "product_list_7TKgXV": {
       "type": "product-list",
