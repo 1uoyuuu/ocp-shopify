@@ -24,6 +24,8 @@
     --statement-dim: {{ section.settings.dim | divided_by: 100.0 }};
     --statement-width: {{ section.settings.max_width }}rem;
     --statement-overlap: {{ section.settings.overlap }}svh;
+    --statement-products-width: {{ section.settings.products_width }}rem;
+    --statement-window: {{ section.settings.window_height }}svh;
   "
 >
   <div class="statement__viewport">
@@ -48,6 +50,40 @@
           {%- endif -%}
         {%- endfor -%}
       </p>
+
+      {% if section.settings.collection != blank %}
+        {%- comment -%}
+          The products run up the right-hand side as the section is read.
+          Rendered through the theme's own product card rather than a second
+          one written here, so they keep the hover strip, the quick add and
+          everything else those carry.
+        {%- endcomment -%}
+        <div class="statement__products">
+          {% if section.settings.products_label != blank %}
+            <p class="statement__products-label">{{ section.settings.products_label }}</p>
+          {% endif %}
+
+          <div class="statement__window">
+            <div
+              class="statement__track"
+              ref="track"
+            >
+              {% paginate section.settings.collection.products by section.settings.max_products %}
+                {% for product in section.settings.collection.products limit: section.settings.max_products %}
+                  <div class="statement__product">
+                    {% content_for 'block',
+                      type: '_product-card',
+                      id: 'static-product-card',
+                      closest.product: product,
+                      product_view_context: 'collection'
+                    %}
+                  </div>
+                {% endfor %}
+              {% endpaginate %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 </scroll-statement>
@@ -94,7 +130,12 @@
   .statement__panel {
     position: absolute;
     inset: 0;
+
+    /* The paragraph on the left, the products running up the right. */
     display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--statement-products-width, 20rem));
+    gap: clamp(2rem, 6vw, 6rem);
+    align-items: center;
     align-content: center;
     padding-inline: var(--ocp-page-margin);
     background-color: var(--statement-background, var(--color-background));
@@ -120,8 +161,63 @@
   /* Dim ahead of the reading and full behind it. Opacity rather than a
      second colour, so it works against any panel colour without a second
      setting to keep in step. */
+  .statement__products {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .statement__products-label {
+    margin: 0;
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    color: var(--statement-text, var(--color-foreground));
+  }
+
+  /* What is visible of the column at any moment; the track slides through
+     it. Clipped rather than scrollable, so it is the page's scroll that
+     moves it and never a second scrollbar of its own. */
+  .statement__window {
+    height: var(--statement-window, 62svh);
+    overflow: clip;
+  }
+
+  .statement__track {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    /* --products-travel is measured by statement.js: how far the track has
+       to move for its last card to reach the bottom of the window. */
+    transform: translateY(calc(var(--products, 0) * var(--products-travel, 0px) * -1));
+    will-change: transform;
+  }
+
   .statement__word {
     opacity: calc(var(--statement-dim, 0.22) + var(--fill, 1) * (1 - var(--statement-dim, 0.22)));
+  }
+
+  /* One column below the breakpoint: side by side there is not enough width
+     for a readable paragraph and a card, so the products fall under it and
+     the column stops travelling — the page's own scroll carries them. */
+  @media screen and (max-width: 989px) {
+    .statement .statement__panel {
+      grid-template-columns: minmax(0, 1fr);
+      gap: clamp(1.5rem, 5vh, 3rem);
+    }
+
+    .statement .statement__window {
+      height: auto;
+      overflow: visible;
+    }
+
+    .statement .statement__track {
+      transform: none;
+    }
   }
 
   /*
@@ -149,6 +245,11 @@
 {
   "name": "Statement",
   "tag": "section",
+  "blocks": [
+    {
+      "type": "_product-card"
+    }
+  ],
   "settings": [
     {
       "type": "textarea",
@@ -156,6 +257,51 @@
       "label": "Paragraph",
       "info": "Fills in word by word as the section is scrolled.",
       "default": "We don't roast. We choose. Every week we taste through what other roasters have made, here and half a world away, and only what earns it reaches the shelf."
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Runs up the right-hand side as the paragraph is read."
+    },
+    {
+      "type": "text",
+      "id": "products_label",
+      "label": "Label above them",
+      "default": "(Featured products)"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "How many",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "products_width",
+      "label": "Column width",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "rem",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "window_height",
+      "label": "Column height",
+      "min": 30,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 62
     },
     {
       "type": "header",

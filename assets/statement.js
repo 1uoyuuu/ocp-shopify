@@ -16,6 +16,10 @@ import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-c
 const BEATS = {
   panel: [0.0, 0.3],
 
+  // The products run for the whole of the read, so the column keeps moving
+  // for as long as there are words still filling.
+  products: [0.3, 0.95],
+
   // Starts once the panel has landed. The words ride up on it, so filling
   // them on the way would have the paragraph resolving while it is still
   // travelling.
@@ -50,9 +54,12 @@ class ScrollStatement extends HTMLElement {
 
   /** @type {HTMLElement[]} */
   #words = [];
+  /** @type {HTMLElement | null} */
+  #track = null;
 
   connectedCallback() {
     this.#words = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-word]')]);
+    this.#track = this.querySelector('[ref="track"]');
 
     // The composition the stylesheet already describes — panel up, every
     // word filled — is the right one to leave standing.
@@ -60,6 +67,7 @@ class ScrollStatement extends HTMLElement {
 
     this.dataset.driven = '';
 
+    this.#measureTrack();
     this.#read();
     this.#current = this.#target;
     this.#apply();
@@ -107,6 +115,7 @@ class ScrollStatement extends HTMLElement {
   };
 
   #onResize = () => {
+    this.#measureTrack();
     this.#read();
     this.#current = this.#target;
     this.#apply();
@@ -133,10 +142,27 @@ class ScrollStatement extends HTMLElement {
     this.#frame = requestAnimationFrame(this.#tick);
   };
 
+  /**
+   * How far the column has to travel for its last card to finish level with
+   * the bottom of the window. Measured rather than assumed, since it
+   * depends on how many products there are and how tall the cards come out.
+   */
+  #measureTrack() {
+    if (!this.#track) return;
+
+    const window_ = this.#track.parentElement;
+    if (!window_) return;
+
+    const travel = this.#track.scrollHeight - window_.clientHeight;
+
+    this.style.setProperty('--products-travel', `${Math.max(0, travel)}px`);
+  }
+
   #apply() {
     const progress = this.#current;
 
     this.style.setProperty('--panel', `${beatAt(progress, BEATS.panel)}`);
+    this.style.setProperty('--products', `${beatAt(progress, BEATS.products)}`);
 
     const fill = beatAt(progress, BEATS.fill);
     const count = this.#words.length;
