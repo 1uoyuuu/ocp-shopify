@@ -95,43 +95,34 @@ class HeaderTone extends HTMLElement {
   };
 
   /**
-   * The first thing painted under a point that is not part of the header,
-   * and not the header's own blended output.
+   * The luminance of what is actually visible under a point.
+   *
+   * This walks the hit stack — every element under the point, nearest
+   * first — rather than the ancestor chain of the topmost one. A section's
+   * colour is often painted by an absolutely positioned sibling of its
+   * content rather than by an ancestor of it: `.section-background` is
+   * exactly that. Walking upwards missed it and carried on to the
+   * `.shopify-section` wrapper, which the hero's stacking rule paints white
+   * — so a blue section with white type on it read as a white backdrop and
+   * the header turned blue in the middle of it.
    *
    * @param {number} x
    * @param {number} y
-   * @returns {Element | null}
-   */
-  #behind(x, y) {
-    for (const element of document.elementsFromPoint(x, y)) {
-      if (element.closest(OVERLAYS) || element.contains(this.#host)) continue;
-      return element;
-    }
-
-    return null;
-  }
-
-  /**
-   * Walks up for the first background that actually paints something. An
-   * element with a transparent background shows whatever is behind it, so
-   * its own colour says nothing.
-   *
-   * @param {Element} element
    * @returns {number | null} Relative luminance, or null if unknowable.
    */
-  #luminanceOf(element) {
-    /** @type {Element | null} */
-    let node = element;
+  #luminanceAt(x, y) {
+    for (const element of document.elementsFromPoint(x, y)) {
+      if (element.closest(OVERLAYS)) continue;
 
-    while (node && node !== document.documentElement.parentElement) {
-      if (MEDIA.has(node.tagName)) return null;
+      // Media has its own colours and is what difference is for.
+      if (MEDIA.has(element.tagName)) return null;
 
-      const colour = parse(getComputedStyle(node).backgroundColor);
-      if (colour && colour.a > 0.9) {
-        return 0.2126 * linear(colour.r) + 0.7152 * linear(colour.g) + 0.0722 * linear(colour.b);
-      }
+      const colour = parse(getComputedStyle(element).backgroundColor);
 
-      node = node.parentElement;
+      // Anything see-through says nothing about what shows through it.
+      if (!colour || colour.a <= 0.9) continue;
+
+      return 0.2126 * linear(colour.r) + 0.7152 * linear(colour.g) + 0.0722 * linear(colour.b);
     }
 
     return null;
@@ -150,10 +141,7 @@ class HeaderTone extends HTMLElement {
     // transparency all the way up — counts as not light, which leaves the
     // blend doing what it already did.
     const light = SAMPLES.every((fraction) => {
-      const element = this.#behind(width * fraction, y);
-      if (!element) return false;
-
-      const luminance = this.#luminanceOf(element);
+      const luminance = this.#luminanceAt(width * fraction, y);
       return luminance !== null && luminance >= LIGHT_THRESHOLD;
     });
 
