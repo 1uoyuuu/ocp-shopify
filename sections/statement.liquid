@@ -25,8 +25,6 @@
     --statement-width: {{ section.settings.max_width }}rem;
     --statement-overlap: {{ section.settings.overlap }}svh;
     --statement-products-width: {{ section.settings.products_width }}rem;
-    --statement-window: {{ section.settings.window_height }}svh;
-    --statement-speed: {{ section.settings.products_speed | default: 35 }};
   "
 >
   <div class="statement__viewport">
@@ -53,47 +51,47 @@
       </p>
 
       {%- comment -%}
-        The products run up the right-hand side as the section is read.
-        Rendered through the theme's own product card rather than a second
-        one written here, so they keep the hover strip, the quick add and
-        everything else those carry.
+        The products run up the right-hand side, rendered through the theme's
+        own product card rather than a second one written here, so they keep
+        the hover strip, the quick add and everything else those carry.
 
-        The column is part of the composition, not an optional extra: with
-        no collection chosen it falls back to placeholder cards rather than
-        disappearing, which is what left the right-hand side empty when the
-        template pointed at a collection this store does not have.
+        The track is taken out of flow so its height cannot stretch the panel:
+        it is far taller than the screen on purpose, and the sticky frame is
+        what hides the part that has not arrived yet. Nothing clips the column
+        itself — it simply starts below the fold and is carried up.
+
+        With no collection chosen it falls back to placeholder cards rather
+        than disappearing, so a half-configured section looks unfinished
+        instead of losing a third of its layout.
       {%- endcomment -%}
-      <div class="statement__products">
-        {% if section.settings.products_label != blank %}
-          <p class="statement__products-label">{{ section.settings.products_label }}</p>
-        {% endif %}
-
-        <div class="statement__window">
-          <div
-            class="statement__track"
-            ref="track"
-          >
-            {% if section.settings.collection != blank and shop.products_count != 0 %}
-              {% paginate section.settings.collection.products by section.settings.max_products %}
-                {% for product in section.settings.collection.products limit: section.settings.max_products %}
-                  <div class="statement__product">
-                    {% content_for 'block',
-                      type: '_product-card',
-                      id: 'static-product-card',
-                      closest.product: product,
-                      product_view_context: 'collection'
-                    %}
-                  </div>
-                {% endfor %}
-              {% endpaginate %}
-            {% else %}
-              {% for i in (1..section.settings.max_products) %}
+      <div
+        class="statement__products"
+        ref="column"
+      >
+        <div
+          class="statement__track"
+          ref="track"
+        >
+          {% if section.settings.collection != blank and shop.products_count != 0 %}
+            {% paginate section.settings.collection.products by section.settings.max_products %}
+              {% for product in section.settings.collection.products limit: section.settings.max_products %}
                 <div class="statement__product">
-                  {% content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: null %}
+                  {% content_for 'block',
+                    type: '_product-card',
+                    id: 'static-product-card',
+                    closest.product: product,
+                    product_view_context: 'collection'
+                  %}
                 </div>
               {% endfor %}
-            {% endif %}
-          </div>
+            {% endpaginate %}
+          {% else %}
+            {% for i in (1..section.settings.max_products) %}
+              <div class="statement__product">
+                {% content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: null %}
+              </div>
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
     </div>
@@ -109,7 +107,12 @@
   .statement {
     display: block;
     position: relative;
-    height: var(--statement-distance, 180svh);
+
+    /* The read and the column are scrolled one after the other, so the
+       section has to be long enough for both. statement.js measures how far
+       the column has to travel and writes it here; the travel maps 1:1 onto
+       scroll, so a card moves a pixel for a pixel. */
+    height: calc(var(--statement-distance, 180svh) + var(--products-travel, 0px));
 
     /* Pulled up into the hold at the end of the section above, so the block
        rises while that section's frame is still pinned — the picture behind
@@ -150,6 +153,7 @@
     align-items: center;
     align-content: center;
     padding-inline: var(--ocp-page-margin);
+    padding-block: var(--ocp-page-margin);
     background-color: var(--statement-background, var(--color-background));
     transform: translateY(calc((1 - var(--panel, 1)) * 100%));
     will-change: transform;
@@ -174,41 +178,33 @@
      second colour, so it works against any panel colour without a second
      setting to keep in step. */
   .statement__products {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    position: relative;
+    align-self: stretch;
     min-width: 0;
+
+    /* The cards read against the panel, not against the page's colour
+       scheme — otherwise their titles and prices come out in the brand blue
+       over white. Reuses the section's own text colour rather than adding a
+       second setting that could drift away from it. */
+    --color-foreground: var(--statement-text, #111111);
+    color: var(--statement-text, #111111);
   }
 
-  .statement__products-label {
-    margin: 0;
-    font-family: var(--font-subheading--family);
-    font-weight: var(--font-subheading--weight);
-    font-size: var(--ocp-text-size);
-    letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
-    color: var(--statement-text, var(--color-foreground));
-  }
-
-  /* What is visible of the column at any moment; the track cycles through
-     it. Clipped rather than scrollable, so the carousel is never a second
-     scrollbar competing with the page. */
-  .statement__window {
-    height: var(--statement-window, 62svh);
-    overflow: clip;
-
-    /* The cards run off both edges rather than stopping at them, so the
-       column reads as continuous rather than as a list with two ends. */
-    mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
-  }
-
+  /*
+   * Out of flow, so a column far taller than the screen cannot stretch the
+   * panel it sits in. Nothing clips it: it begins below the fold and the
+   * sticky frame is what hides the rest.
+   */
   .statement__track {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+
     display: flex;
     flex-direction: column;
     gap: var(--statement-track-gap, 1.5rem);
 
-    /* statement.js writes the transform: the offset is a running distance
-       in pixels, not a beat between 0 and 1, because the loop never ends. */
+    transform: translate3d(0, var(--products-offset, 0px), 0);
     will-change: transform;
   }
 
@@ -225,13 +221,14 @@
       gap: clamp(1.5rem, 5vh, 3rem);
     }
 
-    .statement .statement__window {
-      height: auto;
-      overflow: visible;
-      mask-image: none;
+    /* Stacked, the page's own scroll carries the cards, so the section
+       needs no extra length and the column no transform. */
+    .statement.statement {
+      height: var(--statement-distance, 180svh);
     }
 
     .statement .statement__track {
+      position: static;
       transform: none;
     }
   }
@@ -254,6 +251,15 @@
   scroll-statement:not([data-driven]) .statement__panel {
     position: static;
     padding-block: clamp(4rem, 14vh, 9rem);
+
+    /* Nothing is going to carry the column past anybody, so it reads as a
+       list under the paragraph rather than a strip beside it. */
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  scroll-statement:not([data-driven]) .statement__track {
+    position: static;
+    transform: none;
   }
 {% endstylesheet %}
 
@@ -280,17 +286,12 @@
       "info": "Runs up the right-hand side as the paragraph is read."
     },
     {
-      "type": "text",
-      "id": "products_label",
-      "label": "Label above them",
-      "default": "(Featured products)"
-    },
-    {
       "type": "range",
       "id": "max_products",
       "label": "How many",
+      "info": "They are scrolled through one after another, so ten is the most that stays worth the scroll.",
       "min": 2,
-      "max": 12,
+      "max": 10,
       "step": 1,
       "default": 6
     },
@@ -303,27 +304,6 @@
       "step": 1,
       "unit": "rem",
       "default": 20
-    },
-    {
-      "type": "range",
-      "id": "window_height",
-      "label": "Column height",
-      "min": 30,
-      "max": 90,
-      "step": 5,
-      "unit": "%",
-      "default": 60
-    },
-    {
-      "type": "range",
-      "id": "products_speed",
-      "label": "Carousel speed",
-      "info": "Pixels a second. Scrolling the page pushes it along too, and hovering holds it still.",
-      "min": 0,
-      "max": 120,
-      "step": 5,
-      "unit": "px",
-      "default": 35
     },
     {
       "type": "header",

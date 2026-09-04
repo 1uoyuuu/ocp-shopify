@@ -1,23 +1,30 @@
-import {
-  getIntersectionRoot,
-  getScrollEventTarget,
-  getScrollTop,
-  scrollContainerMediaQuery,
-} from '@theme/scroll-container';
+import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-container';
 
 /**
- * A panel that rises into the viewport, carrying a paragraph that fills in
- * word by word as the scroll carries on.
+ * A panel that rises into the viewport carrying a paragraph, which fills in
+ * word by word; then a column of products carried up past the reader before
+ * the section lets the page go.
+ *
+ * The two are scrolled one after the other. The section is long enough for
+ * both — its own length for the read, plus however far the column has to
+ * travel, measured here and handed to the stylesheet. Because exactly that
+ * much height is added for exactly that much travel, the column moves a
+ * pixel for a pixel scrolled.
  *
  * Progress comes from the section's own viewport rect rather than a scroll
  * offset, which sidesteps this theme's split scroll container — a rect is
  * measured against the viewport whichever element is doing the scrolling.
  * Only the event has to come from the right place.
  *
- * Nothing here decides how any of it looks. Each beat is a number between 0
- * and 1 on a custom property; the stylesheet is written against those.
+ * Nothing here decides how any of it looks. Each beat is a number on a custom
+ * property; the stylesheet is written against those.
  */
 
+/**
+ * Beats within the read, as fractions of it. They are scaled by the share of
+ * the section the read actually occupies, which depends on how far the column
+ * turns out to have to travel.
+ */
 const BEATS = {
   panel: [0.0, 0.3],
 
@@ -25,27 +32,24 @@ const BEATS = {
   // them on the way would have the paragraph resolving while it is still
   // travelling.
   fill: [0.32, 0.9],
+
+  // The column climbs into place from below while the last quarter of the
+  // paragraph is still filling: 0.32 + 0.75 × (0.9 − 0.32). Arriving under
+  // its own beat rather than after the read means the eye is already moving
+  // right by the time the scroll hands over to it.
+  enter: [0.755, 0.98],
 };
 
 /**
- * How much of the page's scroll the carousel takes on top of its own drift.
- * A fraction rather than the whole distance, so scrolling nudges the column
- * along instead of yanking it — the drift stays the thing you notice.
+ * The column only travels where there is a column to travel in. Below this
+ * the products sit stacked under the paragraph and the page's own scroll is
+ * the only movement they need.
  */
-const SCROLL_COUPLING = 0.35;
+const columnMedia = matchMedia('(min-width: 990px)');
 
-/**
- * The carousel only runs where there is a column to run in. Below this the
- * products sit stacked under the paragraph and the page's own scroll is the
- * only movement they need.
- */
-const carouselMedia = matchMedia('(min-width: 990px)');
-
-/**
- * Share of the fill spent staggering, against how long each word takes to
+/** Share of the fill spent staggering, against how long each word takes to
  * arrive. Spreading the ripple across a fixed share rather than giving each
- * word a set delay keeps the pace steady however long the paragraph is.
- */
+ * word a set delay keeps the pace steady however long the paragraph is. */
 const STAGGER_SPREAD = 0.75;
 
 /** Fraction of the remaining distance closed per 60fps frame, so the fill
@@ -57,7 +61,11 @@ const SETTLE = 0.0005;
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 /** @param {number} progress @param {[number, number]} beat */
-const beatAt = (progress, [from, to]) => clamp((progress - from) / (to - from), 0, 1);
+const beatAt = (progress, [from, to]) =>
+  to <= from ? (progress >= to ? 1 : 0) : clamp((progress - from) / (to - from), 0, 1);
+
+/** @param {[number, number]} beat @param {number} share */
+const scaled = ([from, to], share) => /** @type {[number, number]} */ ([from * share, to * share]);
 
 class ScrollStatement extends HTMLElement {
   /** @type {EventTarget | null} */
@@ -72,23 +80,21 @@ class ScrollStatement extends HTMLElement {
   /** @type {HTMLElement | null} */
   #track = null;
   /** @type {HTMLElement | null} */
-  #window = null;
+  #column = null;
+  /** @type {ResizeObserver | null} */
+  #resize = null;
 
-  /** Running distance the carousel has travelled, in px, kept inside the
-   * height of one card so it never grows without bound. */
-  #offset = 0;
-  #lastScrollTop = 0;
-  #paused = false;
-  #looping = false;
-  #loopFrame = 0;
-  #loopTime = 0;
-  /** @type {IntersectionObserver | null} */
-  #observer = null;
+  /** How far the column has to move for its last card to finish on screen. */
+  #travel = 0;
+  /** Where the column starts, measured down from its resting place. */
+  #enterFrom = 0;
+  /** Share of the section the read occupies; the rest belongs to the column. */
+  #readSpan = 1;
 
   connectedCallback() {
     this.#words = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-word]')]);
     this.#track = this.querySelector('[ref="track"]');
-    this.#window = this.#track?.parentElement ?? null;
+    this.#column = this.querySelector('[ref="column"]');
 
     // The composition the stylesheet already describes — panel up, every
     // word filled — is the right one to leave standing.
@@ -96,6 +102,7 @@ class ScrollStatement extends HTMLElement {
 
     this.dataset.driven = '';
 
+    this.#measure();
     this.#read();
     this.#current = this.#target;
     this.#apply();
@@ -104,39 +111,25 @@ class ScrollStatement extends HTMLElement {
     // Which element scrolls flips at the desktop breakpoint, and scroll
     // events don't bubble to window.
     scrollContainerMediaQuery.addEventListener('change', this.#bindScroll);
+    columnMedia.addEventListener('change', this.#onResize);
     window.addEventListener('resize', this.#onResize);
 
-    // Turning over off-screen would burn a frame budget on something nobody
-    // can see, and the whole point is that it never stops while you watch.
-    this.#observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) this.#startLoop();
-        else this.#stopLoop();
-      },
-      // At the desktop breakpoint the page scrolls .page-wrapper, not the
-      // document, so the observer has to watch against that.
-      { root: getIntersectionRoot() }
-    );
-    this.#observer.observe(this);
-
-    carouselMedia.addEventListener('change', this.#onBreakpoint);
-
-    this.#window?.addEventListener('pointerenter', this.#onPointerEnter);
-    this.#window?.addEventListener('pointerleave', this.#onPointerLeave);
+    // Cards arrive before their images have been measured, and the whole
+    // timeline is built on how tall the column turns out to be.
+    if ('ResizeObserver' in window && this.#track) {
+      this.#resize = new ResizeObserver(this.#onResize);
+      this.#resize.observe(this.#track);
+    }
   }
 
   disconnectedCallback() {
     this.#scrollTarget?.removeEventListener('scroll', this.#onScroll);
     scrollContainerMediaQuery.removeEventListener('change', this.#bindScroll);
+    columnMedia.removeEventListener('change', this.#onResize);
     window.removeEventListener('resize', this.#onResize);
 
-    carouselMedia.removeEventListener('change', this.#onBreakpoint);
-    this.#window?.removeEventListener('pointerenter', this.#onPointerEnter);
-    this.#window?.removeEventListener('pointerleave', this.#onPointerLeave);
-
-    this.#observer?.disconnect();
-    this.#observer = null;
-    this.#stopLoop();
+    this.#resize?.disconnect();
+    this.#resize = null;
 
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;
@@ -149,6 +142,40 @@ class ScrollStatement extends HTMLElement {
   };
 
   /**
+   * How far the column has to go, and where it starts from.
+   *
+   * The track is out of flow, so its height is its own and reading it cannot
+   * be circular — the section's height depends on this measurement rather
+   * than the other way round.
+   */
+  #measure() {
+    const track = this.#track;
+    const column = this.#column;
+    const panel = column?.parentElement;
+
+    if (!track || !column || !panel || !columnMedia.matches) {
+      this.#travel = 0;
+      this.style.setProperty('--products-travel', '0px');
+      return;
+    }
+
+    // Both rects carry the panel's transform, so the difference between them
+    // is the column's place within the panel and nothing else.
+    const inset = column.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+
+    // A screen's height below its resting place puts the first card just off
+    // the bottom edge, whatever the panel's padding happens to be.
+    this.#enterFrom = window.innerHeight - inset;
+
+    // The same inset again at the bottom, so the last card finishes clear of
+    // the edge rather than flush against it.
+    const visible = Math.max(200, window.innerHeight - inset * 2);
+
+    this.#travel = Math.max(0, track.scrollHeight - visible);
+    this.style.setProperty('--products-travel', `${this.#travel}px`);
+  }
+
+  /**
    * Runs from the section's top edge reaching the bottom of the screen to
    * its bottom edge reaching there — a span of exactly its own height, so
    * the panel rises during the approach where the movement already is.
@@ -158,6 +185,10 @@ class ScrollStatement extends HTMLElement {
     if (!rect.height) return;
 
     this.#target = clamp((window.innerHeight - rect.top) / rect.height, 0, 1);
+
+    // Whatever the section is long enough for beyond the read belongs to the
+    // column; the read's beats are squeezed into what is left.
+    this.#readSpan = clamp((rect.height - this.#travel) / rect.height, 0.05, 1);
   }
 
   #onScroll = () => {
@@ -169,6 +200,7 @@ class ScrollStatement extends HTMLElement {
   };
 
   #onResize = () => {
+    this.#measure();
     this.#read();
     this.#current = this.#target;
     this.#apply();
@@ -195,116 +227,13 @@ class ScrollStatement extends HTMLElement {
     this.#frame = requestAnimationFrame(this.#tick);
   };
 
-  #onPointerEnter = () => {
-    this.#paused = true;
-  };
-
-  #onPointerLeave = () => {
-    this.#paused = false;
-  };
-
-  #onBreakpoint = () => {
-    if (carouselMedia.matches) {
-      this.#startLoop();
-      return;
-    }
-
-    this.#stopLoop();
-
-    // Stacked below the breakpoint the stylesheet wants no transform at all,
-    // and an inline one would outrank it.
-    this.#track?.style.removeProperty('transform');
-  };
-
-  #startLoop() {
-    if (this.#looping || !this.#track || !carouselMedia.matches) return;
-
-    this.#looping = true;
-    this.#loopTime = performance.now();
-    this.#lastScrollTop = getScrollTop();
-    this.#loopFrame = requestAnimationFrame(this.#loop);
-  }
-
-  #stopLoop() {
-    this.#looping = false;
-    cancelAnimationFrame(this.#loopFrame);
-    this.#loopFrame = 0;
-  }
-
-  /**
-   * The carousel proper. Two things push it: a drift it does on its own, and
-   * a share of whatever the page just scrolled — so it is alive while you sit
-   * still and answers you when you move.
-   *
-   * @param {number} now
-   */
-  #loop = (now) => {
-    if (!this.#looping || !this.#track) return;
-
-    const elapsed = Math.min(now - this.#loopTime, 100);
-    this.#loopTime = now;
-
-    const scrollTop = getScrollTop();
-    const scrolled = scrollTop - this.#lastScrollTop;
-    this.#lastScrollTop = scrollTop;
-
-    const speed = Number(getComputedStyle(this).getPropertyValue('--statement-speed')) || 0;
-    const drift = this.#paused ? 0 : (speed * elapsed) / 1000;
-
-    this.#offset += drift + scrolled * SCROLL_COUPLING;
-    this.#recycle();
-
-    this.#track.style.transform = `translate3d(0, ${-this.#offset}px, 0)`;
-
-    this.#loopFrame = requestAnimationFrame(this.#loop);
-  };
-
-  /**
-   * What makes the column endless: once a card has gone off the top it is
-   * moved to the bottom of the track and the offset drops by exactly what it
-   * occupied, so the pixels on screen do not shift.
-   *
-   * Moving the cards beats cloning them — a clone means two DOM nodes with
-   * the same ids and two of every quick-add form, and half of what you see
-   * would be the dead copy.
-   */
-  #recycle() {
-    const track = this.#track;
-    if (!track || track.children.length < 2) return;
-
-    const gap = parseFloat(getComputedStyle(track).rowGap) || 0;
-
-    // Guard the loops: a card that measures zero (images still loading)
-    // would otherwise never satisfy the condition.
-    let guard = track.children.length * 2;
-
-    while (guard-- > 0) {
-      const first = /** @type {HTMLElement} */ (track.firstElementChild);
-      const advance = first.offsetHeight + gap;
-      if (advance <= 0 || this.#offset < advance) break;
-
-      track.append(first);
-      this.#offset -= advance;
-    }
-
-    guard = track.children.length * 2;
-
-    while (guard-- > 0 && this.#offset < 0) {
-      const last = /** @type {HTMLElement} */ (track.lastElementChild);
-      const advance = last.offsetHeight + gap;
-      if (advance <= 0) break;
-
-      track.prepend(last);
-      this.#offset += advance;
-    }
-  }
-
   #apply() {
     const progress = this.#current;
+    const share = this.#readSpan;
 
-    this.style.setProperty('--panel', `${beatAt(progress, BEATS.panel)}`);
+    this.style.setProperty('--panel', `${beatAt(progress, scaled(BEATS.panel, share))}`);
 
-    const fill = beatAt(progress, BEATS.fill);
+    const fill = beatAt(progress, scaled(BEATS.fill, share));
     const count = this.#words.length;
     const step = count > 1 ? STAGGER_SPREAD / (count - 1) : 0;
     const rise = 1 - STAGGER_SPREAD;
@@ -315,6 +244,22 @@ class ScrollStatement extends HTMLElement {
       const local = rise > 0 ? clamp((fill - index * step) / rise, 0, 1) : fill;
       word.style.setProperty('--fill', `${local}`);
     });
+
+    if (!columnMedia.matches) {
+      this.style.removeProperty('--products-offset');
+      return;
+    }
+
+    // Two movements along one axis: climbing into place, then being carried
+    // on past. Written as a single offset so the handover cannot show a seam
+    // between them.
+    const entered = beatAt(progress, scaled(BEATS.enter, share));
+    const carried = beatAt(progress, [share, 1]);
+
+    this.style.setProperty(
+      '--products-offset',
+      `${(1 - entered) * this.#enterFrom - carried * this.#travel}px`
+    );
   }
 }
 

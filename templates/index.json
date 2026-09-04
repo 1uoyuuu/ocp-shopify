@@ -257,11 +257,8 @@
         "scroll_distance": 180,
         "overlap": 100,
         "collection": "frontpage",
-        "products_label": "(Featured products)",
         "max_products": 6,
-        "products_width": 20,
-        "window_height": 60,
-        "products_speed": 35
+        "products_width": 20
       },
       "blocks": {
         "static-product-card": {
@@ -286,7 +283,7 @@
               "type": "_product-card-gallery",
               "name": "t:names.product_card_media",
               "settings": {
-                "image_ratio": "square",
+                "image_ratio": "portrait",
                 "show_card_meta": true,
                 "card_meta_date_prefix": "",
                 "card_meta_date_format": "(%d/%b/%Y)",
