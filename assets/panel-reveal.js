@@ -91,6 +91,8 @@ class PanelReveal extends HTMLElement {
   #words = [];
   /** @type {HTMLElement[]} */
   #slides = [];
+  /** @type {HTMLElement[]} */
+  #snapPoints = [];
 
   connectedCallback() {
     this.#words = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-word]')]);
@@ -105,6 +107,9 @@ class PanelReveal extends HTMLElement {
     this.#read();
     this.#current = this.#target;
     this.#apply();
+
+    this.#buildSnapPoints();
+    this.#placeSnapPoints();
 
     this.#bindScroll();
     // Which element scrolls flips at the desktop breakpoint, and scroll
@@ -150,6 +155,7 @@ class PanelReveal extends HTMLElement {
   };
 
   #onResize = () => {
+    this.#placeSnapPoints();
     this.#read();
     this.#current = this.#target;
     this.#apply();
@@ -196,6 +202,51 @@ class PanelReveal extends HTMLElement {
     });
 
     this.#applySlides(progress);
+  }
+
+  /**
+   * One snap target per location, so a scroll settles on a shop rather than
+   * between two.
+   *
+   * They are made here rather than written into the markup because their
+   * positions come from the same constants that time the sequence — put
+   * them in Liquid and the two would drift the first time a beat moved.
+   */
+  #buildSnapPoints() {
+    if (this.#snapPoints.length) return;
+
+    this.#snapPoints = this.#slides.map(() => {
+      const point = document.createElement('div');
+      point.className = 'panel-reveal__snap';
+      point.setAttribute('aria-hidden', 'true');
+      this.appendChild(point);
+      return point;
+    });
+  }
+
+  /**
+   * Progress is (viewportHeight - rect.top) / height, so for the sequence to
+   * read `settled` the section's top must sit at `viewportHeight -
+   * settled * height`. A snap target aligned to the top of the screen puts
+   * it exactly there when it sits that far down the section.
+   */
+  #placeSnapPoints() {
+    const height = this.getBoundingClientRect().height;
+    const count = this.#slides.length;
+    if (!height || !count) return;
+
+    const span = (1 - SLIDES_FROM) / count;
+    const fade = span * CROSSFADE;
+    const nameFade = span * NAME_FADE;
+
+    this.#snapPoints.forEach((point, index) => {
+      const from = SLIDES_FROM + index * span;
+
+      // Where that location has fully arrived — image swapped, name up.
+      const settled = index === 0 ? BEATS.media[1] + nameFade : from + fade + nameFade;
+
+      point.style.top = `${settled * height - window.innerHeight}px`;
+    });
   }
 
   /**

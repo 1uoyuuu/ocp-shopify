@@ -24,6 +24,9 @@
     --reveal-scrim: {{ section.settings.scrim | divided_by: 100.0 }};
   "
   data-part="{{ section.settings.split_direction }}"
+  {% if section.settings.snap %}
+    data-snap
+  {% endif %}
 >
   <div class="panel-reveal__viewport">
     <div
@@ -190,6 +193,39 @@
     will-change: clip-path, opacity;
   }
 
+  /*
+   * Where a scroll settles. Zero-size and positioned by panel-reveal.js,
+   * whose constants decide where each location has fully arrived.
+   *
+   * `proximity`, not `mandatory`: the snap type has to go on the scroll
+   * container, which is the whole page. With mandatory and only these few
+   * targets on it, the page could not come to rest anywhere else at all —
+   * every other section would be dragged to the nearest shop. Proximity
+   * snaps when a scroll ends near one and leaves the rest of the page alone.
+   */
+  .panel-reveal__snap {
+    position: absolute;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+    scroll-snap-align: start;
+  }
+
+  @media screen and (min-width: 990px) {
+    .page-wrapper:has(.panel-reveal[data-snap][data-driven]) {
+      scroll-snap-type: y proximity;
+    }
+  }
+
+  /* Below the breakpoint the document scrolls rather than the wrapper, so
+     the snap type has to move with it. */
+  @media screen and (max-width: 989px) {
+    html:has(.panel-reveal[data-snap][data-driven]) {
+      scroll-snap-type: y proximity;
+    }
+  }
+
   .panel-reveal__slide {
     position: absolute;
     inset: 0;
@@ -340,6 +376,13 @@
       "step": 10,
       "unit": "%",
       "default": 400
+    },
+    {
+      "type": "checkbox",
+      "id": "snap",
+      "label": "Settle on each location",
+      "info": "A scroll comes to rest on a shop rather than between two. The opening — panel, slogan, parting — is left to scroll freely.",
+      "default": true
     },
     {
       "type": "select",

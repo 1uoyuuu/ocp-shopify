@@ -87,7 +87,8 @@
         "scrim": 20,
         "scroll_distance": 400,
         "split_direction": "horizontal",
-        "part_distance": 100
+        "part_distance": 100,
+        "snap": true
       }
     },
     "product_list_7TKgXV": {
