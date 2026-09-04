@@ -366,6 +366,9 @@ until a menu is created in Shopify admin and selected.
 - A `range` `step` must be divisible by **0.1** — anything finer is rejected.
   For hundredths or thousandths, make the setting a whole number and scale it
   in Liquid (`| divided_by: 100.0`), as `sections/warp-text.liquid` does.
+- A `range` `default` must land **on the step grid** — `(default - min) / step`
+  has to be a whole number. `min: 30, max: 90, step: 5, default: 62` is
+  rejected. **Theme check does not catch this.**
 - `{% doc %}` is only valid in snippets and blocks — **not sections**. Use
   `{% comment %}`.
 - Classic `<script src>` tags need `defer` or theme check flags them as
@@ -387,6 +390,29 @@ until a menu is created in Shopify admin and selected.
   ```
 - GSAP `pin: true` injects a wrapper element, which fights `morph.js`. Prefer
   `position: sticky` or Observer.
+
+**Sync — how a bad schema actually shows up**
+- An invalid `{% schema %}` does not fail the push and does not surface
+  anywhere in git. Shopify **silently refuses that section file, and every
+  JSON template that references it**, while every other file in the same
+  commit lands normally. The homepage then renders the *previous* version of
+  the section with the *previous* template — so the change looks like it was
+  never made, or like a CSS/layout bug in code that is provably correct.
+  This cost several rounds of debugging the wrong thing.
+- Assets have no schema, so a `.js` file updates while its `.liquid` sits
+  frozen. **A section whose JS is current and whose markup is stale is the
+  signature of this.**
+- Confirm it by reading the theme rather than guessing:
+  ```bash
+  shopify theme pull --theme 161860649065 --path ./live \
+    --only sections/NAME.liquid --only templates/index.json
+  ```
+  then diff against the repo. `shopify theme pull` is read-only and safe —
+  the ban is on `shopify theme push`.
+- Also declaring a **private (`_`-prefixed) block in a section's schema
+  `blocks`** is wrong: those are rendered statically by id and are not a type
+  a section offers. `sections/product-list.liquid` renders `_product-card`
+  without declaring it.
 
 **Verification**
 - `curl` against the storefront returns **0 bytes** (it needs the browser
