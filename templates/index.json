@@ -22,6 +22,20 @@
         "heading_line_3": "IN AUSTRALIA"
       }
     },
+    "panel_reveal": {
+      "type": "panel-reveal",
+      "settings": {
+        "line_1": "Electrify Mesmerising",
+        "line_2": "Sensory Experience",
+        "image": "shopify://shop_images/images_2.jpg",
+        "background_color": "#0f80be",
+        "text_color": "#ffffff",
+        "font": "heading",
+        "scroll_distance": 250,
+        "split_direction": "horizontal",
+        "part_distance": 100
+      }
+    },
     "product_list_7TKgXV": {
       "type": "product-list",
       "blocks": {
@@ -403,20 +417,6 @@
         "label_font": "subheading",
         "padding-block-start": 100,
         "padding-block-end": 96
-      }
-    },
-    "panel_reveal": {
-      "type": "panel-reveal",
-      "settings": {
-        "line_1": "Electrify Mesmerising",
-        "line_2": "Sensory Experience",
-        "image": "",
-        "background_color": "#0f80be",
-        "text_color": "#ffffff",
-        "font": "heading",
-        "scroll_distance": 250,
-        "split_direction": "horizontal",
-        "part_distance": 60
       }
     }
   },
