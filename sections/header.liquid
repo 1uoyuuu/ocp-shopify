@@ -323,6 +323,20 @@
   }
 </script>
 
+{%- comment -%}
+  Inside .header-section so it is part of the one element that carries the
+  blend and the colour rules — the same treatment as MENU and CART, from the
+  same declarations rather than a copy of them.
+
+  Outside <header-component> deliberately: that carries `contain: layout`,
+  which makes it the containing block for fixed descendants. The logo is
+  `position: fixed` and has to stay measured against the viewport, or the
+  hero intro would scale and centre it against a 60px header row instead.
+  .header-section itself only ever goes `position: sticky`, which does not
+  create a containing block, so fixed still resolves to the viewport there.
+{%- endcomment -%}
+{% render 'site-logo' %}
+
 <header-component
   id="header-component"
   class="{{ class }}"
@@ -665,7 +679,8 @@
 
      !important because the transparent-header rules set these through a
      chain of :not()s that outweighs anything reasonable here. */
-  .header-section:has(#header-component[data-blend]):not(:has(.menu-drawer-container[open])) .header__row {
+  .header-section:has(#header-component[data-blend]):not(:has(.menu-drawer-container[open]))
+    :is(.header__row, .site-logo) {
     /* stylelint-disable declaration-no-important */
     --color: #ffffff !important;
     --color-rgb: 255 255 255 !important;
@@ -693,7 +708,7 @@
   .header-section:has(#header-component[data-blend][data-over-light]):not(
       :has(.menu-drawer-container[open])
     )
-    .header__row {
+    :is(.header__row, .site-logo) {
     /* stylelint-disable declaration-no-important */
     --color: var(--header-light-color) !important;
     --color-foreground: var(--header-light-color) !important;

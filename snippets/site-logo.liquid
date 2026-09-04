@@ -56,40 +56,14 @@
   }
 
   /*
-   * The wordmark inverts against whatever it crosses, exactly as MENU and
-   * CART do.
-   *
-   * The source has to be white. Difference is |backdrop - source|, so white
-   * gives 255 - backdrop — a true inversion — while black gives back the
-   * backdrop unchanged and the logo disappears. What reads as a black
-   * wordmark over a pale section is white type being inverted, not black
-   * type.
-   *
-   * Keyed on the header's own [data-blend] so the one setting governs both.
-   * A second switch on the logo could be left disagreeing with it.
+   * No colour or blend of its own. Sitting inside .header-section, it is
+   * painted into the group that element blends, and the header's own colour
+   * rules name .site-logo alongside .header__row — so it inverts, turns the
+   * light-section colour, and takes the drawer's colour without any of that
+   * being restated here.
    */
   .site-logo {
     color: var(--color-foreground);
-  }
-
-  .page-wrapper:has(#header-component[data-blend]) .site-logo {
-    color: #ffffff;
-    mix-blend-mode: difference;
-  }
-
-  /*
-   * The menu panel is a flat colour picked to work with its own text, and
-   * the logo sits over it — so it takes that text colour and stops
-   * inverting, the same as the header row.
-   *
-   * The :has() argument is scoped through the id purely for weight: the
-   * blend rule above scores (1,3,0) through `#header-component`, so a
-   * selector built only from classes would lose to it and the logo would
-   * keep inverting over the open panel.
-   */
-  .page-wrapper:has(#header-component .menu-drawer-container[open]) .site-logo {
-    color: var(--drawer-text-color);
-    mix-blend-mode: normal;
   }
 
   /* This snippet is the single source of truth for the logo everywhere —

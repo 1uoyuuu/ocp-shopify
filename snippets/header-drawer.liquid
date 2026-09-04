@@ -44,11 +44,10 @@
 %}
 
 {% comment %}
-  Declared on the page wrapper rather than on <header-drawer> or the header:
-  custom properties only inherit downward, and two things need to read this
-  — the header row, to recolour CLOSE / CART while the panel is open, and
-  the site logo, which is a sibling of the header rather than inside it.
-  The wrapper is the nearest element that is an ancestor of both.
+  Declared on the page wrapper rather than on <header-drawer>: custom
+  properties only inherit downward, and this is read further up than it is
+  set — by the header row, to recolour CLOSE / CART while the panel is open,
+  and by the site logo alongside it.
 {% endcomment %}
 {% style %}
   .page-wrapper {
@@ -897,7 +896,7 @@
      Keyed on [open], which outlives the closing slide, rather than
      .menu-open, which is dropped as soon as the close starts and would snap
      the header back to page colours over a panel still on screen. */
-  #header-component:has(.menu-drawer-container[open]) .header__row {
+  .header-section:has(#header-component .menu-drawer-container[open]) :is(.header__row, .site-logo) {
     --color-foreground: var(--drawer-text-color);
   }
 
