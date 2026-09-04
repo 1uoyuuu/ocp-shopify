@@ -256,7 +256,7 @@
         "dim": 22,
         "scroll_distance": 180,
         "overlap": 100,
-        "collection": "frontpage",
+        "collection": "all-coffee",
         "products_label": "(Featured products)",
         "max_products": 6,
         "products_width": 20,

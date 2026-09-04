@@ -51,23 +51,28 @@
         {%- endfor -%}
       </p>
 
-      {% if section.settings.collection != blank %}
-        {%- comment -%}
-          The products run up the right-hand side as the section is read.
-          Rendered through the theme's own product card rather than a second
-          one written here, so they keep the hover strip, the quick add and
-          everything else those carry.
-        {%- endcomment -%}
-        <div class="statement__products">
-          {% if section.settings.products_label != blank %}
-            <p class="statement__products-label">{{ section.settings.products_label }}</p>
-          {% endif %}
+      {%- comment -%}
+        The products run up the right-hand side as the section is read.
+        Rendered through the theme's own product card rather than a second
+        one written here, so they keep the hover strip, the quick add and
+        everything else those carry.
 
-          <div class="statement__window">
-            <div
-              class="statement__track"
-              ref="track"
-            >
+        The column is part of the composition, not an optional extra: with
+        no collection chosen it falls back to placeholder cards rather than
+        disappearing, which is what left the right-hand side empty when the
+        template pointed at a collection this store does not have.
+      {%- endcomment -%}
+      <div class="statement__products">
+        {% if section.settings.products_label != blank %}
+          <p class="statement__products-label">{{ section.settings.products_label }}</p>
+        {% endif %}
+
+        <div class="statement__window">
+          <div
+            class="statement__track"
+            ref="track"
+          >
+            {% if section.settings.collection != blank and shop.products_count != 0 %}
               {% paginate section.settings.collection.products by section.settings.max_products %}
                 {% for product in section.settings.collection.products limit: section.settings.max_products %}
                   <div class="statement__product">
@@ -80,10 +85,16 @@
                   </div>
                 {% endfor %}
               {% endpaginate %}
-            </div>
+            {% else %}
+              {% for i in (1..section.settings.max_products) %}
+                <div class="statement__product">
+                  {% content_for 'block', type: '_product-card', id: 'static-product-card', closest.product: null %}
+                </div>
+              {% endfor %}
+            {% endif %}
           </div>
         </div>
-      {% endif %}
+      </div>
     </div>
   </div>
 </scroll-statement>
