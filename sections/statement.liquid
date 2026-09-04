@@ -26,26 +26,28 @@
   "
 >
   <div class="statement__viewport">
-    <div
-      class="statement__panel"
-      aria-hidden="true"
-    ></div>
-
     {%- comment -%}
+      The paragraph sits on the panel rather than beside it, so the white
+      block and its words rise as one thing. Held off it, the words would be
+      legible over the section behind before the white had arrived under
+      them.
+
       Split to words so the fill can run across the paragraph. Each carries
-      its own trailing space inside the span, so the line breaks where it
+      its own trailing space inside the span, so lines break where they
       would have anyway.
     {%- endcomment -%}
-    <p class="statement__text">
-      {%- for word in words -%}
-        {%- if word != blank -%}
-          <span
-            class="statement__word"
-            data-word
-          >{{ word }} </span>
-        {%- endif -%}
-      {%- endfor -%}
-    </p>
+    <div class="statement__panel">
+      <p class="statement__text">
+        {%- for word in words -%}
+          {%- if word != blank -%}
+            <span
+              class="statement__word"
+              data-word
+            >{{ word }} </span>
+          {%- endif -%}
+        {%- endfor -%}
+      </p>
+    </div>
   </div>
 </scroll-statement>
 
@@ -76,24 +78,23 @@
     position: sticky;
     top: 0;
     height: 100svh;
-    display: grid;
-    align-content: center;
-    padding-inline: var(--ocp-page-margin);
     overflow: clip;
   }
 
-  /* Rises from below the fold into place, over whatever is behind it. */
+  /* The white block itself: background and paragraph together, rising from
+     below the fold as one. */
   .statement__panel {
     position: absolute;
     inset: 0;
+    display: grid;
+    align-content: center;
+    padding-inline: var(--ocp-page-margin);
     background-color: var(--statement-background, var(--color-background));
     transform: translateY(calc((1 - var(--panel, 1)) * 100%));
     will-change: transform;
   }
 
   .statement__text {
-    position: relative;
-    z-index: 1;
     margin: 0;
     max-width: var(--statement-width, 46rem);
 
@@ -127,8 +128,12 @@
 
   scroll-statement:not([data-driven]) .statement__viewport {
     position: static;
-    padding-block: clamp(4rem, 14vh, 9rem);
     height: auto;
+  }
+
+  scroll-statement:not([data-driven]) .statement__panel {
+    position: static;
+    padding-block: clamp(4rem, 14vh, 9rem);
   }
 {% endstylesheet %}
 

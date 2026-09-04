@@ -15,7 +15,11 @@ import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-c
 
 const BEATS = {
   panel: [0.0, 0.3],
-  fill: [0.28, 0.88],
+
+  // Starts once the panel has landed. The words ride up on it, so filling
+  // them on the way would have the paragraph resolving while it is still
+  // travelling.
+  fill: [0.32, 0.9],
 };
 
 /**
