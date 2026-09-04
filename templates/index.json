@@ -260,7 +260,7 @@
         "products_label": "(Featured products)",
         "max_products": 6,
         "products_width": 20,
-        "window_height": 62,
+        "window_height": 60,
         "products_speed": 35
       },
       "blocks": {
