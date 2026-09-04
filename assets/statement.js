@@ -2,8 +2,9 @@ import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-c
 
 /**
  * A panel that rises into the viewport carrying a paragraph, which fills in
- * word by word; then a column of products carried up past the reader before
- * the section lets the page go.
+ * word by word; then a run of products carried past the reader before the
+ * section lets the page go — up the right-hand side on a wide screen, across
+ * the bottom on a narrow one.
  *
  * The two are scrolled one after the other. The section is long enough for
  * both — its own length for the read, plus however far the column has to
@@ -42,11 +43,12 @@ const BEATS = {
 };
 
 /**
- * The column only travels where there is a column to travel in. Below this
- * the products sit stacked under the paragraph and the page's own scroll is
- * the only movement they need.
+ * Which way the products travel. Above this they are a column beside the
+ * paragraph and are carried upward; below it they are a strip under the
+ * paragraph and are carried leftward. The timeline is the same either way —
+ * only the axis it is measured and written on changes.
  */
-const columnMedia = matchMedia('(min-width: 990px)');
+const uprightMedia = matchMedia('(min-width: 990px)');
 
 /** Share of the fill spent staggering, against how long each word takes to
  * arrive. Spreading the ripple across a fixed share rather than giving each
@@ -85,9 +87,9 @@ class ScrollStatement extends HTMLElement {
   /** @type {ResizeObserver | null} */
   #resize = null;
 
-  /** How far the column has to move for its last card to finish on screen. */
+  /** How far the products have to move for the last card to finish on screen. */
   #travel = 0;
-  /** Where the column starts, measured down from its resting place. */
+  /** How far past its resting place the run starts, along whichever axis. */
   #enterFrom = 0;
   /** Share of the section the read occupies; the rest belongs to the column. */
   #readSpan = 1;
@@ -112,7 +114,7 @@ class ScrollStatement extends HTMLElement {
     // Which element scrolls flips at the desktop breakpoint, and scroll
     // events don't bubble to window.
     scrollContainerMediaQuery.addEventListener('change', this.#bindScroll);
-    columnMedia.addEventListener('change', this.#onResize);
+    uprightMedia.addEventListener('change', this.#onResize);
     window.addEventListener('resize', this.#onResize);
 
     // Cards arrive before their images have been measured, and the whole
@@ -126,7 +128,7 @@ class ScrollStatement extends HTMLElement {
   disconnectedCallback() {
     this.#scrollTarget?.removeEventListener('scroll', this.#onScroll);
     scrollContainerMediaQuery.removeEventListener('change', this.#bindScroll);
-    columnMedia.removeEventListener('change', this.#onResize);
+    uprightMedia.removeEventListener('change', this.#onResize);
     window.removeEventListener('resize', this.#onResize);
 
     this.#resize?.disconnect();
@@ -143,36 +145,45 @@ class ScrollStatement extends HTMLElement {
   };
 
   /**
-   * How far the column has to go, and where it starts from.
+   * How far the products have to go, and where they start from.
    *
-   * The track is out of flow, so its height is its own and reading it cannot
-   * be circular — the section's height depends on this measurement rather
-   * than the other way round.
+   * Written once for both axes: upright it is heights and tops, sideways it
+   * is widths and lefts, and nothing else differs. The track never
+   * contributes the dimension being measured — out of flow when upright, no
+   * wider than its cell can constrain when sideways — so reading it cannot
+   * be circular with the section height that depends on it.
    */
   #measure() {
     const track = this.#track;
     const column = this.#column;
     const panel = column?.parentElement;
 
-    if (!track || !column || !panel || !columnMedia.matches) {
+    if (!track || !column || !panel) {
       this.#travel = 0;
       this.style.setProperty('--products-travel', '0px');
       return;
     }
 
+    const upright = uprightMedia.matches;
+    const columnRect = column.getBoundingClientRect();
+    const panelRect = panel.getBoundingClientRect();
+
     // Both rects carry the panel's transform, so the difference between them
-    // is the column's place within the panel and nothing else.
-    const inset = column.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+    // is the products' place within the panel and nothing else.
+    const inset = upright ? columnRect.top - panelRect.top : columnRect.left - panelRect.left;
 
-    // A screen's height below its resting place puts the first card just off
-    // the bottom edge, whatever the panel's padding happens to be.
-    this.#enterFrom = window.innerHeight - inset;
+    const extent = upright ? window.innerHeight : window.innerWidth;
+    const reach = upright ? track.scrollHeight : track.scrollWidth;
 
-    // The same inset again at the bottom, so the last card finishes clear of
-    // the edge rather than flush against it.
-    const visible = Math.max(200, window.innerHeight - inset * 2);
+    // A whole screen past its resting place puts the first card just off the
+    // far edge, whatever the panel's padding happens to be.
+    this.#enterFrom = extent - inset;
 
-    this.#travel = Math.max(0, track.scrollHeight - visible);
+    // The same inset again at the other end, so the last card finishes clear
+    // of the edge rather than flush against it.
+    const visible = Math.max(200, extent - inset * 2);
+
+    this.#travel = Math.max(0, reach - visible);
     this.style.setProperty('--products-travel', `${this.#travel}px`);
   }
 
@@ -246,14 +257,9 @@ class ScrollStatement extends HTMLElement {
       word.style.setProperty('--fill', `${local}`);
     });
 
-    if (!columnMedia.matches) {
-      this.style.removeProperty('--products-offset');
-      return;
-    }
-
-    // Two movements along one axis: climbing into place, then being carried
+    // Two movements along one axis: arriving into place, then being carried
     // on past. Written as a single offset so the handover cannot show a seam
-    // between them.
+    // between them, and left to the stylesheet to decide which axis it is.
     const entered = beatAt(progress, scaled(BEATS.enter, share));
     const carried = beatAt(progress, [share, 1]);
 

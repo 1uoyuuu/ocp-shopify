@@ -252,7 +252,6 @@
         "background_color": "#ffffff",
         "text_color": "#111111",
         "font": "heading",
-        "max_width": 46,
         "dim": 22,
         "scroll_distance": 180,
         "overlap": 100,
