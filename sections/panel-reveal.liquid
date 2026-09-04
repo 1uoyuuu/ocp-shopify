@@ -1,0 +1,294 @@
+{% comment %}
+  Four beats driven by scroll: a flat panel rises into the viewport, two
+  lines of type arrive one after the other, the lines part, and an image
+  opens between them until it fills the screen.
+
+  panel-reveal.js writes each beat out as a number between 0 and 1 on a
+  custom property and decides nothing about appearance; everything below is
+  expressed against those. The composition described here — panel up, lines
+  in place, image closed — is also what stands when the script never runs.
+{% endcomment %}
+
+{% liquid
+  assign font = section.settings.font | default: 'heading'
+%}
+
+<panel-reveal
+  class="panel-reveal"
+  style="
+    --reveal-background: {{ section.settings.background_color }};
+    --reveal-text: {{ section.settings.text_color }};
+    --reveal-font: var(--font-{{ font }}--family);
+    --reveal-distance: {{ section.settings.scroll_distance }}svh;
+    --reveal-part: {{ section.settings.part_distance }}svh;
+  "
+  data-part="{{ section.settings.split_direction }}"
+>
+  <div class="panel-reveal__viewport">
+    <div
+      class="panel-reveal__panel"
+      aria-hidden="true"
+    ></div>
+
+    <h2 class="panel-reveal__lines">
+      {% for line in (1..2) %}
+        {% assign key = 'line_' | append: line %}
+        {% assign text = section.settings[key] %}
+        {% if text != blank %}
+          {%- comment -%}
+            The outer element parts; the inner one rises inside it and is
+            clipped by it, so each line wipes up out of nothing rather than
+            drifting in.
+          {%- endcomment -%}
+          <span
+            class="panel-reveal__line"
+            data-line
+          >
+            <span class="panel-reveal__text">{{ text }}</span>
+          </span>
+        {% endif %}
+      {% endfor %}
+    </h2>
+
+    {% if section.settings.image != blank %}
+      <div class="panel-reveal__media">
+        {{
+          section.settings.image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'panel-reveal__image',
+            loading: 'lazy',
+            sizes: '100vw',
+            widths: '750,1100,1500,1920,2400'
+        }}
+      </div>
+    {% endif %}
+  </div>
+</panel-reveal>
+
+<script
+  src="{{ 'panel-reveal.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  .panel-reveal {
+    display: block;
+    position: relative;
+    height: var(--reveal-distance, 250svh);
+  }
+
+  /*
+   * The panel has to rise over whatever is behind it — the pinned hero, on
+   * the home page — so this section's wrapper is left see-through. The
+   * hero's own stacking rule paints every section after it opaque, so the
+   * hero cannot show through them; here that is precisely what should
+   * happen, and the first selector repeats the hero's to outweigh it.
+   */
+  .shopify-section:has(.hero-video[data-stack]) ~ .shopify-section:has(.panel-reveal),
+  .shopify-section:has(.panel-reveal) {
+    background-color: transparent;
+  }
+
+  .panel-reveal__viewport {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: grid;
+    place-items: center;
+    padding-inline: var(--ocp-page-margin);
+
+    /* The lines part well past the edges, and the image opens from nothing. */
+    overflow: clip;
+  }
+
+  /* Rises from below the fold into place. Everything else sits over it. */
+  .panel-reveal__panel {
+    position: absolute;
+    inset: 0;
+    background-color: var(--reveal-background, var(--color-background));
+    transform: translateY(calc((1 - var(--panel, 1)) * 100%));
+    will-change: transform;
+  }
+
+  .panel-reveal__lines {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    font-family: var(--reveal-font);
+    font-weight: 700;
+
+    /* The hero's size — the site has two, and this is the larger. */
+    font-size: var(--ocp-display-size);
+    line-height: 1.05;
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--reveal-text, var(--color-foreground));
+  }
+
+  .panel-reveal__line {
+    display: block;
+
+    /* Clips the rise happening inside it. */
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  .panel-reveal__text {
+    display: block;
+    transform: translateY(calc((1 - var(--line, 1)) * 110%));
+    will-change: transform;
+  }
+
+  /* The lines travel apart to open the middle. Vertically by default: with
+     two stacked rows, moving them up and down opens the gap the image grows
+     into, where sliding them sideways would leave it to open across them. */
+  .panel-reveal__line:first-child {
+    transform: translateY(calc(var(--split, 0) * var(--reveal-part, 60svh) * -1));
+  }
+
+  .panel-reveal__line:last-child {
+    transform: translateY(calc(var(--split, 0) * var(--reveal-part, 60svh)));
+  }
+
+  .panel-reveal[data-part='horizontal'] .panel-reveal__line:first-child {
+    transform: translateX(calc(var(--split, 0) * var(--reveal-part, 60svh) * -1));
+  }
+
+  .panel-reveal[data-part='horizontal'] .panel-reveal__line:last-child {
+    transform: translateX(calc(var(--split, 0) * var(--reveal-part, 60svh)));
+  }
+
+  /* Opens from a small rectangle at the centre out to the full frame. The
+     image is laid out at full size throughout and only the visible window
+     changes, so it never stretches on the way. */
+  .panel-reveal__media {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    clip-path: inset(calc((1 - var(--media, 0)) * 47%));
+    opacity: var(--media, 0);
+    will-change: clip-path, opacity;
+  }
+
+  .panel-reveal__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /*
+   * Without the script nothing writes those numbers, so the defaults above
+   * stand: the panel up, the lines in place, the image closed. The section
+   * has no scroll to drive it either, so it collapses to a single screen
+   * rather than leaving two more of empty colour.
+   */
+  panel-reveal:not([data-driven]) {
+    height: auto;
+  }
+
+  panel-reveal:not([data-driven]) .panel-reveal__viewport {
+    position: static;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Panel reveal",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "line_1",
+      "label": "First line",
+      "default": "Electrify Mesmerising"
+    },
+    {
+      "type": "text",
+      "id": "line_2",
+      "label": "Second line",
+      "default": "Sensory Experience"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Opens between the lines once they have parted, and fills the screen."
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Panel",
+      "default": "#0f80be"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "header",
+      "content": "Motion"
+    },
+    {
+      "type": "range",
+      "id": "scroll_distance",
+      "label": "Scroll distance",
+      "info": "The section's height, as a share of the screen. The whole sequence is spread across it.",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "%",
+      "default": 250
+    },
+    {
+      "type": "select",
+      "id": "split_direction",
+      "label": "The lines part",
+      "options": [
+        { "value": "vertical", "label": "Up and down" },
+        { "value": "horizontal", "label": "Left and right" }
+      ],
+      "default": "vertical"
+    },
+    {
+      "type": "range",
+      "id": "part_distance",
+      "label": "How far they part",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Panel reveal"
+    }
+  ]
+}
+{% endschema %}

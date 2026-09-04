@@ -405,27 +405,24 @@
         "padding-block-end": 96
       }
     },
-    "warp_text": {
-      "type": "warp-text",
+    "panel_reveal": {
+      "type": "panel-reveal",
       "settings": {
-        "text": "Electrify\nMesmerising\nSensory\nExperiences",
+        "line_1": "Electrify Mesmerising",
+        "line_2": "Sensory Experience",
+        "image": "",
         "background_color": "#0f80be",
         "text_color": "#ffffff",
         "font": "heading",
-        "height": 60,
-        "warp_strength": 8,
-        "warp_scale": 16,
-        "speed": 55,
-        "pointer_influence": 42,
-        "pointer_strength": 38,
-        "refraction": 18,
-        "ripple": true
+        "scroll_distance": 250,
+        "split_direction": "vertical",
+        "part_distance": 60
       }
     }
   },
   "order": [
     "hero_video",
-    "warp_text",
+    "panel_reveal",
     "product_list_7TKgXV",
     "subscription_steps"
   ]
