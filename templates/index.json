@@ -256,11 +256,12 @@
         "dim": 22,
         "scroll_distance": 180,
         "overlap": 100,
-        "collection": "all-coffee",
+        "collection": "frontpage",
         "products_label": "(Featured products)",
         "max_products": 6,
         "products_width": 20,
-        "window_height": 62
+        "window_height": 62,
+        "products_speed": 35
       },
       "blocks": {
         "static-product-card": {
