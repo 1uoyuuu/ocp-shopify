@@ -45,15 +45,16 @@ const SLIDES_FROM = 0.36;
 const CROSSFADE = 0.32;
 
 /**
- * Share of a span the name takes to arrive or leave. The names are timed
- * separately from the images they sit on: the images are stacked and cross-
- * fade through one another, so a name sharing that timing would be legible
- * over the previous one and two shops would be readable at once.
+ * Share of a span a name takes to change. Short enough to read as the name
+ * simply changing rather than as an effect of its own.
  *
- * A name instead waits for its image to have finished arriving, and is gone
- * again before the next one starts — so only ever one is on screen.
+ * A name hands straight over to the next at the midpoint of the cross-fade
+ * bringing its image in — one fading out as the other fades in, meeting at
+ * that point rather than overlapping across it. Only one shop is ever
+ * legible, and the change is tied to the picture changing instead of
+ * trailing it.
  */
-const NAME_FADE = 0.16;
+const NAME_FADE = 0.05;
 
 /**
  * How much of the reveal is spent staggering, against how much each word
@@ -279,18 +280,18 @@ class PanelReveal extends HTMLElement {
         index === 0 ? '1' : `${smooth(clamp((progress - from) / fade, 0, 1))}`
       );
 
-      // Its name waits until the image it belongs to has fully arrived —
-      // for the first, until the frame has finished opening, since the clip
-      // would otherwise cut the name in half on its way out.
-      const nameFrom = index === 0 ? BEATS.media[1] : from + fade;
-      const arriving = smooth(clamp((progress - nameFrom) / nameFade, 0, 1));
+      // Its name takes over halfway through the cross-fade that brings its
+      // image in, and gives way at the point the next one takes over. The
+      // first has no cross-fade to sit in the middle of, so it arrives as
+      // the frame finishes opening.
+      const takesOver = index === 0 ? BEATS.media[1] : from + fade / 2;
+      const givesWay = index === count - 1 ? null : SLIDES_FROM + (index + 1) * span + fade / 2;
 
-      // ...and is gone before the next one begins. The last has nothing
-      // following it, so it stays for the rest of the section.
-      const last = index === count - 1;
-      const leaving = last
-        ? 0
-        : smooth(clamp((progress - (from + span - nameFade)) / nameFade, 0, 1));
+      // Linear, and over a couple of svh — long enough not to flicker,
+      // short enough that it reads as the name changing rather than as
+      // something being animated.
+      const arriving = clamp((progress - takesOver) / nameFade, 0, 1);
+      const leaving = givesWay === null ? 0 : clamp((progress - (givesWay - nameFade)) / nameFade, 0, 1);
 
       slide.style.setProperty('--name', `${arriving * (1 - leaving)}`);
     });
