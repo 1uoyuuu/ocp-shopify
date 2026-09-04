@@ -415,7 +415,7 @@
         "text_color": "#ffffff",
         "font": "heading",
         "scroll_distance": 250,
-        "split_direction": "vertical",
+        "split_direction": "horizontal",
         "part_distance": 60
       }
     }

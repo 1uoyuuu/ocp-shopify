@@ -36,15 +36,23 @@
         {% assign text = section.settings[key] %}
         {% if text != blank %}
           {%- comment -%}
-            The outer element parts; the inner one rises inside it and is
-            clipped by it, so each line wipes up out of nothing rather than
-            drifting in.
+            Split to words so the ripple can run across the whole slogan as
+            one phrase. Each word clips its own riser; the line around them
+            is what parts, and must not clip or it would cut them off as
+            they travel.
           {%- endcomment -%}
-          <span
-            class="panel-reveal__line"
-            data-line
-          >
-            <span class="panel-reveal__text">{{ text }}</span>
+          {% assign words = text | split: ' ' %}
+          <span class="panel-reveal__line">
+            {% for word in words %}
+              {% if word != blank %}
+                <span
+                  class="panel-reveal__word"
+                  data-word
+                >
+                  <span class="panel-reveal__text">{{ word }}</span>
+                </span>
+              {% endif %}
+            {% endfor %}
           </span>
         {% endif %}
       {% endfor %}
@@ -132,16 +140,25 @@
   }
 
   .panel-reveal__line {
+    display: flex;
+    justify-content: center;
+    gap: 0.28em;
+
+    /* Deliberately not clipping: this is the element that parts, and a clip
+       here would cut the words off as it carried them away. */
+    will-change: transform;
+  }
+
+  .panel-reveal__word {
     display: block;
 
     /* Clips the rise happening inside it. */
     overflow: hidden;
-    will-change: transform;
   }
 
   .panel-reveal__text {
     display: block;
-    transform: translateY(calc((1 - var(--line, 1)) * 110%));
+    transform: translateY(calc((1 - var(--word, 1)) * 110%));
     will-change: transform;
   }
 

@@ -23,11 +23,19 @@ import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-c
  */
 const BEATS = {
   panel: [0.0, 0.25],
-  line1: [0.25, 0.45],
-  line2: [0.33, 0.53],
+  reveal: [0.25, 0.55],
   split: [0.58, 0.78],
   media: [0.62, 1.0],
 };
+
+/**
+ * How much of the reveal is spent staggering, against how much each word
+ * spends rising. Spreading the whole ripple across a fixed share of the
+ * beat rather than giving each word a fixed delay keeps the pacing steady
+ * however long the slogan is — and keeps it one ripple across both lines
+ * rather than a line, then another line.
+ */
+const STAGGER_SPREAD = 0.55;
 
 /** Fraction of the remaining distance closed per 60fps frame, so the
  * sequence trails the scroll rather than being welded to it. */
@@ -53,10 +61,10 @@ class PanelReveal extends HTMLElement {
   #current = 0;
 
   /** @type {HTMLElement[]} */
-  #lines = [];
+  #words = [];
 
   connectedCallback() {
-    this.#lines = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-line]')]);
+    this.#words = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-word]')]);
 
     // The static composition the stylesheet already describes is the right
     // one to leave in place here.
@@ -145,11 +153,16 @@ class PanelReveal extends HTMLElement {
     this.style.setProperty('--split', `${smooth(beatAt(progress, BEATS.split))}`);
     this.style.setProperty('--media', `${smooth(beatAt(progress, BEATS.media))}`);
 
-    // Each line carries its own beat, so the stagger is a property of the
-    // line rather than something the stylesheet has to know the count of.
-    this.#lines.forEach((line, index) => {
-      const beat = index === 0 ? BEATS.line1 : BEATS.line2;
-      line.style.setProperty('--line', `${smooth(beatAt(progress, beat))}`);
+    // One ripple across every word of the slogan, both lines included, so
+    // it reads as a single phrase arriving rather than two blocks.
+    const reveal = beatAt(progress, BEATS.reveal);
+    const count = this.#words.length;
+    const step = count > 1 ? STAGGER_SPREAD / (count - 1) : 0;
+    const rise = 1 - STAGGER_SPREAD;
+
+    this.#words.forEach((word, index) => {
+      const local = rise > 0 ? clamp((reveal - index * step) / rise, 0, 1) : reveal;
+      word.style.setProperty('--word', `${smooth(local)}`);
     });
   }
 }
