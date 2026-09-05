@@ -287,7 +287,7 @@
                 "card_meta_date_prefix": "",
                 "card_meta_date_format": "(%d/%b/%Y)",
                 "card_meta_color": "{{ settings.color_palette.color1 }}",
-                "card_meta_scrim": 15,
+                "card_meta_scrim": 0,
                 "border": "none",
                 "border_width": 1,
                 "border_opacity": 100,
@@ -296,7 +296,9 @@
                 "padding-block-start": 0,
                 "padding-block-end": 0,
                 "padding-inline-start": 0,
-                "padding-inline-end": 0
+                "padding-inline-end": 0,
+                "card_media_background": "#f6f6f6",
+                "card_media_hover_lift": 8
               },
               "blocks": {}
             },

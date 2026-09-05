@@ -70,6 +70,8 @@
     {% render 'border-override', settings: block_settings %}
     {% render 'spacing-style', settings: block_settings %}
     --gallery-aspect-ratio: {{ ratio }};
+    --card-media-background: {{ block_settings.card_media_background | default: '#f6f6f6' }};
+    --card-media-lift: {{ block_settings.card_media_hover_lift | default: 8 }};
   "
   data-product-id="{{ product.id }}"
   {% if settings.show_second_image_on_hover and product.media.size > 1 %}
@@ -241,6 +243,48 @@
     overflow: hidden;
     container-type: inline-size; /* Make card-gallery a container */
     container-name: card-gallery-container; /* Optional: name the container */
+  }
+
+  /*
+   * A surface behind the product, for photography that is cut out rather than
+   * shot against something — a transparent PNG over nothing reads as a bag
+   * floating on the page.
+   *
+   * It has to go on `slideshow-container`, not on `.card-gallery`: the
+   * slideshow paints an opaque fill of its own inside the gallery and would
+   * cover anything set further out. Both are painted anyway, so the placeholder
+   * and any path without a slideshow get the surface too.
+   *
+   * `.card-gallery slideshow-container` outranks the slideshow's own rule on
+   * specificity rather than on where it happens to land in the bundle.
+   */
+  .card-gallery,
+  .card-gallery slideshow-container {
+    background-color: var(--card-media-background, var(--color-background));
+    transition: background-color var(--animation-speed, 0.2s) ease;
+  }
+
+  /*
+   * Hovering lifts that surface toward white rather than tinting the product
+   * itself — with a cut-out image the surface is most of the tile, so lifting
+   * it is what reads as the card brightening.
+   */
+  @media (hover: hover) and (pointer: fine) {
+    .card-gallery:hover,
+    .card-gallery:hover slideshow-container {
+      background-color: color-mix(
+        in srgb,
+        #fff calc(var(--card-media-lift, 8) * 1%),
+        var(--card-media-background, var(--color-background))
+      );
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-gallery,
+    .card-gallery slideshow-container {
+      transition: none;
+    }
   }
 
   @container (max-width: 70px) {
