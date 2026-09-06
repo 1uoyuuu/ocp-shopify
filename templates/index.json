@@ -298,7 +298,7 @@
                 "padding-inline-start": 0,
                 "padding-inline-end": 0,
                 "card_media_background": "#f6f6f6",
-                "card_media_hover_lift": 8
+                "card_media_hover_lift": 15
               },
               "blocks": {}
             },

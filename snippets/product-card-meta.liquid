@@ -141,11 +141,24 @@
   /*
    * Without hover there is no way to reveal the band, so show it outright
    * rather than hiding the roaster and roast date from touch users.
+   *
+   * It also moves to the top of the image and stays there. Riding the cursor
+   * is the whole reason it sits low on a mouse — there is no cursor here, and
+   * a band parked across the bottom of the picture with nothing moving it
+   * reads as something that failed to animate. At the top it reads as a
+   * label, which is what it is.
    */
   @media (hover: none) {
     .card-meta,
     .card-gallery:has(.card-meta)::after {
       opacity: 1;
+    }
+
+    .card-gallery .card-meta,
+    .card-gallery .card-meta[data-tracking] {
+      top: 0;
+      bottom: auto;
+      transform: none;
     }
   }
 

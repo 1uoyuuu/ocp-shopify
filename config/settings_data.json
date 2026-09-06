@@ -80,7 +80,7 @@
     "popover_border_radius": 0,
     "currency_code_enabled_product_pages": false,
     "currency_code_enabled_product_cards": false,
-    "mobile_quick_add": true,
+    "mobile_quick_add": false,
     "quick_add_background": "{{ settings.color_palette.background }}",
     "quick_add_text": "{{ settings.color_palette.foreground }}",
     "product_corner_radius": 0,
@@ -103,7 +103,8 @@
       "foreground": "#0f80be",
       "color1": "#383838",
       "color2": "#f2f2f2"
-    }
+    },
+    "quick_add": false
   },
   "presets": {
     "Atelier": {

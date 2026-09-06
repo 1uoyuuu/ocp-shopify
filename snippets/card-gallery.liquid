@@ -71,7 +71,7 @@
     {% render 'spacing-style', settings: block_settings %}
     --gallery-aspect-ratio: {{ ratio }};
     --card-media-background: {{ block_settings.card_media_background | default: '#f6f6f6' }};
-    --card-media-lift: {{ block_settings.card_media_hover_lift | default: 8 }};
+    --card-media-lift: {{ block_settings.card_media_hover_lift | default: 15 }};
   "
   data-product-id="{{ product.id }}"
   {% if settings.show_second_image_on_hover and product.media.size > 1 %}
@@ -274,7 +274,7 @@
     .card-gallery:hover slideshow-container {
       background-color: color-mix(
         in srgb,
-        #fff calc(var(--card-media-lift, 8) * 1%),
+        #fff calc(var(--card-media-lift, 15) * 1%),
         var(--card-media-background, var(--color-background))
       );
     }
