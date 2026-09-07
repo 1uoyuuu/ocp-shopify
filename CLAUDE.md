@@ -457,6 +457,19 @@ until a menu is created in Shopify admin and selected.
 - GSAP `pin: true` injects a wrapper element, which fights `morph.js`. Prefer
   `position: sticky` or Observer.
 
+**Sync — when a push simply never arrives**
+- Shopify applies **each commit's diff**, not the tree. So a webhook that gets
+  dropped loses that commit's file changes *permanently* — later commits carry
+  only their own files, and waiting achieves nothing.
+- The tell that it is the connection rather than a bad schema: files with **no
+  schema** (assets, snippets) are stale too. A rejection only drops the file
+  whose schema is invalid, plus the JSON templates referencing it.
+- The fix is a fresh commit that touches **exactly the files that were lost** —
+  a comment edit is enough. A nudge commit that touches something else will
+  sync that something else and leave the rest behind, which looks like a
+  partial recovery and is not one. This happened on 2026-09-07 and cost about
+  twenty minutes of waiting for a backlog that was never going to drain.
+
 **Sync — how a bad schema actually shows up**
 - An invalid `{% schema %}` does not fail the push and does not surface
   anywhere in git. Shopify **silently refuses that section file, and every
