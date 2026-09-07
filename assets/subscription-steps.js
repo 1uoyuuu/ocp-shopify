@@ -28,10 +28,18 @@ class SubscriptionSteps extends HTMLElement {
   #targetY = 0;
   #currentX = 0;
   #currentY = 0;
+  /** @type {HTMLElement | null} */
+  #scatter = null;
 
   connectedCallback() {
     this.summary = this.querySelector('[ref="summary"]');
     this.#cards = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-card]')]);
+
+    // The cards sit on the title screen, not across the whole section, so
+    // that screen is what the pointer is measured against and what listens.
+    // Measured against the section the cursor could never reach the far end
+    // of the range, since the cards only occupy the top half of it.
+    this.#scatter = this.querySelector('[ref="scatter"]');
 
     this.addEventListener('click', this.#onClick);
     this.#renderSummary();
@@ -44,15 +52,18 @@ class SubscriptionSteps extends HTMLElement {
       !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     if (canDrift) {
-      this.addEventListener('pointermove', this.#onPointerMove);
-      this.addEventListener('pointerleave', this.#onPointerLeave);
+      const surface = this.#scatter ?? this;
+      surface.addEventListener('pointermove', this.#onPointerMove);
+      surface.addEventListener('pointerleave', this.#onPointerLeave);
     }
   }
 
   disconnectedCallback() {
     this.removeEventListener('click', this.#onClick);
-    this.removeEventListener('pointermove', this.#onPointerMove);
-    this.removeEventListener('pointerleave', this.#onPointerLeave);
+
+    const surface = this.#scatter ?? this;
+    surface.removeEventListener('pointermove', this.#onPointerMove);
+    surface.removeEventListener('pointerleave', this.#onPointerLeave);
 
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;
@@ -90,7 +101,7 @@ class SubscriptionSteps extends HTMLElement {
 
   /** @param {PointerEvent} event */
   #onPointerMove = (event) => {
-    const { left, top, width, height } = this.getBoundingClientRect();
+    const { left, top, width, height } = (this.#scatter ?? this).getBoundingClientRect();
     if (!width || !height) return;
 
     // -0.5 at one edge, +0.5 at the other, so a card's travel is symmetric

@@ -47,75 +47,86 @@
     --subscription-items: {{ items }};
   "
 >
-  <div class="subscription__inner">
-    <header class="subscription__header">
-      {% if section.settings.eyebrow != blank %}
-        <p class="subscription__eyebrow">{{ section.settings.eyebrow }}</p>
-      {% endif %}
+  {%- comment -%}
+    Two screens, not two sections: the title and the scatter fill the first,
+    and what the subscription actually asks of the reader waits on the
+    second. One thing in the editor, two beats on the page.
+  {%- endcomment -%}
+  <div
+    class="subscription__screen subscription__screen--title"
+    ref="scatter"
+  >
+    <div class="subscription__inner">
+      <header class="subscription__header">
+        {% if section.settings.eyebrow != blank %}
+          <p class="subscription__eyebrow">{{ section.settings.eyebrow }}</p>
+        {% endif %}
 
-      {% if section.settings.heading != blank %}
-        <h2 class="subscription__heading">{{ section.settings.heading }}</h2>
-      {% endif %}
-
-      {% if section.settings.intro != blank %}
-        <div class="subscription__intro">{{ section.settings.intro }}</div>
-      {% endif %}
-    </header>
+        {% if section.settings.heading != blank %}
+          <h2 class="subscription__heading">{{ section.settings.heading }}</h2>
+        {% endif %}
+      </header>
+    </div>
 
     {%- comment -%}
-      With no steps added the section is just a statement and a link — which
-      is how it runs on the home page, the builder being for a subscription
-      page of its own later. Everything that only makes sense alongside the
-      steps is left out rather than rendered empty.
-    {%- endcomment -%}
-    {%- comment -%}
-      Holds both kinds. With no steps among them it is `display: contents`,
-      so it adds neither a row nor a gap to the column and the cards inside
-      still resolve their position against the section.
+      The cards live on this screen so they resolve their position against
+      it. Placed against the whole section they would spread over both, and
+      the paragraph below would be read through coffee bags.
+
+      With no steps among them the wrapper is `display: contents`, so it adds
+      neither a row nor a gap to the column.
     {%- endcomment -%}
     {% if section.blocks.size > 0 %}
       <div class="subscription__blocks{% if step_blocks.size > 0 %} subscription__steps{% endif %}">
         {% content_for 'blocks' %}
       </div>
     {% endif %}
+  </div>
 
-    <div class="subscription__summary">
-      {% if step_blocks.size > 0 %}
-        {% if section.settings.summary_label != blank %}
-          <p class="subscription__summary-label">{{ section.settings.summary_label }}</p>
-        {% endif %}
-
-        {%- comment -%}
-          Filled in by subscription-steps.js. Hidden until the element is
-          defined so it can't sit empty if the module never loads — the steps
-          above still read correctly on their own.
-        {%- endcomment -%}
-        <p
-          class="subscription__summary-line"
-          ref="summary"
-          role="status"
-        ></p>
+  <div class="subscription__screen subscription__screen--detail">
+    <div class="subscription__inner">
+      {% if section.settings.intro != blank %}
+        <div class="subscription__intro">{{ section.settings.intro }}</div>
       {% endif %}
 
-      {% if section.settings.cta_label != blank %}
-        {% if section.settings.cta_link != blank %}
-          <a
-            class="subscription__cta"
-            href="{{ section.settings.cta_link }}"
-          >
-            {{- section.settings.cta_label -}}
-          </a>
-        {% else %}
+      <div class="subscription__summary">
+        {% if step_blocks.size > 0 %}
+          {% if section.settings.summary_label != blank %}
+            <p class="subscription__summary-label">{{ section.settings.summary_label }}</p>
+          {% endif %}
+
           {%- comment -%}
-            No destination set yet, so this renders as plain text rather than
-            a link that would reload the page. The layout still reads as
-            finished in the editor.
+            Filled in by subscription-steps.js. Hidden until the element is
+            defined so it can't sit empty if the module never loads — the
+            steps above still read correctly on their own.
           {%- endcomment -%}
-          <span class="subscription__cta subscription__cta--inert">
-            {{- section.settings.cta_label -}}
-          </span>
+          <p
+            class="subscription__summary-line"
+            ref="summary"
+            role="status"
+          ></p>
         {% endif %}
-      {% endif %}
+
+        {% if section.settings.cta_label != blank %}
+          {% if section.settings.cta_link != blank %}
+            <a
+              class="subscription__cta"
+              href="{{ section.settings.cta_link }}"
+            >
+              {{- section.settings.cta_label -}}
+            </a>
+          {% else %}
+            {%- comment -%}
+              No destination set yet, so this renders as plain text rather
+              than a link that would reload the page. The layout still reads
+              as finished in the editor.
+            {%- endcomment -%}
+            <span class="subscription__cta subscription__cta--inert">
+              {{- section.settings.cta_label -}}
+            </span>
+          {% endif %}
+        {% endif %}
+      </div>
     </div>
   </div>
 </subscription-steps>
@@ -133,19 +144,40 @@
 
 {% stylesheet %}
   .subscription {
+    display: block;
+    background-color: var(--subscription-background, var(--color-background));
+    color: var(--subscription-text, var(--color-foreground));
+    padding-inline: var(--ocp-page-margin);
+  }
+
+  /*
+   * A screen each. The title screen is the positioning context for the
+   * scatter, which is why it and not the section carries `position:
+   * relative` — placed against the section the cards would spread over both
+   * screens, and the paragraph would be read through coffee bags.
+   *
+   * The section's own padding lives on the screens rather than around the
+   * pair, so the first screen keeps its breathing room at the top and the
+   * last keeps it at the bottom without either gaining a seam in between.
+   */
+  .subscription__screen {
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
     min-height: var(--subscription-min-height, 100svh);
-    background-color: var(--subscription-background, var(--color-background));
-    color: var(--subscription-text, var(--color-foreground));
-    padding-block: var(--subscription-padding-start, 96px) var(--subscription-padding-end, 96px);
-    padding-inline: var(--ocp-page-margin);
 
     /* Cards are placed by their centre, so one near an edge hangs past it.
        Clipping here keeps that from widening the page. */
     overflow: clip;
+  }
+
+  .subscription__screen--title {
+    padding-block-start: var(--subscription-padding-start, 96px);
+  }
+
+  .subscription__screen--detail {
+    padding-block-end: var(--subscription-padding-end, 96px);
   }
 
   .subscription__inner {
@@ -159,7 +191,7 @@
 
   /* Lifted over the cards. Done on the copy itself rather than on
      .subscription__inner, which has to stay unpositioned so the cards
-     resolve against the section and can spread across all of it. */
+     resolve against the screen and can spread across all of it. */
   .subscription__header,
   .subscription__summary {
     position: relative;
@@ -236,7 +268,7 @@
    * between the two, and the eye skipped it.
    */
   .subscription__intro {
-    margin-block-start: 1.5rem;
+    margin: 0;
     max-width: 32ch;
     font-family: var(--subscription-heading-font);
     font-weight: 700;
