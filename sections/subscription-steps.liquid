@@ -400,9 +400,10 @@
     color: var(--subscription-text, var(--color-foreground));
 
     /* Drawn rather than declared: text-decoration does not cross into an
-       inline-block, and the letter swap makes every word one, so a declared
-       underline would vanish the moment the words are boxed. A line of its
-       own also stays put while they roll over it. */
+       inline-block, and the swap makes every word one, so a declared underline
+       would vanish the moment the words are boxed — and only on hover, which
+       is the worst way to find out. A line of its own also stays put while
+       they roll over it. */
     padding-block-end: 0.18em;
     background: linear-gradient(currentcolor, currentcolor) 0 100% / 100% 1px no-repeat;
   }
