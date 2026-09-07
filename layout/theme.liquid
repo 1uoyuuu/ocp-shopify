@@ -180,6 +180,13 @@
 
       <footer>
         {% sections 'footer-group' %}
+
+        {%- comment -%}
+          The site's one hover for clickable text. Rendered here rather than from
+          a section, since the links it covers are spread across the header,
+          the menu panel, the footer and the page in between.
+        {%- endcomment -%}
+        {%- render 'letter-swap' -%}
       </footer>
     </div>
 

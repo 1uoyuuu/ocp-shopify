@@ -1,0 +1,92 @@
+{% doc %}
+  The site's one hover for clickable text: each letter swaps for a copy of
+  itself arriving from below, a beat behind its neighbour.
+
+  Rendered once from the layout. letter-swap.js decides which links take it
+  and builds the letters; everything here is how they move.
+{% enddoc %}
+
+<script
+  src="{{ 'letter-swap.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  /*
+   * A letter is a clipped box holding two copies of itself, one above the
+   * other. Hovering slides the pair up by exactly one copy, so the second
+   * arrives where the first was.
+   */
+  .swap-word {
+    /* Whole words, so a line can only break between them and never inside
+       one — which is what boxing every letter would otherwise allow. */
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .swap-char {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+
+    /*
+     * Held to one line. Without a height `overflow: hidden` clips nothing —
+     * the box simply grows to fit both copies, and the link comes out three
+     * times as tall with the spare copy sitting in plain sight.
+     *
+     * `1em` is the fallback for browsers without `lh`, and is exact at the
+     * leading of 1 the display type runs at.
+     */
+    height: 1em;
+    height: 1lh;
+
+    /*
+     * The clip box has to be a little taller than the line box or a
+     * descender is shaved off at that leading. The padding gives that room
+     * and the negative margin takes it back out of the layout, so the line
+     * is exactly the height it was. content-box, because the theme sets
+     * border-box globally and the height above is meant to be the letter,
+     * not the letter minus the room just made for it.
+     */
+    --swap-bleed: 0.18em;
+    box-sizing: content-box;
+    padding-block: var(--swap-bleed);
+    margin-block: calc(var(--swap-bleed) * -1);
+  }
+
+  .swap-char__inner {
+    display: block;
+    transition: transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Each letter a beat behind the one before it, which is the whole effect
+       — all of them at once is just a word moving. */
+    transition-delay: calc(var(--swap-i, 0) * 16ms);
+  }
+
+  .swap-char__face {
+    display: block;
+  }
+
+  /*
+   * Pushed down by the full bleed so it sits outside the clip box rather than
+   * peeking into the room the padding just opened up.
+   */
+  .swap-char__face--ghost {
+    margin-block-start: calc(var(--swap-bleed) * 2);
+  }
+
+  /*
+   * Half the pair plus that gap is exactly one letter's worth of travel, so
+   * the copy lands where the original stood rather than near it.
+   */
+  [data-swap-host]:hover .swap-char__inner,
+  [data-swap-host]:focus-visible .swap-char__inner {
+    transform: translateY(calc(-50% - var(--swap-bleed)));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .swap-char__inner {
+      transition: none;
+    }
+  }
+{% endstylesheet %}

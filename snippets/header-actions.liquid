@@ -27,7 +27,11 @@
       The text style shows the label at every width (rather than falling back
       to the icon on mobile) so the header reads the same on both.
     {% endcomment %}
-    <span class="{% if display_style == 'icon' %}hidden{% endif %}">
+    {%- comment -%}
+      Classed so the letter swap can find the word without going near the
+      bubble below, whose markup cart-icon.js writes the live count into.
+    {%- endcomment -%}
+    <span class="header-actions__cart-label{% if display_style == 'icon' %} hidden{% endif %}">
       {{ 'content.cart_title' | t }}
     </span>
 
