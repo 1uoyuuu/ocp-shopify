@@ -68,7 +68,12 @@ function splitTextNode(node) {
 
 /** @param {Element} element */
 function prepare(element) {
-  if (!(element instanceof HTMLElement) || element.dataset.letterSwap !== undefined) return;
+  if (!(element instanceof HTMLElement)) return;
+
+  // Done already — unless something has since rebuilt the inside of it, which
+  // is exactly what the header does to itself. Checking for the words rather
+  // than trusting the flag is what lets this heal.
+  if (element.dataset.letterSwap !== undefined && element.querySelector('.swap-word')) return;
 
   const texts = /** @type {Text[]} */ (
     [...element.childNodes].filter(
@@ -113,21 +118,39 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
   document.addEventListener('DOMContentLoaded', scan);
 
   /*
-   * Links arrive after this script has run, and the header is the worst of
-   * it: adding to the cart re-renders that section, and morph rebuilds its
-   * markup from the server's HTML — taking the split words with it. Watching
-   * the document is what makes the effect survive that, and a drawer or a
-   * filtered list rendering for the first time.
+   * The markup this touches does not stay put. The header hydrates itself
+   * after load — it re-renders through the Section Rendering API on idle —
+   * and re-renders again on every cart change, and morph puts the server's
+   * plain text back where the split words were.
+   *
+   * Watching only for added *elements* missed all of that, because what
+   * morph puts back is a text node. So any change to the document schedules
+   * a fresh pass instead, coalesced into one frame: the pass is a handful of
+   * selectors, and everything already done bails immediately.
    */
-  const watcher = new MutationObserver((records) => {
-    for (const record of records) {
-      for (const node of record.addedNodes) {
-        if (!(node instanceof HTMLElement)) continue;
-        if (node.matches(TARGETS)) prepare(node);
-        for (const found of node.querySelectorAll(TARGETS)) prepare(found);
-      }
-    }
+  let queued = false;
+  const rescan = () => {
+    if (queued) return;
+    queued = true;
+
+    // A timeout rather than a frame. requestAnimationFrame does not run in a
+    // hidden tab, and since the flag is only cleared inside the callback,
+    // one starved frame would leave it raised and every later change
+    // ignored — the same latch that once froze the scroll sections.
+    setTimeout(() => {
+      queued = false;
+      scan();
+    }, 0);
+  };
+
+  new MutationObserver(rescan).observe(document.documentElement, {
+    childList: true,
+    subtree: true,
   });
 
-  watcher.observe(document.documentElement, { childList: true, subtree: true });
+  // A closed <details> does not render its contents, and the menu panel is
+  // one. Nothing about that should stop the split — it is DOM work, not
+  // layout — but scanning again when one opens costs a single query and
+  // removes the question.
+  document.addEventListener('toggle', scan, { capture: true });
 }
