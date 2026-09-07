@@ -1,6 +1,6 @@
 {% doc %}
-  The site's one hover for clickable text: each letter swaps for a copy of
-  itself arriving from below, a beat behind its neighbour.
+  The site's one hover for clickable text: the words swap for copies of
+  themselves arriving from below, all of them together.
 
   Rendered once from the layout. letter-swap.js decides which links take it
   and builds the letters; everything here is how they move.
@@ -13,28 +13,26 @@
 
 {% stylesheet %}
   /*
-   * A letter is a clipped box holding two copies of itself, one above the
+   * A word is a clipped box holding two copies of itself, one above the
    * other. Hovering slides the pair up by exactly one copy, so the second
-   * arrives where the first was.
+   * arrives where the first was. Every word in a link moves together — the
+   * whole label rolls over rather than rippling across.
    */
   .swap-word {
-    /* Whole words, so a line can only break between them and never inside
-       one — which is what boxing every letter would otherwise allow. */
-    display: inline-block;
-    white-space: nowrap;
-  }
-
-  .swap-char {
     display: inline-block;
     overflow: hidden;
     vertical-align: top;
 
+    /* Whole words, so a line can only break between them and never inside
+       one — which boxing each letter would otherwise allow. */
+    white-space: nowrap;
+
     /*
      * Held to one line. Without a height `overflow: hidden` clips nothing —
-     * the box simply grows to fit both copies, and the link comes out three
-     * times as tall with the spare copy sitting in plain sight.
+     * the box simply grows to fit both copies, and the link comes out twice
+     * as tall with the spare copy sitting in plain sight.
      *
-     * `1em` is the fallback for browsers without `lh`, and is exact at the
+     * `1em` is the fallback where `lh` is unsupported, and is exact at the
      * leading of 1 the display type runs at.
      */
     height: 1em;
@@ -45,8 +43,8 @@
      * descender is shaved off at that leading. The padding gives that room
      * and the negative margin takes it back out of the layout, so the line
      * is exactly the height it was. content-box, because the theme sets
-     * border-box globally and the height above is meant to be the letter,
-     * not the letter minus the room just made for it.
+     * border-box globally and the height above is meant to be the word, not
+     * the word minus the room just made for it.
      */
     --swap-bleed: 0.18em;
     box-sizing: content-box;
@@ -54,38 +52,44 @@
     margin-block: calc(var(--swap-bleed) * -1);
   }
 
-  .swap-char__inner {
+  .swap-word__inner {
     display: block;
     transition: transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
-
-    /* Each letter a beat behind the one before it, which is the whole effect
-       — all of them at once is just a word moving. */
-    transition-delay: calc(var(--swap-i, 0) * 16ms);
   }
 
-  .swap-char__face {
+  .swap-word__face {
     display: block;
   }
 
   /*
-   * Pushed down by the full bleed so it sits outside the clip box rather than
-   * peeking into the room the padding just opened up.
+   * Pushed down by the full bleed so it waits outside the clip box rather
+   * than peeking into the room the padding just opened up.
    */
-  .swap-char__face--ghost {
+  .swap-word__face--ghost {
     margin-block-start: calc(var(--swap-bleed) * 2);
   }
 
   /*
-   * Half the pair plus that gap is exactly one letter's worth of travel, so
-   * the copy lands where the original stood rather than near it.
+   * Half the pair plus that gap is exactly one word's worth of travel, so the
+   * copy lands where the original stood rather than near it.
    */
-  [data-swap-host]:hover .swap-char__inner,
-  [data-swap-host]:focus-visible .swap-char__inner {
+  [data-swap-host]:hover .swap-word__inner,
+  [data-swap-host]:focus-visible .swap-word__inner {
     transform: translateY(calc(-50% - var(--swap-bleed)));
   }
 
+  /*
+   * The menu panel's links clip their own text for the ellipsis a very long
+   * label would need. That clip sits a hair tighter than the swap's, so it
+   * would shave the tops off the words on their way past. The word box does
+   * the clipping here; the ellipsis is left to the rare label that needs it.
+   */
+  .menu-drawer .menu-drawer__menu-item-text:has(.swap-word) {
+    overflow: visible;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .swap-char__inner {
+    .swap-word__inner {
       transition: none;
     }
   }
