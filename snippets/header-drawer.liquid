@@ -1014,10 +1014,11 @@
      and push every link to the left edge. */
   .menu-drawer .menu-drawer__menu-item--mainlist {
     /* Redeclared here rather than inherited from menu-font-styles, whose
-       preset is sized for a compact side drawer. This panel fills the
-       viewport, so its links are one of the site's two sizes like
-       everything else. */
+       preset is sized and led for a compact side drawer. This panel fills
+       the viewport, so its links take the house display size and the
+       leading that goes with it, like everything else at that size. */
     --menu-top-level-font-size: var(--ocp-display-size);
+    --menu-top-level-font-line-height: var(--ocp-leading-display);
 
     justify-content: center;
     text-align: center;
@@ -1172,7 +1173,7 @@
     color: var(--color-foreground);
     text-align: center;
     text-decoration: none;
-    line-height: 1.2;
+    line-height: var(--ocp-leading-snug);
   }
 
   .menu-drawer__menu {
@@ -1428,7 +1429,7 @@
     text-decoration: none;
     white-space: nowrap;
     overflow-x: hidden;
-    line-height: 1.2;
+    line-height: var(--ocp-leading-snug);
     box-shadow: none;
   }
 

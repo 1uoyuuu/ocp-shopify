@@ -188,15 +188,18 @@ changes mobile.
 
 ### The `--ocp-*` house tokens
 
-All four live in `snippets/theme-styles-variables.liquid`'s `:root`. They are
-the single source for the values below — nothing else may state one.
+All of them live in `snippets/theme-styles-variables.liquid`'s `:root`. They
+are the single source for the values below — nothing else may state one.
 
 | Token | Value | Covers |
 |---|---|---|
 | `--ocp-display-size` | `min(8rem, 9.5vw)`, `12vw` ≤749px | Hero headings, subscription heading, menu panel links |
-| `--ocp-display-size-sm` | `calc(--ocp-display-size / 2)` | Display lines too long to sit at the full size — the panel-reveal slogan |
+| `--ocp-display-size-sm` | `calc(--ocp-display-size / 3)` | Display lines too long to sit at the full size — the panel-reveal slogan, the statement paragraph |
 | `--ocp-text-size` | `0.875rem` | Everything else, without exception |
-| `--ocp-letter-spacing` | `-0.02em` | All of our own type |
+| `--ocp-leading-display` | `1` | Both display sizes |
+| `--ocp-leading-snug` | `1.15` | Headings, labels, UI text |
+| `--ocp-leading-text` | `1.4` | Running text — footer, intros |
+| `--ocp-letter-spacing` | `-0.02em` | All type, ours and the theme's alike |
 | `--ocp-page-margin` | `16px`, `32px` ≥750px | Every section's inline gutter, header and footer included |
 
 **The type scale is these three and no others.** No fourth size, no
@@ -210,6 +213,34 @@ The small display size is *derived* from the large one rather than written
 out, which is the only reason a third step is safe: it cannot drift, and it
 inherits the large one's responsive behaviour for free. A fourth step should
 be derived the same way or not added.
+
+Leading follows the same shape and for the same reason: three steps replaced
+seven — `1`, `1.05`, `1.15`, `1.2`, `1.45`, `1.5` and `normal` — every one of
+which had looked reasonable where it was written.
+
+### The theme's own presets are on the scale too
+
+`h1`–`h6` and `paragraph` are generated from `settings.type_size_h1` and
+friends, and stock components on every non-home template read them. They had
+drifted to 120/24/14/14/12/12 — which is how the same product card came to
+read at 14px on the home page and 12px on a collection.
+
+`:root` now redeclares `--font-h1--size` … `--font-paragraph--line-height`
+against the tokens, *below* the loop that generates them. **That override has
+to stay below the loop**: within one rule, the last declaration of a custom
+property is the one that stands. It is the single place in this theme where
+source order is the mechanism rather than the hazard described above, so
+leave it where it is.
+
+The theme's `--letter-spacing--*-normal` steps are pointed at
+`--ocp-letter-spacing` for the same reason — stock prices, titles, buttons and
+accordions all sit on the `normal` step, and left at `0em` they tracked
+differently from every line of our own type. `tight` and `loose` are
+untouched.
+
+**Do not set a size, leading or tracking in `config/settings_data.json`.**
+Those settings still exist and the editor still shows them, but nothing reads
+them any more.
 
 The same rule killed three settings — the header's `actions_font_size`, the
 footer's `font_size`, the menu's `drawer_link_size` — along with the drum's

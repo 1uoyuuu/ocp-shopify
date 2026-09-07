@@ -244,16 +244,33 @@
        whole site tightens or loosens together from one place. */
     --ocp-letter-spacing: -0.02em;
 
+    /* Three leadings, on the same principle as the three sizes: display type
+       sets solid because it is read as shape before it is read as words;
+       anything at the small display size or below that might wrap gets just
+       enough room to stack; running text gets room to read.
+
+       These replaced seven values — 1, 1.05, 1.15, 1.2, 1.45, 1.5 and
+       `normal` — each of which had looked reasonable where it was written.
+       That is exactly how the site once reached ten font sizes. */
+    --ocp-leading-display: 1;
+    --ocp-leading-snug: 1.15;
+    --ocp-leading-text: 1.4;
+
+    /* Normal means the house value, not zero. Stock components — prices,
+       product titles, buttons, accordions — all sit on the `normal` step,
+       so pointing it here is what brings them onto our tracking instead of
+       leaving half the site untracked. Tight and loose stay as they were,
+       for anything that genuinely wants to differ. */
     --letter-spacing--display-tight: -0.03em;
-    --letter-spacing--display-normal: 0em;
+    --letter-spacing--display-normal: var(--ocp-letter-spacing);
     --letter-spacing--display-loose: 0.03em;
 
     --letter-spacing--heading-tight: -0.03em;
-    --letter-spacing--heading-normal: 0em;
+    --letter-spacing--heading-normal: var(--ocp-letter-spacing);
     --letter-spacing--heading-loose: 0.03em;
 
     --letter-spacing--body-tight: -0.03em;
-    --letter-spacing--body-normal: 0em;
+    --letter-spacing--body-normal: var(--ocp-letter-spacing);
     --letter-spacing--body-loose: 0.03em;
 
     /* Line height / Leading */
@@ -395,6 +412,37 @@
     --font-size--4xl: 2.5rem;
     --font-size--5xl: 3rem;
     --font-size--6xl: 3.5rem;
+
+    /*
+     * The type presets, brought onto the house scale.
+     *
+     * These are declared above by the loop that reads settings.type_size_h1
+     * and friends; redeclaring them here is deliberate and has to stay below
+     * that loop, since within one rule the last declaration of a custom
+     * property is the one that stands. It is the one place in this theme
+     * where source order is the mechanism rather than a hazard.
+     *
+     * Doing it here rather than by retyping numbers into the settings keeps
+     * a single owner for every size: change a token and the whole site
+     * moves, stock components included. The presets stop carrying sizes of
+     * their own — which is how the same product card came to read at 14px
+     * on the home page and 12px on a collection.
+     */
+    --font-h1--size: var(--ocp-display-size);
+    --font-h2--size: var(--ocp-display-size-sm);
+    --font-h3--size: var(--ocp-text-size);
+    --font-h4--size: var(--ocp-text-size);
+    --font-h5--size: var(--ocp-text-size);
+    --font-h6--size: var(--ocp-text-size);
+    --font-paragraph--size: var(--ocp-text-size);
+
+    --font-h1--line-height: var(--ocp-leading-display);
+    --font-h2--line-height: var(--ocp-leading-snug);
+    --font-h3--line-height: var(--ocp-leading-snug);
+    --font-h4--line-height: var(--ocp-leading-snug);
+    --font-h5--line-height: var(--ocp-leading-snug);
+    --font-h6--line-height: var(--ocp-leading-snug);
+    --font-paragraph--line-height: var(--ocp-leading-text);
 
     /* Menu font sizes */
     --menu-font-sm--size: 0.875rem;
