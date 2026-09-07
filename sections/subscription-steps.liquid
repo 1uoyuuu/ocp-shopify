@@ -229,12 +229,20 @@
     text-transform: uppercase;
   }
 
+  /*
+   * The paragraph carries this section on its own now that the steps are
+   * gone, so it takes the same size the statement's does — the small display
+   * step, not the text one. At 14px under a 128px heading there was nothing
+   * between the two, and the eye skipped it.
+   */
   .subscription__intro {
     margin-block-start: 1.5rem;
-    max-width: 42ch;
-    font-family: var(--font-body--family);
-    font-size: var(--ocp-text-size);
-    line-height: var(--ocp-leading-text);
+    max-width: 32ch;
+    font-family: var(--subscription-heading-font);
+    font-weight: 700;
+    font-size: var(--ocp-display-size-sm);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
   }
 
   /* The step numbers are drawn from this counter rather than written into

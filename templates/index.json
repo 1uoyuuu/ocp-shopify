@@ -213,36 +213,9 @@
             "depth": 6
           },
           "blocks": {}
-        },
-        "step_roaster": {
-          "type": "subscription-step",
-          "settings": {
-            "title": "Your roaster",
-            "options": "Australian\nInternational"
-          },
-          "blocks": {}
-        },
-        "step_brew": {
-          "type": "subscription-step",
-          "settings": {
-            "title": "Your brew",
-            "options": "Filter\nEspresso"
-          },
-          "blocks": {}
-        },
-        "step_frequency": {
-          "type": "subscription-step",
-          "settings": {
-            "title": "How often",
-            "options": "Weekly\nFortnightly\nMonthly"
-          },
-          "blocks": {}
         }
       },
       "block_order": [
-        "step_roaster",
-        "step_brew",
-        "step_frequency",
         "card_1",
         "card_2",
         "card_3",
@@ -260,7 +233,7 @@
         "intro": "<p>Tell us how you drink it. We'll handle the rest. Every subscription pulls from the same shelf we sell in-store — nothing set aside, nothing lesser, just picked to match how you brew.</p>",
         "summary_label": "(Your box)",
         "cta_label": "Subscribe now",
-        "cta_link": "",
+        "cta_link": "/pages/subscriptions",
         "text_alignment": "center",
         "min_height": 100,
         "background_color": "#ffffff",
@@ -282,7 +255,7 @@
         "dim": 22,
         "scroll_distance": 180,
         "overlap": 100,
-        "tail": 60,
+        "tail": 80,
         "collection": "frontpage",
         "max_products": 6,
         "products_width": 20
@@ -429,27 +402,12 @@
           ]
         }
       }
-    },
-    "interlude": {
-      "type": "interlude",
-      "settings": {
-        "heading": "Don't know what to pick?",
-        "sub": "Good. That's the whole point of us.",
-        "text_size": "display",
-        "font": "heading",
-        "background_color": "#0F80BE",
-        "text_color": "#FFFFFF",
-        "scroll_distance": 140,
-        "overlap": 60,
-        "tail": 40
-      }
     }
   },
   "order": [
     "hero_video",
     "panel_reveal",
     "statement",
-    "interlude",
     "subscription_steps"
   ]
 }
