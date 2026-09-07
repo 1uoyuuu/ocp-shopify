@@ -265,18 +265,32 @@
   }
 
   /*
-   * Hovering lifts that surface toward white rather than tinting the product
-   * itself — with a cut-out image the surface is most of the tile, so lifting
-   * it is what reads as the card brightening.
+   * Hovering fills that surface with the colour of the bag standing on it,
+   * read from the photograph itself by card-media-tint.js. With a cut-out
+   * image the surface is most of the tile, so the card takes on the product's
+   * own colour rather than a tint laid over it.
+   *
+   * A card whose colour could not be read gets no --card-media-hover, and the
+   * plain lift toward white stands in — which is also what the whole thing
+   * falls back to if the script never runs.
    */
   @media (hover: hover) and (pointer: fine) {
     .card-gallery:hover,
     .card-gallery:hover slideshow-container {
-      background-color: color-mix(
-        in srgb,
-        #fff calc(var(--card-media-lift, 15) * 1%),
-        var(--card-media-background, var(--color-background))
+      background-color: var(
+        --card-media-hover,
+        color-mix(
+          in srgb,
+          #fff calc(var(--card-media-lift, 15) * 1%),
+          var(--card-media-background, var(--color-background))
+        )
       );
+    }
+
+    /* Only where there is a colour behind it: white on the resting grey would
+       be invisible. The tint's lightness is held in a band for exactly this. */
+    .card-gallery[data-tinted]:hover .card-meta {
+      color: #fff;
     }
   }
 

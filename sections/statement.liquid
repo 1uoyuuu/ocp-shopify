@@ -24,9 +24,14 @@
     --statement-dim: {{ section.settings.dim | divided_by: 100.0 }};
     --statement-overlap: {{ section.settings.overlap }}lvh;
     --statement-products-width: {{ section.settings.products_width }}rem;
+    --statement-tail: {{ section.settings.tail }}lvh;
+    --statement-tail-units: {{ section.settings.tail }};
   "
 >
-  <div class="statement__viewport">
+  <div
+    class="statement__viewport"
+    ref="frame"
+  >
     {%- comment -%}
       The paragraph sits on the panel rather than beside it, so the white
       block and its words rise as one thing. Held off it, the words would be
@@ -107,11 +112,15 @@
     display: block;
     position: relative;
 
-    /* The read and the column are scrolled one after the other, so the
-       section has to be long enough for both. statement.js measures how far
-       the column has to travel and writes it here; the travel maps 1:1 onto
-       scroll, so a card moves a pixel for a pixel. */
-    height: calc(var(--statement-distance, 180lvh) + var(--products-travel, 0px));
+    /* The read, the column and a pause are scrolled one after another, so the
+       section has to be long enough for all three. statement.js measures how
+       far the column has to travel and writes it here; the travel maps 1:1
+       onto scroll, so a card moves a pixel for a pixel. The tail is scroll
+       with nothing assigned to it — the panel simply holds, finished, before
+       the page moves on. */
+    height: calc(
+      var(--statement-distance, 180lvh) + var(--products-travel, 0px) + var(--statement-tail, 0lvh)
+    );
 
     /* Pulled up into the hold at the end of the section above, so the block
        rises while that section's frame is still pinned — the picture behind
@@ -351,6 +360,17 @@
       "step": 1,
       "unit": "rem",
       "default": 20
+    },
+    {
+      "type": "range",
+      "id": "tail",
+      "label": "Pause after them",
+      "info": "How long the finished panel holds before the next section arrives. One screen is 100.",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "unit": "%",
+      "default": 60
     },
     {
       "type": "header",

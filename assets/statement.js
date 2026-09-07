@@ -84,6 +84,8 @@ class ScrollStatement extends HTMLElement {
   #track = null;
   /** @type {HTMLElement | null} */
   #column = null;
+  /** @type {HTMLElement | null} */
+  #viewport = null;
   /** @type {ResizeObserver | null} */
   #resize = null;
 
@@ -91,13 +93,19 @@ class ScrollStatement extends HTMLElement {
   #travel = 0;
   /** How far past its resting place the run starts, along whichever axis. */
   #enterFrom = 0;
-  /** Share of the section the read occupies; the rest belongs to the column. */
+  /** Scroll at the end with nothing assigned to it, so the finished panel
+   * holds for a beat before the page moves on. */
+  #tail = 0;
+  /** Share of the section the read occupies. */
   #readSpan = 1;
+  /** Where the products have finished and the pause begins. */
+  #carryEnd = 1;
 
   connectedCallback() {
     this.#words = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-word]')]);
     this.#track = this.querySelector('[ref="track"]');
     this.#column = this.querySelector('[ref="column"]');
+    this.#viewport = this.querySelector('[ref="frame"]');
 
     // The composition the stylesheet already describes — panel up, every
     // word filled — is the right one to leave standing.
@@ -175,6 +183,12 @@ class ScrollStatement extends HTMLElement {
       return;
     }
 
+    // The sticky frame is exactly one screen tall, so measuring it resolves
+    // whatever `lvh` currently means without restating the unit here.
+    const screen = this.#viewport?.getBoundingClientRect().height || window.innerHeight;
+    const units = parseFloat(getComputedStyle(this).getPropertyValue('--statement-tail-units'));
+    this.#tail = ((Number.isFinite(units) ? units : 0) / 100) * screen;
+
     const upright = uprightMedia.matches;
     const columnRect = column.getBoundingClientRect();
     const panelRect = panel.getBoundingClientRect();
@@ -219,9 +233,12 @@ class ScrollStatement extends HTMLElement {
 
     this.#target = clamp((window.innerHeight - rect.top) / rect.height, 0, 1);
 
-    // Whatever the section is long enough for beyond the read belongs to the
-    // column; the read's beats are squeezed into what is left.
-    this.#readSpan = clamp((rect.height - this.#travel) / rect.height, 0.05, 1);
+    // The section is long enough for three things in order: the read, the
+    // products, then a pause. Each beat is placed against what is left after
+    // the ones that follow it, so changing the pause or the product count
+    // moves the boundaries and nothing else.
+    this.#readSpan = clamp((rect.height - this.#travel - this.#tail) / rect.height, 0.05, 1);
+    this.#carryEnd = clamp((rect.height - this.#tail) / rect.height, this.#readSpan, 1);
   }
 
   #onScroll = () => {
@@ -298,7 +315,7 @@ class ScrollStatement extends HTMLElement {
     // on past. Written as a single offset so the handover cannot show a seam
     // between them, and left to the stylesheet to decide which axis it is.
     const entered = beatAt(progress, scaled(BEATS.enter, share));
-    const carried = beatAt(progress, [share, 1]);
+    const carried = beatAt(progress, [share, this.#carryEnd]);
 
     this.style.setProperty(
       '--products-offset',
