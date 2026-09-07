@@ -49,7 +49,6 @@
     class="card-meta"
     style="
       --card-meta-color: {{ block_settings.card_meta_color | default: '#ffffff' }};
-      --card-meta-scrim: {{ block_settings.card_meta_scrim | default: 15 | divided_by: 100.0 }};
     "
     aria-hidden="true"
   >
@@ -116,24 +115,15 @@
   }
 
   /*
-   * Product photography is arbitrary, so the text needs something to sit
-   * against. The scrim dims the whole image on hover rather than boxing the
-   * band, which keeps the card reading as one image.
+   * The text had a scrim under it once — the photography is arbitrary and
+   * white type needs something to sit against. It is gone: the card now takes
+   * on the bag's own colour on hover, and that colour's lightness is held in a
+   * band chosen so white reads against it. The surface the text needs is the
+   * hover state itself, so dimming the image on top of it only muddied a
+   * colour that had already been picked to work.
    */
-  .card-gallery:has(.card-meta)::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: rgb(0 0 0 / var(--card-meta-scrim, 0.15));
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
   @media (hover: hover) and (pointer: fine) {
-    .card-gallery:hover .card-meta,
-    .card-gallery:has(.card-meta):hover::after {
+    .card-gallery:hover .card-meta {
       opacity: 1;
     }
   }
@@ -149,8 +139,7 @@
    * label, which is what it is.
    */
   @media (hover: none) {
-    .card-meta,
-    .card-gallery:has(.card-meta)::after {
+    .card-meta {
       opacity: 1;
     }
 
