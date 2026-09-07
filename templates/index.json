@@ -282,6 +282,7 @@
         "dim": 22,
         "scroll_distance": 180,
         "overlap": 100,
+        "tail": 60,
         "collection": "frontpage",
         "max_products": 6,
         "products_width": 20
