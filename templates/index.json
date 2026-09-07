@@ -213,9 +213,36 @@
             "depth": 6
           },
           "blocks": {}
+        },
+        "step_roaster": {
+          "type": "subscription-step",
+          "settings": {
+            "title": "Your roaster",
+            "options": "Australian\nInternational"
+          },
+          "blocks": {}
+        },
+        "step_brew": {
+          "type": "subscription-step",
+          "settings": {
+            "title": "Your brew",
+            "options": "Filter\nEspresso"
+          },
+          "blocks": {}
+        },
+        "step_frequency": {
+          "type": "subscription-step",
+          "settings": {
+            "title": "How often",
+            "options": "Weekly\nFortnightly\nMonthly"
+          },
+          "blocks": {}
         }
       },
       "block_order": [
+        "step_roaster",
+        "step_brew",
+        "step_frequency",
         "card_1",
         "card_2",
         "card_3",
@@ -229,8 +256,8 @@
       ],
       "settings": {
         "eyebrow": "(Subscriptions)",
-        "heading": "Coffee on repeat",
-        "intro": "<p>Choose a blend to come back to or a single origin that changes every delivery, tell us how often you drink it, and it arrives freshly roasted.</p>",
+        "heading": "Coffee on repeat.",
+        "intro": "<p>Tell us how you drink it. We'll handle the rest. Every subscription pulls from the same shelf we sell in-store — nothing set aside, nothing lesser, just picked to match how you brew.</p>",
         "summary_label": "(Your box)",
         "cta_label": "Subscribe now",
         "cta_link": "",
@@ -248,7 +275,7 @@
     "statement": {
       "type": "statement",
       "settings": {
-        "text": "We don't roast. We choose. Every week we taste through what other roasters have made, here and half a world away, and only what earns it reaches the shelf.",
+        "text": "Think of us less as a coffee shop, more as a curator of the world's best roasters. We taste all week so you don't have to — what's new from Australia's sharpest, what's just landed from abroad, and what earns its place goes on the shelf.",
         "background_color": "#ffffff",
         "text_color": "#111111",
         "font": "heading",
