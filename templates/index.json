@@ -429,12 +429,27 @@
           ]
         }
       }
+    },
+    "interlude": {
+      "type": "interlude",
+      "settings": {
+        "heading": "Don't know what to pick?",
+        "sub": "Good. That's the whole point of us.",
+        "text_size": "display",
+        "font": "heading",
+        "background_color": "#0F80BE",
+        "text_color": "#FFFFFF",
+        "scroll_distance": 140,
+        "overlap": 60,
+        "tail": 40
+      }
     }
   },
   "order": [
     "hero_video",
     "panel_reveal",
     "statement",
+    "interlude",
     "subscription_steps"
   ]
 }
