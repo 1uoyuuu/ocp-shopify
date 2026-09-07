@@ -249,6 +249,8 @@
       "type": "statement",
       "settings": {
         "text": "Think of us not just as a normal coffee shop, but as a curator of the world's best roasters. We spend our week doing the tasting so you don't have to — cupping through what's new from Australia's sharpest roasters, and what's just landed from the ones overseas that everyone's talking about. What earns its place that week goes on the shelf. Nothing more complicated than that.",
+        "cta_label": "Shop all",
+        "cta_link": "/collections/all",
         "background_color": "#ffffff",
         "text_color": "#111111",
         "font": "heading",

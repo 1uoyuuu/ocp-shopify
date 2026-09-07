@@ -98,6 +98,31 @@
           {% endif %}
         </div>
       </div>
+
+      {%- comment -%}
+        On the panel rather than in the frame, so it rises with the white
+        block instead of hanging over the section behind it. Set apart from
+        the grid so it sits at the foot of the screen whatever the paragraph
+        and the products are doing above it.
+      {%- endcomment -%}
+      {% if section.settings.cta_label != blank %}
+        {% if section.settings.cta_link != blank %}
+          <a
+            class="statement__cta"
+            href="{{ section.settings.cta_link }}"
+          >
+            {{- section.settings.cta_label -}}
+          </a>
+        {% else %}
+          {%- comment -%}
+            No destination set yet, so this renders as plain text rather than
+            a link that would reload the page.
+          {%- endcomment -%}
+          <span class="statement__cta statement__cta--inert">
+            {{- section.settings.cta_label -}}
+          </span>
+        {% endif %}
+      {% endif %}
     </div>
   </div>
 </scroll-statement>
@@ -220,6 +245,44 @@
     will-change: transform;
   }
 
+  /*
+   * Same setup as the subscription's link — the site has one kind of button
+   * and this is it — placed at the foot of the screen rather than after the
+   * text, since the panel is a fixed frame and there is no "after" in it.
+   *
+   * The underline is drawn rather than declared: text-decoration does not
+   * cross into an inline-block, and the letter swap makes every word one, so
+   * a declared underline would simply vanish the moment the words are boxed.
+   * A line of its own also stays put while they roll over it.
+   */
+  .statement__cta {
+    position: absolute;
+    inset-inline: 0;
+    bottom: calc(var(--ocp-page-margin) * 1.5);
+    margin-inline: auto;
+    width: fit-content;
+
+    /* A label of two words shrink-wrapped to fit-content lands a hair narrower
+       than it needs and breaks in half. It is a button; it does not wrap. */
+    white-space: nowrap;
+
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--statement-text, var(--color-foreground));
+
+    padding-block-end: 0.3em;
+    background: linear-gradient(currentcolor, currentcolor) 0 100% / 100% 1px no-repeat;
+  }
+
+  .statement__cta--inert {
+    opacity: 0.5;
+  }
+
   .statement__word {
     opacity: calc(var(--statement-dim, 0.22) + var(--fill, 1) * (1 - var(--statement-dim, 0.22)));
   }
@@ -329,6 +392,17 @@
       "label": "Paragraph",
       "info": "Fills in word by word as the section is scrolled.",
       "default": "We don't roast. We choose. Every week we taste through what other roasters have made, here and half a world away, and only what earns it reaches the shelf."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "Shop all"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button link"
     },
     {
       "type": "header",

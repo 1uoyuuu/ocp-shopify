@@ -24,6 +24,7 @@ const TARGETS = [
   '.menu-drawer__menu-item-text',
   '.menu-drawer__social-link',
   '.ocp-footer__link',
+  '.statement__cta',
   '.subscription__cta',
 ].join(', ');
 
