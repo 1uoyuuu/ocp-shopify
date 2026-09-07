@@ -439,6 +439,15 @@ until a menu is created in Shopify admin and selected.
   animation from the scroll handler too — extract a `#step(now)` that moves by
   real elapsed time and call it from both. Both `statement.js` and
   `panel-reveal.js` had this.
+- **The header rebuilds itself, so anything you add to its markup is
+  temporary.** It hydrates after load (`assets/section-hydration.js` →
+  Section Rendering API on idle) and re-renders on every cart change; morph
+  then restores the server's HTML over whatever the page had made of it. Only
+  the header does this, so a bug from it looks like "the menu is broken" while
+  the rest of the site is fine. `assets/letter-swap.js` survives it by
+  re-checking for its own markup rather than trusting a "done" flag, and by
+  scanning on any document mutation — watching for added *elements* is not
+  enough, since what morph puts back is a text node.
 - Duplicate `#private` class fields are a **syntax error**, not a warning —
   easy to introduce when refactoring a placeholder field into a real method.
   Quick check:
