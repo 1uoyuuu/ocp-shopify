@@ -1014,10 +1014,11 @@
      and push every link to the left edge. */
   .menu-drawer .menu-drawer__menu-item--mainlist {
     /* Redeclared here rather than inherited from menu-font-styles, whose
-       preset is sized and led for a compact side drawer. This panel fills
-       the viewport, so its links take the house display size and the
-       leading that goes with it, like everything else at that size. */
-    --menu-top-level-font-size: var(--ocp-display-size);
+       preset is sized and led for a compact side drawer. The small display
+       step rather than the full one: at the full size a five-item menu fills
+       the panel edge to edge and reads as a wall, and a word like
+       "Subscription" runs out of room on a phone. */
+    --menu-top-level-font-size: var(--ocp-display-size-sm);
     --menu-top-level-font-line-height: var(--ocp-leading-display);
 
     justify-content: center;

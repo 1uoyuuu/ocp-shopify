@@ -193,8 +193,8 @@ are the single source for the values below — nothing else may state one.
 
 | Token | Value | Covers |
 |---|---|---|
-| `--ocp-display-size` | `min(8rem, 9.5vw)`, `12vw` ≤749px | Hero headings, subscription heading, menu panel links |
-| `--ocp-display-size-sm` | `calc(--ocp-display-size / 3)` | Display lines too long to sit at the full size — the panel-reveal slogan, the statement paragraph |
+| `--ocp-display-size` | `min(8rem, 9.5vw)`, `12vw` ≤749px | Hero headings, subscription heading |
+| `--ocp-display-size-sm` | `calc(--ocp-display-size / 3)` | Display lines too long to sit at the full size — the panel-reveal slogan, the statement paragraph, the menu panel links |
 | `--ocp-text-size` | `0.875rem` | Everything else, without exception |
 | `--ocp-leading-display` | `1` | Both display sizes |
 | `--ocp-leading-snug` | `1.15` | Headings, labels, UI text |
