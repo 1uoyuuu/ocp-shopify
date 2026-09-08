@@ -51,7 +51,7 @@
           "settings": {
             "heading": "Shop",
             "menu": "",
-            "links": "Shop all | /collections/all\nCoffee | /collections/all\nEquipment | /collections/all\nSubscription | /pages/subscriptions",
+            "links": "Shop all | /collections/all\nCoffee | /collections/coffee\nEquipment | /collections/equipment\nSubscription | /pages/subscriptions",
             "layout": "vertical",
             "column": 2
           },
