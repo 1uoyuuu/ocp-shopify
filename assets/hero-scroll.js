@@ -51,6 +51,13 @@ const EASE = 0.12;
 /** Frame duration the EASE constant is expressed against. */
 const BASE_FRAME_MS = 1000 / 60;
 
+/**
+ * How far the playhead may have moved and the intro still count as untouched.
+ * The cue belongs to that moment only: past it the reader has started, by a
+ * scroll or by the cue itself, and a prompt to start is just in the way.
+ */
+const CUE_START_EPSILON = 0.002;
+
 /** Below this much remaining progress there is nothing left to see. */
 const SETTLE = 0.0005;
 
@@ -532,6 +539,7 @@ class HeroScrollComponent extends HTMLElement {
 
     this.#progress = Math.abs(delta) < SETTLE ? this.#target : this.#progress + delta * factor;
     this.#timeline.progress(this.#progress);
+    this.#reflectCue();
 
     if (Math.abs(this.#target - this.#progress) < SETTLE) {
       this.#frame = 0;
@@ -553,10 +561,23 @@ class HeroScrollComponent extends HTMLElement {
     this.#observer?.enable();
     scrollTo({ top: 0, behavior: 'instant' });
     this.#timeline.progress(this.#progress);
+    this.#reflectCue();
+  }
+
+  /**
+   * The cue is a prompt to begin, so it belongs to the one moment before
+   * anything has begun: the intro holding the page with its playhead still
+   * at the start. Re-locking after a scroll back to the top lands at the
+   * *end* of the timeline, not the beginning, so it stays away until the
+   * intro has actually been rewound.
+   */
+  #reflectCue() {
+    this.toggleAttribute('data-intro-start', this.#locked && this.#progress <= CUE_START_EPSILON);
   }
 
   #unlock() {
     this.#locked = false;
+    this.removeAttribute('data-intro-start');
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;
     document.documentElement.classList.remove('hero-intro-locked');

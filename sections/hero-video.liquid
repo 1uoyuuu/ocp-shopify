@@ -236,12 +236,13 @@
 
   /*
    * The mark points down and to the right, being the Y of the wordmark, so a
-   * quarter turn anticlockwise aims it straight down the page.
+   * quarter turn clockwise aims it straight down the page.
    *
-   * It exists only while the intro has the page held: the class the component
-   * puts on <html> for exactly that span is what shows it, so it fades the
-   * moment scrolling is handed back and never appears at all on the paths
-   * where the intro does not run.
+   * It shows only at the very start of the intro — the component sets an
+   * attribute for that and clears it the instant the playhead moves, so a
+   * click or a first scroll takes it away rather than leaving it hanging
+   * over an intro already under way. It never appears at all where the intro
+   * does not run, since nothing sets the attribute there.
    */
   .hero-video__cue {
     position: absolute;
@@ -261,8 +262,10 @@
     color: inherit;
     cursor: pointer;
 
-    font-family: var(--font-subheading--family);
-    font-weight: var(--font-subheading--weight);
+    /* The body face, not the subheading one: that family is Arial's bold cut,
+       so asking it for a lighter weight changes nothing. */
+    font-family: var(--font-body--family);
+    font-weight: var(--font-body--weight);
     font-size: var(--ocp-text-size);
     line-height: var(--ocp-leading-snug);
     letter-spacing: var(--ocp-letter-spacing);
@@ -271,10 +274,10 @@
     opacity: 0;
     pointer-events: none;
     transform: translateX(-50%);
-    transition: opacity 0.4s ease;
+    transition: opacity 0.9s ease;
   }
 
-  html.hero-intro-locked .hero-video__cue {
+  hero-scroll-component[data-intro-start] .hero-video__cue {
     opacity: 1;
     pointer-events: auto;
   }
@@ -282,7 +285,7 @@
   .hero-video__cue-arrow {
     display: block;
     width: 1.1rem;
-    rotate: -45deg;
+    rotate: 45deg;
   }
 
   .hero-video__cue-arrow svg {
