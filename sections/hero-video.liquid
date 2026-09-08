@@ -140,6 +140,25 @@
         </div>
       </div>
     </div>
+
+    {%- comment -%}
+      Shown only while the intro holds the page. Clicking it plays the
+      timeline out to its end, which is the same thing a scroll does — so it
+      lands exactly where scrolling would have, rather than jumping the page
+      past an animation still mid-flight.
+    {%- endcomment -%}
+    {% if section.settings.show_cue %}
+      <button
+        class="hero-video__cue"
+        type="button"
+        ref="cue"
+      >
+        {% if section.settings.cue_label != blank %}
+          <span class="hero-video__cue-label">{{ section.settings.cue_label }}</span>
+        {% endif %}
+        <span class="hero-video__cue-arrow">{% render 'logo-arrow' %}</span>
+      </button>
+    {% endif %}
 </hero-scroll-component>
 
 <script
@@ -213,6 +232,69 @@
        at either end from handing the scroll on to the page behind. */
     touch-action: none;
     overscroll-behavior: none;
+  }
+
+  /*
+   * The mark points down and to the right, being the Y of the wordmark, so a
+   * quarter turn anticlockwise aims it straight down the page.
+   *
+   * It exists only while the intro has the page held: the class the component
+   * puts on <html> for exactly that span is what shows it, so it fades the
+   * moment scrolling is handed back and never appears at all on the paths
+   * where the intro does not run.
+   */
+  .hero-video__cue {
+    position: absolute;
+    left: 50%;
+    bottom: 12%;
+    z-index: 2;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.9rem;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+
+    font-family: var(--font-subheading--family);
+    font-weight: var(--font-subheading--weight);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%);
+    transition: opacity 0.4s ease;
+  }
+
+  html.hero-intro-locked .hero-video__cue {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .hero-video__cue-arrow {
+    display: block;
+    width: 1.1rem;
+    rotate: -45deg;
+  }
+
+  .hero-video__cue-arrow svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video__cue {
+      transition: none;
+    }
   }
 
   .hero-video__stage {
@@ -470,6 +552,22 @@
       "id": "heading_line_3",
       "label": "Line 3 — bottom, flush right",
       "default": "IN AUSTRALIA"
+    },
+    {
+      "type": "header",
+      "content": "Scroll cue"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cue",
+      "label": "Show the scroll cue",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "cue_label",
+      "label": "Cue label",
+      "default": "Scroll"
     }
   ],
   "presets": [

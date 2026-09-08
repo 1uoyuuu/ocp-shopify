@@ -111,6 +111,7 @@ class HeroScrollComponent extends HTMLElement {
     this.headingLine3 = this.querySelector('[ref="headingLine3"]');
     this.videoSlot = this.querySelector('[ref="videoSlot"]');
     this.media = this.querySelector('[ref="media"]');
+    this.cue = this.querySelector('[ref="cue"]');
 
     // The headings and the site header are hidden by default in CSS so they
     // can't flash in before the timeline's "from" state applies — any path
@@ -183,6 +184,7 @@ class HeroScrollComponent extends HTMLElement {
     scrollContainerMediaQuery.addEventListener('change', this.#bindScrollListener);
 
     window.addEventListener('resize', this.#resizeListener);
+    this.cue?.addEventListener('click', this.#onCueClick);
 
     // Where the video lands depends on the width of the words either side of
     // it, so a timeline built against fallback font metrics goes stale the
@@ -198,7 +200,21 @@ class HeroScrollComponent extends HTMLElement {
     this.#scrollEventTarget?.removeEventListener('scroll', this.#scrollListener);
     scrollContainerMediaQuery.removeEventListener('change', this.#bindScrollListener);
     window.removeEventListener('resize', this.#resizeListener);
+    this.cue?.removeEventListener('click', this.#onCueClick);
   }
+
+  /**
+   * Sends the playhead to the end rather than jumping the page there. The
+   * easing loop then walks it out and releases the lock on arrival, exactly
+   * as a long scroll would — so the intro finishes properly instead of being
+   * cut off with a heading still mid-blur.
+   */
+  #onCueClick = () => {
+    if (!this.#locked) return;
+
+    this.#target = 1;
+    this.#startEasing();
+  };
 
   /**
    * Watches the real scroll container — this theme scrolls `.page-wrapper`

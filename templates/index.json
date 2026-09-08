@@ -19,7 +19,9 @@
         "heading_line_1": "THE BEST",
         "heading_line_2_left": "COFFEE",
         "heading_line_2_right": "SHOP",
-        "heading_line_3": "IN AUSTRALIA"
+        "heading_line_3": "IN AUSTRALIA",
+        "show_cue": true,
+        "cue_label": "Scroll"
       }
     },
     "panel_reveal": {
