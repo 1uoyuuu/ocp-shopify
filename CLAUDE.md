@@ -411,6 +411,13 @@ until a menu is created in Shopify admin and selected.
 - A `range` `step` must be divisible by **0.1** — anything finer is rejected.
   For hundredths or thousandths, make the setting a whole number and scale it
   in Liquid (`| divided_by: 100.0`), as `sections/warp-text.liquid` does.
+- A `range` must span **more than one step**: `min: 1, max: 2, step: 1` is
+  refused. Widen the max (or shrink the step) so `(max - min) / step` is at
+  least 2. **Theme check does not catch this**, and the refusal is the silent
+  kind described below — the file simply never arrives. Isolated on
+  2026-09-07 by comparing a refused schema against the ranges Shopify had
+  already accepted in the same file, after `info` and `"tag": null` had each
+  been ruled out one at a time.
 - A `range` `default` must land **on the step grid** — `(default - min) / step`
   has to be a whole number. `min: 30, max: 90, step: 5, default: 62` is
   rejected. **Theme check does not catch this.**
