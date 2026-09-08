@@ -238,8 +238,14 @@
     transition: opacity var(--animation-speed, 0.2s) var(--animation-easing, ease);
   }
 
-  .ocp-footer .footer-column__link:hover,
-  .ocp-footer__link:hover {
+  /*
+   * The fade is the fallback, not the effect. Where letter-swap.js has run,
+   * the link swaps and marks itself a host; where it has not — reduced
+   * motion, or the module never loading — this is what is left to answer the
+   * cursor, and a link with no hover at all is worse than a plain fade.
+   */
+  .ocp-footer .footer-column__link:not([data-swap-host]):hover,
+  .ocp-footer__link:not([data-swap-host]):hover {
     opacity: 0.65;
   }
 

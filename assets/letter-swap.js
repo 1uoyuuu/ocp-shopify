@@ -24,6 +24,7 @@ const TARGETS = [
   '.header-actions__cart-label',
   '.menu-drawer__menu-item-text',
   '.menu-drawer__social-link',
+  '.footer-column__link',
   '.ocp-footer__link',
   '.statement__cta',
   '.subscription__cta',
