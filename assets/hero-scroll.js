@@ -58,6 +58,14 @@ const BASE_FRAME_MS = 1000 / 60;
  */
 const CUE_START_EPSILON = 0.002;
 
+/**
+ * How long the cue takes to play the intro out. A gesture's easing is tuned
+ * to feel attached to the hand that made it, which is far too quick for a
+ * single click: it would race the whole intro past in under a second. This
+ * is a watched animation rather than a followed one, so it gets a duration.
+ */
+const CUE_PLAYOUT_SECONDS = 2;
+
 /** Below this much remaining progress there is nothing left to see. */
 const SETTLE = 0.0005;
 
@@ -200,6 +208,7 @@ class HeroScrollComponent extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this.#killPlayout();
     this.#observer?.kill();
     this.#timeline?.kill();
     this.#unlock();
@@ -217,11 +226,53 @@ class HeroScrollComponent extends HTMLElement {
    * cut off with a heading still mid-blur.
    */
   #onCueClick = () => {
-    if (!this.#locked) return;
+    if (!this.#locked || this.#playout) return;
 
-    this.#target = 1;
-    this.#startEasing();
+    const gsap = window.gsap;
+    if (!gsap) {
+      this.#target = 1;
+      this.#startEasing();
+      return;
+    }
+
+    // The gesture loop is stood down for the duration: two hands on the
+    // playhead would fight, and the tween is the one that knows where it is
+    // going.
+    cancelAnimationFrame(this.#frame);
+    this.#frame = 0;
+
+    const playhead = { progress: this.#progress };
+
+    this.#playout = gsap.to(playhead, {
+      progress: 1,
+      duration: CUE_PLAYOUT_SECONDS,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        this.#progress = playhead.progress;
+        this.#target = playhead.progress;
+        this.#timeline.progress(this.#progress);
+        this.#reflectCue();
+      },
+      onComplete: () => {
+        this.#playout = undefined;
+        this.#progress = 1;
+        this.#target = 1;
+        this.#timeline.progress(1);
+        this.#unlock();
+      },
+    });
   };
+
+  /**
+   * A gesture during the playout takes the playhead back — the reader has
+   * changed their mind about watching it, and the tween must not keep
+   * pulling against them.
+   */
+  #killPlayout() {
+    if (!this.#playout) return;
+    this.#playout.kill();
+    this.#playout = undefined;
+  }
 
   /**
    * Watches the real scroll container — this theme scrolls `.page-wrapper`
@@ -516,6 +567,7 @@ class HeroScrollComponent extends HTMLElement {
   }
 
   #startEasing() {
+    this.#killPlayout();
     if (this.#frame) return;
     this.#lastTime = performance.now();
     this.#frame = requestAnimationFrame(this.#ease);
@@ -585,6 +637,8 @@ class HeroScrollComponent extends HTMLElement {
   }
 
   #resizeListener = () => {
+    // The timeline is about to be rebuilt from under it.
+    this.#killPlayout();
     const wasLocked = this.#locked;
     this.#buildTimeline();
     if (!wasLocked) this.#timeline.progress(1);
@@ -595,6 +649,9 @@ class HeroScrollComponent extends HTMLElement {
 
   /** @type {import('gsap/Observer').Observer | undefined} */
   #observer;
+
+  /** The cue's playout, while one is running. @type {object | undefined} */
+  #playout;
 
   /** @type {EventTarget | undefined} */
   #scrollEventTarget;

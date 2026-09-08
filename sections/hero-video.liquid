@@ -153,10 +153,10 @@
         type="button"
         ref="cue"
       >
+        <span class="hero-video__cue-arrow">{% render 'logo-arrow' %}</span>
         {% if section.settings.cue_label != blank %}
           <span class="hero-video__cue-label">{{ section.settings.cue_label }}</span>
         {% endif %}
-        <span class="hero-video__cue-arrow">{% render 'logo-arrow' %}</span>
       </button>
     {% endif %}
 </hero-scroll-component>
@@ -259,8 +259,11 @@
     padding: 0;
     border: 0;
     background: none;
-    color: inherit;
     cursor: pointer;
+
+    /* It sits on the video, not on the page, so it takes the theme's white
+       rather than the foreground colour the headings resolve to. */
+    color: var(--color-white, #ffffff);
 
     /* The body face, not the subheading one: that family is Arial's bold cut,
        so asking it for a lighter weight changes nothing. */
