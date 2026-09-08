@@ -62,7 +62,7 @@
           "settings": {
             "heading": "OCP",
             "menu": "",
-            "links": "Locations | /pages/locations\nTerms & policies | /policies/terms-of-service",
+            "links": "Locations | /pages/locations\nTerms & policies | /pages/terms-policies",
             "layout": "vertical",
             "column": 3
           },
