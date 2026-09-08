@@ -402,6 +402,31 @@
     margin: 0;
     padding: 0;
   }
+
+  /*
+   * Three things on one line only while there is room for three. Below that
+   * the two that belong together — the policies and who made it — keep the
+   * line, spread to its ends, and the copyright takes a line of its own
+   * beneath them.
+   *
+   * A full basis is what puts it there: with the row already filled, it can
+   * only wrap, and ordering it last means it wraps to the bottom rather than
+   * pushing anything down.
+   */
+  @media screen and (max-width: 989px) {
+    .ocp-footer .ocp-footer__legal {
+      order: 1;
+    }
+
+    .ocp-footer .ocp-footer__credit {
+      order: 2;
+    }
+
+    .ocp-footer .ocp-footer__copyright {
+      order: 3;
+      flex-basis: 100%;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
