@@ -168,7 +168,10 @@
   }
 
   .ocp-footer .footer-column {
-    grid-column: var(--footer-column-index, auto);
+    /* Where it starts, and how many columns it takes. Unset it reads as
+       `auto / span 1`, which is what every column did before any of them
+       could be wider than one. */
+    grid-column: var(--footer-column-index, auto) / span var(--footer-column-span, 1);
     min-width: 0;
   }
 
