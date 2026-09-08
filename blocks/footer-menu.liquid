@@ -9,9 +9,8 @@
 
   A link can carry a second value beside it — opening hours, for the column
   of shops. Those cannot live in the navigation menu, so they are matched to
-  it by name here. The match ignores case and a leading "OCP", so the menu is
-  free to say "Crows Nest" where the hours say "OCP Crows Nest"; a name that
-  matches nothing simply renders as a link with no hours.
+  it by name here, in footer-menu-row. A name that matches nothing simply
+  renders as a link with no hours.
 {% endcomment %}
 
 {% liquid
@@ -85,8 +84,7 @@
       "type": "textarea",
       "id": "hours",
       "label": "Hours beside each link",
-      "info": "One per line, as: Name | Hours. Matched to the links by name, ignoring case and a leading \"OCP\". Leave empty for an ordinary column of links.",
-      "default": ""
+      "info": "One per line, as: Name | Hours. Matched to the links by name. Leave empty for an ordinary column of links."
     },
     {
       "type": "select",
