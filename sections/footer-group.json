@@ -50,7 +50,7 @@
           "type": "footer-menu",
           "settings": {
             "heading": "Shop",
-            "menu": "",
+            "menu": "footer-menu-shop",
             "links": "Shop all | /collections/all\nCoffee | /collections/coffee\nEquipment | /collections/equipment\nSubscription | /pages/subscriptions",
             "layout": "vertical",
             "column": 2
