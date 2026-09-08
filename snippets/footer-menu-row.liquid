@@ -21,15 +21,43 @@
   # match the other keystroke for keystroke.
   assign key = label | downcase | remove: 'ocp' | remove: ' ' | remove: '-' | remove: "'"
 
+  # The link's page handle, as a second thing to match on: a menu reading
+  # "Crows Nest" and a page at /pages/crows-nest reduce to the same letters
+  # even when the two lists word the name differently.
+  assign handle_key = url | split: '?' | first | split: '/' | last | downcase | remove: 'ocp' | remove: '-' | remove: '_'
+
   assign hours = ''
   for line in hour_lines
     assign pair = line | split: '|'
+    if pair[1] == blank
+      continue
+    endif
     assign candidate = pair[0] | downcase | remove: 'ocp' | remove: ' ' | remove: '-' | remove: "'"
-    if candidate == key and pair[1] != blank
+    if candidate == key or candidate == handle_key
       assign hours = pair[1] | strip
       break
     endif
   endfor
+
+  # Nothing matched outright. Try again allowing one name to sit inside the
+  # other, so "George St" finds "George Street" and "Crows Nest" finds "Crows
+  # Nest Shop". Held to names of four letters or more, since a short one
+  # would start matching things it has no business matching.
+  if hours == blank and key.size > 3
+    for line in hour_lines
+      assign pair = line | split: '|'
+      if pair[1] == blank
+        continue
+      endif
+      assign candidate = pair[0] | downcase | remove: 'ocp' | remove: ' ' | remove: '-' | remove: "'"
+      if candidate.size > 3
+        if candidate contains key or key contains candidate
+          assign hours = pair[1] | strip
+          break
+        endif
+      endif
+    endfor
+  endif
 %}
 
 <li class="{% if hours != blank %}footer-column__pair{% endif %}">
