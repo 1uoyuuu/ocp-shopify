@@ -494,6 +494,11 @@ until a menu is created in Shopify admin and selected.
   without declaring it.
 
 **Verification**
+- **Never byte-compare a JSON template against the store.** Shopify rewrites
+  `templates/*.json`, `sections/*-group.json` and `config/settings_data.json`
+  on its side — key order, formatting, and dropping values whose setting no
+  longer exists in the schema. `diff` on the raw file therefore always fails
+  and looks like a stalled sync. Parse both and compare the objects.
 - `curl` against the storefront returns **0 bytes** (it needs the browser
   session). A grep over an empty response "passes" every negative check —
   this produced a false "account link is gone" once. Verify in the browser.

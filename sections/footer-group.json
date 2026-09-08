@@ -90,14 +90,12 @@
         "background_color": "#0f80be",
         "text_color": "#ffffff",
         "font": "subheading",
-        "font_size": "0.875rem",
         "show_wordmark": true,
         "copyright": "© Only Coffee Project 2026. All rights reserved",
         "legal_menu": "",
         "legal_links": "",
         "credit": "Made by ycdat.studio",
         "credit_link": "",
-        "padding_inline": 32,
         "padding-block-start": 60,
         "padding-block-end": 24
       }
