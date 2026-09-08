@@ -62,8 +62,8 @@
           "type": "footer-menu",
           "settings": {
             "heading": "OCP",
-            "menu": "",
-            "links": "Locations | /pages/locations\nTerms & policies | /pages/terms-and-policies",
+            "menu": "footer-menu-locations",
+            "links": "",
             "layout": "vertical",
             "column": 3
           },
