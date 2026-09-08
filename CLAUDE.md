@@ -527,16 +527,59 @@ until a menu is created in Shopify admin and selected.
   el.getAnimations().forEach(a => a.finish());
   ```
   Screenshots are the more trustworthy signal.
+- The pane **will not emulate a viewport narrower than itself**: it reports
+  setting one and `innerWidth` stays put, so a "narrow" check silently
+  measures the wide layout. To test a breakpoint, retarget its media query in
+  a copy of the CSS (`max-width: 599px` → `2000px`, and disable the others)
+  and load that. It exercises the real declarations at a width the pane can
+  actually render.
 - Enumerating `document.styleSheets[].cssRules` **throws on cross-origin
   sheets**. Since theme CSS is served from the Shopify CDN, a naive loop with
   `try/catch { continue }` silently finds nothing and looks like "no rule
   matches". Fetch the stylesheet URL and search the text instead.
 
+## Pushing — the three ways it silently does nothing
+
+Every one of these happened on 2026-09-07, more than once, and each time the
+next step was a verification run against a commit that did not exist. **A
+clean `git push` is not evidence of anything.** The evidence is the store.
+
+**1. The push is rejected because the branch is behind.**
+The editor writes back constantly, so `git fetch` and `git push` in the same
+chain is a race — the fetch reports "behind 1" and the push goes ahead and
+fails. Gate on it:
+
+```bash
+git fetch origin -q
+if [ -n "$(git log --oneline HEAD..origin/main)" ]; then git rebase origin/main; fi
+git push origin main
+```
+
+Resolve a JSON conflict by taking the editor's file and re-applying our keys
+programmatically — never by hand-merging a machine-generated file.
+
+**2. The commit is empty because the edit changed nothing.**
+Rewriting a JSON template with the same values produces identical bytes,
+`git commit` says "nothing to commit", and the push carries nothing. This is
+the usual state when re-sending values Shopify stripped — they are already
+correct in the repo, which is exactly why nothing moves. **Check `git diff
+--stat` prints something before committing.** To force a real diff, change
+key order (the values are what matter; Shopify rewrites the file anyway).
+
+**3. The commit lands but Shopify refuses one file.**
+See the two Sync sections above. The tell is *partial* arrival: some files
+from one commit on the store, others not.
+
 ## Before pushing
 
 1. `shopify theme check` from the repo root (~361 files).
-2. `git fetch origin` — check for "Update from Shopify" commits and merge.
-3. Any new merchant-facing value exposed as a setting, not hardcoded.
-4. Fonts/colors via CSS variables, not literals.
-5. New CSS wins by specificity, not source order.
-6. `git push` (never `shopify theme push`).
+2. `git fetch origin` — check for "Update from Shopify" commits and **rebase
+   before pushing**, not after being rejected.
+3. `git diff --stat` — confirm there is actually a change to commit.
+4. Any new merchant-facing value exposed as a setting, not hardcoded.
+5. Fonts/colors via CSS variables, not literals.
+6. New CSS wins by specificity, not source order.
+7. `git push` (never `shopify theme push`).
+8. **Verify against the store, not against the push.** `shopify theme pull`
+   the files and compare — parsed content for JSON, bytes for everything
+   else. Say "done" only after that comes back clean.
