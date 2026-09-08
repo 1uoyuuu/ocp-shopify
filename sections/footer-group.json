@@ -29,7 +29,7 @@
           "settings": {
             "heading": "Contact",
             "menu": "",
-            "links": "onlycoffeeproject@gmail.com | mailto:onlycoffeeproject@gmail.com\nContact form | /pages/contact",
+            "links": "onlycoffeeproject@gmail.com | mailto:onlycoffeeproject@gmail.com\nContact Us | /pages/contact",
             "layout": "vertical",
             "column": 1
           },
@@ -40,7 +40,7 @@
           "settings": {
             "heading": "",
             "menu": "",
-            "links": "Instagram | https://www.instagram.com/onlycoffeeproject\nFacebook | https://www.facebook.com",
+            "links": "Instagram | https://www.instagram.com/onlycoffeeproject\nFacebook | https://www.facebook.com/onlycoffeeproject",
             "layout": "horizontal",
             "column": 1
           },
