@@ -488,6 +488,17 @@ until a menu is created in Shopify admin and selected.
   ```
   then diff against the repo. `shopify theme pull` is read-only and safe —
   the ban is on `shopify theme push`.
+- A rejected file also **invalidates values in other files that depend on its
+  schema**. Shopify strips settings its copy of the schema does not know, so
+  a refused block silently empties that block's settings out of every JSON
+  that uses it. Fixing the schema is only half: the JSON has not changed
+  since, and Shopify applies each commit's *diff*, so those values will never
+  arrive on their own. Touch that JSON again once the schema is through.
+- Two things in a setting that Shopify's parser has refused here, neither
+  flagged by theme check: **`"default": ""`** on a `textarea`, and **escaped
+  quotes inside `info`**. Both were in one new setting on
+  `blocks/footer-menu.liquid`; removing them let the file sync on the next
+  push.
 - Also declaring a **private (`_`-prefixed) block in a section's schema
   `blocks`** is wrong: those are rendered statically by id and are not a type
   a section offers. `sections/product-list.liquid` renders `_product-card`
