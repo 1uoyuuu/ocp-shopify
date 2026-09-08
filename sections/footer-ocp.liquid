@@ -264,6 +264,16 @@
     font-weight: 400;
   }
 
+  /* Links after a blank line: one row, pushed to the column's two edges, and
+     held away from what came before so they read as their own thing rather
+     than as more of the list above. */
+  .ocp-footer .footer-column__group {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-block-start: 1.75rem;
+  }
+
   .ocp-footer .footer-schedule__name,
   .ocp-footer .footer-schedule__value {
     margin: 0;

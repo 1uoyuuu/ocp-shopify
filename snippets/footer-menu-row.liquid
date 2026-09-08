@@ -60,7 +60,13 @@
   endif
 %}
 
-<li class="{% if hours != blank %}footer-column__pair{% endif %}">
+{%- comment -%}
+  Both cells are always written, even when there are no hours for this name.
+  The row is `display: contents`, so its children are the grid's items — and
+  one row contributing a single cell shifts every cell after it, which turns
+  one unmatched shop into a column of names and times that no longer line up.
+{%- endcomment -%}
+<li class="{% if hour_lines != blank %}footer-column__pair{% endif %}">
   <a
     class="footer-column__link"
     href="{{ url | strip }}"
@@ -68,7 +74,7 @@
     {{- label -}}
   </a>
 
-  {% if hours != blank %}
+  {% if hour_lines != blank %}
     <span class="footer-column__hours">{{ hours }}</span>
   {% endif %}
 </li>

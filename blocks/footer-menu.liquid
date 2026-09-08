@@ -7,6 +7,9 @@
   filled in before the menus are built rather than rendering as a bare
   heading.
 
+  A blank line in the typed list starts a group: those links share one row,
+  spread edge to edge, set apart from what came before.
+
   A link can carry a second value beside it — opening hours, for the column
   of shops. Those cannot live in the navigation menu, so they are matched to
   it by name here, in footer-menu-row. A name that matches nothing simply
@@ -42,16 +45,43 @@
         {% render 'footer-menu-row', title: link.title, url: link.url, hour_lines: hour_lines %}
       {% endfor %}
     {% elsif block.settings.links != blank %}
-      {% assign lines = block.settings.links | newline_to_br | split: '<br />' %}
-      {% for line in lines %}
-        {% assign trimmed = line | strip %}
-        {% if trimmed == blank %}
-          {% continue %}
+      {%- comment -%}
+        A blank line starts a group, and everything after it shares one row
+        spread edge to edge — the socials under the address, rather than a
+        fourth thing in the same list. The same convention the schedule uses
+        for its gaps, so one blank line means "these belong apart" in both.
+      {%- endcomment -%}
+      {% assign groups = block.settings.links | newline_to_br | replace: '<br /><br />', '||GROUP||' | split: '||GROUP||' %}
+      {% for group in groups %}
+        {% assign lines = group | split: '<br />' %}
+        {% if forloop.first %}
+          {% for line in lines %}
+            {% assign trimmed = line | strip %}
+            {% if trimmed == blank %}
+              {% continue %}
+            {% endif %}
+            {% assign parts = trimmed | split: '|' %}
+            {% assign row_title = parts[0] %}
+            {% assign row_url = parts[1] | default: '#' %}
+            {% render 'footer-menu-row', title: row_title, url: row_url, hour_lines: hour_lines %}
+          {% endfor %}
+        {% else %}
+          <li class="footer-column__group">
+            {% for line in lines %}
+              {% assign trimmed = line | strip %}
+              {% if trimmed == blank %}
+                {% continue %}
+              {% endif %}
+              {% assign parts = trimmed | split: '|' %}
+              <a
+                class="footer-column__link"
+                href="{{ parts[1] | strip | default: '#' }}"
+              >
+                {{- parts[0] | strip -}}
+              </a>
+            {% endfor %}
+          </li>
         {% endif %}
-        {% assign parts = trimmed | split: '|' %}
-        {% assign row_title = parts[0] %}
-        {% assign row_url = parts[1] | default: '#' %}
-        {% render 'footer-menu-row', title: row_title, url: row_url, hour_lines: hour_lines %}
       {% endfor %}
     {% endif %}
   </ul>
