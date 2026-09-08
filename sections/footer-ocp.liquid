@@ -187,16 +187,26 @@
       grid-template-columns: 1fr 1fr;
     }
 
-    /* The assigned columns only make sense at the full four-column width;
-       below that the blocks flow in their listed order instead. */
+    /* Two columns want their own arrangement rather than the four-column one
+       folded in half — which is why each block carries a second column
+       number for this width. A block wide on the full layout stays wide
+       here, where spanning two of two is the whole row. */
     .ocp-footer .footer-column {
-      grid-column: auto;
+      grid-column: var(--footer-column-index-md, auto) / span var(--footer-column-span, 1);
     }
   }
 
   @media screen and (max-width: 599px) {
     .ocp-footer__columns {
       grid-template-columns: 1fr;
+    }
+
+    /* One column, so placement is only a question of sequence — and the
+       sequence that reads best here is not the one the blocks are listed in.
+       The span has to go: two of one column would invent a second. */
+    .ocp-footer .footer-column {
+      grid-column: auto;
+      order: var(--footer-order-sm, 0);
     }
   }
 
