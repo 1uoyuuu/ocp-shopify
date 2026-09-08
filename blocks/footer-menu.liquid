@@ -6,7 +6,20 @@
   later renaming. Failing that, the typed list is used, so a column can be
   filled in before the menus are built rather than rendering as a bare
   heading.
+
+  A link can carry a second value beside it — opening hours, for the column
+  of shops. Those cannot live in the navigation menu, so they are matched to
+  it by name here. The match ignores case and a leading "OCP", so the menu is
+  free to say "Crows Nest" where the hours say "OCP Crows Nest"; a name that
+  matches nothing simply renders as a link with no hours.
 {% endcomment %}
+
+{% liquid
+  assign hour_lines = ''
+  if block.settings.hours != blank
+    assign hour_lines = block.settings.hours | newline_to_br | split: '<br />'
+  endif
+%}
 
 <div
   class="footer-column"
@@ -18,19 +31,16 @@
   {% endif %}
 
   <ul
-    class="footer-column__list list-unstyled{% if block.settings.layout == 'horizontal' %} footer-column__list--horizontal{% endif %}"
+    class="
+      footer-column__list list-unstyled
+      {%- if block.settings.layout == 'horizontal' %} footer-column__list--horizontal{% endif -%}
+      {%- if hour_lines != blank %} footer-column__list--paired{% endif -%}
+    "
     role="list"
   >
     {% if block.settings.menu != blank %}
       {% for link in block.settings.menu.links %}
-        <li>
-          <a
-            class="footer-column__link"
-            href="{{ link.url }}"
-          >
-            {{- link.title -}}
-          </a>
-        </li>
+        {% render 'footer-menu-row', title: link.title, url: link.url, hour_lines: hour_lines %}
       {% endfor %}
     {% elsif block.settings.links != blank %}
       {% assign lines = block.settings.links | newline_to_br | split: '<br />' %}
@@ -40,14 +50,9 @@
           {% continue %}
         {% endif %}
         {% assign parts = trimmed | split: '|' %}
-        <li>
-          <a
-            class="footer-column__link"
-            href="{{ parts[1] | strip | default: '#' }}"
-          >
-            {{- parts[0] | strip -}}
-          </a>
-        </li>
+        {% assign row_title = parts[0] %}
+        {% assign row_url = parts[1] | default: '#' %}
+        {% render 'footer-menu-row', title: row_title, url: row_url, hour_lines: hour_lines %}
       {% endfor %}
     {% endif %}
   </ul>
@@ -75,6 +80,13 @@
       "id": "links",
       "label": "Links",
       "info": "Used only when no menu is selected. One per line, as: Label | /url"
+    },
+    {
+      "type": "textarea",
+      "id": "hours",
+      "label": "Hours beside each link",
+      "info": "One per line, as: Name | Hours. Matched to the links by name, ignoring case and a leading \"OCP\". Leave empty for an ordinary column of links.",
+      "default": ""
     },
     {
       "type": "select",

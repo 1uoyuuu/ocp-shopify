@@ -1,0 +1,46 @@
+{% doc %}
+  One row of a footer link column: the link, and the hours that belong to it
+  if any have been given for that name.
+
+  The hours are matched here rather than stored with the link because the
+  links come from a Shopify navigation menu, which has nowhere to keep them.
+  Matching reduces both sides to letters, so the two lists can each be
+  written the way they read best.
+
+  @param {string} title - The link's label
+  @param {string} url - Where it goes
+  @param {string[]} [hour_lines] - Lines of "Name | Hours", already split
+{% enddoc %}
+
+{% liquid
+  assign label = title | strip
+
+  # Both sides are reduced to letters before comparing, so "OCP Crows Nest",
+  # "Crows Nest" and "crows-nest" are one name. The menu is written for the
+  # reader and the hours for whoever maintains them; neither should have to
+  # match the other keystroke for keystroke.
+  assign key = label | downcase | remove: 'ocp' | remove: ' ' | remove: '-' | remove: "'"
+
+  assign hours = ''
+  for line in hour_lines
+    assign pair = line | split: '|'
+    assign candidate = pair[0] | downcase | remove: 'ocp' | remove: ' ' | remove: '-' | remove: "'"
+    if candidate == key and pair[1] != blank
+      assign hours = pair[1] | strip
+      break
+    endif
+  endfor
+%}
+
+<li class="{% if hours != blank %}footer-column__pair{% endif %}">
+  <a
+    class="footer-column__link"
+    href="{{ url | strip }}"
+  >
+    {{- label -}}
+  </a>
+
+  {% if hours != blank %}
+    <span class="footer-column__hours">{{ hours }}</span>
+  {% endif %}
+</li>

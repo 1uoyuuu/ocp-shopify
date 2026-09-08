@@ -243,6 +243,27 @@
     display: contents;
   }
 
+  /*
+   * A column of links that carry hours lays out the same way the schedule
+   * does — two columns, names and times each aligned with their own — rather
+   * than as a link with text trailing after it. Same grid, so the two read
+   * as one kind of thing wherever they sit in the footer.
+   */
+  .ocp-footer .footer-column__list--paired {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: start;
+    gap: 0 2.5rem;
+  }
+
+  .ocp-footer .footer-column__pair {
+    display: contents;
+  }
+
+  .ocp-footer .footer-column__hours {
+    font-weight: 400;
+  }
+
   .ocp-footer .footer-schedule__name,
   .ocp-footer .footer-schedule__value {
     margin: 0;
