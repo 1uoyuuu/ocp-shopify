@@ -71,6 +71,7 @@
         },
         "locations": {
           "type": "footer-schedule",
+          "disabled": true,
           "settings": {
             "heading": "Locations & hours",
             "rows": "OCP Crows Nest | Daily 6:30–15:00\nOCP Artarmon | Mon–Fri 6:00–14:30 · Sat–Sun 7:00–15:30\nOCP Victoria Cross | Mon–Fri 6:30–15:00 · Sat–Sun 8:00–14:00\nOCP George St | Mon–Fri 7:30–16:00\nOCP Docklands | Mon–Fri 7:00–16:00 · Sat 8:00–14:00",
