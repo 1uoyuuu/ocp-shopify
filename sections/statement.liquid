@@ -220,11 +220,13 @@
     min-width: 0;
 
     /* The cards read against the panel, not against the page's colour
-       scheme — otherwise their titles and prices come out in the brand blue
-       over white. Reuses the section's own text colour rather than adding a
-       second setting that could drift away from it. */
-    --color-foreground: var(--statement-text, #111111);
-    color: var(--statement-text, #111111);
+       scheme. That started out as a way to keep their titles and prices off
+       the brand blue; the section is now set in it deliberately, so what this
+       does today is hold them to whatever the panel's text colour is — one
+       setting for the paragraph, the link and the cards, with no second one
+       to drift away from it. */
+    --color-foreground: var(--statement-text, #0f80be);
+    color: var(--statement-text, #0f80be);
   }
 
   /*
@@ -461,7 +463,7 @@
       "type": "color",
       "id": "text_color",
       "label": "Text",
-      "default": "#111111"
+      "default": "#0f80be"
     },
     {
       "type": "select",

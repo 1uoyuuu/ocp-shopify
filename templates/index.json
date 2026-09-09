@@ -246,7 +246,7 @@
         "products_width": 20,
         "tail": 80,
         "background_color": "#ffffff",
-        "text_color": "#111111",
+        "text_color": "#0f80be",
         "font": "heading",
         "dim": 22,
         "overlap": 100,
