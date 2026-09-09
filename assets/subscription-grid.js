@@ -1,7 +1,9 @@
 import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-container';
 
 /**
- * The subscription grid: a held heading, and the coffees drifting up over it.
+ * The subscription grid: copy held in the middle of the screen while the
+ * coffees drift up past it, and a handover partway through from the heading
+ * to what the subscription actually asks.
  *
  * Four things move, and they are deliberately kept apart.
  *
@@ -53,10 +55,16 @@ const ENTRANCE_END = [0.0, 0.05];
  * grid trails the cursor rather than being welded to it. */
 const DRIFT_EASE = 0.09;
 
-/** Share of a screen the held heading takes to shrink once the grid starts,
- * and the run it takes to fade at the end of the stage. */
-const PIN_SETTLE = 0.45;
-const PIN_LEAVE = 0.4;
+/**
+ * Where in the held run the copy changes over, as a share of it.
+ *
+ * Late, and over a short window: the heading has the first half to itself,
+ * the swap happens with a third of the grid still to come, and what it asks
+ * for is what the reader is left holding. Measured against the run the copy
+ * is actually held for — the stage less one screen — so it lands in the same
+ * place however tall the grid turns out to be.
+ */
+const HANDOVER = [0.5, 0.68];
 
 const BASE_FRAME_MS = 1000 / 60;
 
@@ -79,7 +87,9 @@ class SubscriptionGrid extends HTMLElement {
   /** @type {HTMLElement | null} */
   #stage = null;
   /** @type {HTMLElement | null} */
-  #pin = null;
+  #title = null;
+  /** @type {HTMLElement | null} */
+  #detail = null;
   /** @type {IntersectionObserver | null} */
   #watcher = null;
 
@@ -93,11 +103,11 @@ class SubscriptionGrid extends HTMLElement {
    */
   #inView = true;
   #pointer = { targetX: 0, targetY: 0, x: 0, y: 0 };
-  #pinScale = 0.6;
 
   connectedCallback() {
     this.#stage = this.querySelector('[ref="stage"]');
-    this.#pin = this.querySelector('[ref="pin"]');
+    this.#title = this.querySelector('[ref="title"]');
+    this.#detail = this.querySelector('[ref="detail"]');
 
     // The composition the stylesheet already describes is the finished one.
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -123,8 +133,10 @@ class SubscriptionGrid extends HTMLElement {
 
     if (!this.#slots.length) return;
 
-    const scale = parseFloat(getComputedStyle(this).getPropertyValue('--subscription-pin-scale'));
-    if (Number.isFinite(scale) && scale > 0) this.#pinScale = scale;
+    // Only now does the pinned, cross-faded layout apply. Until this, and for
+    // a reader who has asked for less motion, both pieces of copy are simply
+    // stacked and both are read.
+    this.dataset.driven = '';
 
     this.#bindScroll();
     scrollContainerMediaQuery.addEventListener('change', this.#bindScroll);
@@ -284,22 +296,33 @@ class SubscriptionGrid extends HTMLElement {
   }
 
   /**
-   * Shrinks the held heading as the grid arrives over it, then fades it as the
-   * stage runs out. The scale is keyed to the top of the stage and the fade to
-   * the bottom, so the two never overlap however tall the grid is.
+   * Hands the held copy over: the heading out, what it asks for in, both in
+   * the same place in the middle of the screen.
+   *
+   * Progress is measured against the run the copy is held for — the stage's
+   * height less the one screen the sticky element occupies — which is exactly
+   * how far the reader scrolls while it stays put.
    *
    * @param {number} height
    */
   #hold(height) {
-    if (!this.#stage || !this.#pin) return;
+    if (!this.#stage || !this.#title || !this.#detail) return;
 
     const rect = this.#stage.getBoundingClientRect();
+    const run = rect.height - height;
+    if (run <= 0) return;
 
-    const arrived = clamp(-rect.top / (height * PIN_SETTLE), 0, 1);
-    const leaving = clamp((height - rect.bottom) / (height * PIN_LEAVE), 0, 1);
+    const [from, to] = HANDOVER;
+    const held = clamp(-rect.top / run, 0, 1);
+    const swapped = clamp((held - from) / (to - from), 0, 1);
 
-    this.#pin.style.setProperty('--pin-scale', `${1 - (1 - this.#pinScale) * arrived}`);
-    this.#pin.style.setProperty('--pin-opacity', `${1 - leaving}`);
+    this.#title.style.opacity = `${1 - swapped}`;
+    this.#detail.style.opacity = `${swapped}`;
+
+    // Whichever is more present is the one that takes a click. Toggling an
+    // attribute rather than writing pointer-events keeps the rule in the
+    // stylesheet with the rest of the layout.
+    this.#detail.toggleAttribute('data-live', swapped > 0.5);
   }
 }
 

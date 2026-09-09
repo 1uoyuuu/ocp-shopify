@@ -269,8 +269,7 @@
         "label_font": "subheading",
         "padding-block-start": 100,
         "padding-block-end": 96,
-        "collection": "frontpage",
-        "pin_scale": 60
+        "collection": "frontpage"
       }
     }
   },

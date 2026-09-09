@@ -61,7 +61,6 @@
     --subscription-padding-end: {{ section.settings.padding-block-end }}px;
     --subscription-align: {{ align }};
     --subscription-items: {{ items }};
-    --subscription-pin-scale: {{ section.settings.pin_scale | divided_by: 100.0 }};
   "
 >
   {%- comment -%}
@@ -72,10 +71,16 @@
     class="subscription__stage"
     ref="stage"
   >
+    {%- comment -%}
+      Both pieces of copy are held in the same place, one over the other, and
+      the scroll hands over from the first to the second. They are one element
+      so they cannot drift apart: whatever is showing is centred in the
+      viewport, and the coffees go on passing around it either way.
+    {%- endcomment -%}
     <div class="subscription__pin">
       <header
-        class="subscription__header"
-        ref="pin"
+        class="subscription__copy subscription__copy--title"
+        ref="title"
       >
         {% if section.settings.eyebrow != blank %}
           <p class="subscription__eyebrow">{{ section.settings.eyebrow }}</p>
@@ -85,6 +90,35 @@
           <h2 class="subscription__heading">{{ section.settings.heading }}</h2>
         {% endif %}
       </header>
+
+      <div
+        class="subscription__copy subscription__copy--detail"
+        ref="detail"
+      >
+        {% if section.settings.intro != blank %}
+          <div class="subscription__intro">{{ section.settings.intro }}</div>
+        {% endif %}
+
+        {% if section.settings.cta_label != blank %}
+          {% if section.settings.cta_link != blank %}
+            <a
+              class="subscription__cta"
+              href="{{ section.settings.cta_link }}"
+            >
+              {{- section.settings.cta_label -}}
+            </a>
+          {% else %}
+            {%- comment -%}
+              No destination set yet, so this renders as plain text rather than
+              a link that would reload the page. The layout still reads as
+              finished in the editor.
+            {%- endcomment -%}
+            <span class="subscription__cta subscription__cta--inert">
+              {{- section.settings.cta_label -}}
+            </span>
+          {% endif %}
+        {% endif %}
+      </div>
     </div>
 
     <div class="subscription__grid">
@@ -159,33 +193,6 @@
     </div>
   </div>
 
-  <div class="subscription__screen subscription__screen--detail">
-    <div class="subscription__inner">
-      {% if section.settings.intro != blank %}
-        <div class="subscription__intro">{{ section.settings.intro }}</div>
-      {% endif %}
-
-      {% if section.settings.cta_label != blank %}
-        {% if section.settings.cta_link != blank %}
-          <a
-            class="subscription__cta"
-            href="{{ section.settings.cta_link }}"
-          >
-            {{- section.settings.cta_label -}}
-          </a>
-        {% else %}
-          {%- comment -%}
-            No destination set yet, so this renders as plain text rather than
-            a link that would reload the page. The layout still reads as
-            finished in the editor.
-          {%- endcomment -%}
-          <span class="subscription__cta subscription__cta--inert">
-            {{- section.settings.cta_label -}}
-          </span>
-        {% endif %}
-      {% endif %}
-    </div>
-  </div>
 </subscription-grid>
 
 <script
@@ -213,34 +220,68 @@
   }
 
   /*
-   * Its own height is taken back out of the flow, so the grid below decides
-   * where the first row lands rather than starting a screen down. It is the
-   * grid that moves; this only ever sits in the middle of the viewport.
+   * Undriven, the two pieces of copy simply sit one after the other and are
+   * both read. That is the state the section is in before the script runs,
+   * and the one it stays in for a reader who has asked for less motion — a
+   * layout that depends on a fade to reveal half its words has no business
+   * being the default.
    */
   .subscription__pin {
+    display: flex;
+    flex-direction: column;
+    align-items: var(--subscription-items, center);
+    gap: clamp(3rem, 10vh, 8rem);
+    padding-block: 12lvh;
+  }
+
+  .subscription__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: var(--subscription-items, center);
+    gap: clamp(2.5rem, 6vw, 5rem);
+    text-align: var(--subscription-align, center);
+  }
+
+  /*
+   * Driven: held in the middle of the screen, its own height taken back out
+   * of the flow so the grid below decides where the first row lands rather
+   * than starting a screen down. It is the grid that moves; this only ever
+   * sits in the middle of the viewport.
+   *
+   * Scoped through the host rather than layered on top of the rules above, so
+   * it wins on specificity and not on where it happens to land in a bundle
+   * this theme concatenates in an order we do not control.
+   */
+  subscription-grid[data-driven] .subscription__pin {
     position: sticky;
     top: 0;
     z-index: 0;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
     height: 100lvh;
     margin-block-end: -100lvh;
+    padding-block: 0;
 
-    /* Decoration behaves, but the heading must not eat clicks meant for the
-       page underneath it once it has faded out. */
+    /* Decoration behaves: whichever copy is faded out must not eat clicks
+       meant for the one that is showing. */
     pointer-events: none;
   }
 
-  .subscription__header {
-    text-align: var(--subscription-align, center);
+  /* One cell, both in it — so the handover is a cross-fade in place rather
+     than one piece of copy moving aside for another. */
+  subscription-grid[data-driven] .subscription__copy {
+    grid-area: 1 / 1;
+    will-change: opacity;
+  }
 
-    /* Written by subscription-grid.js. Stated here so the composition is
-       right before it runs, and stays right if it never does. */
-    opacity: var(--pin-opacity, 1);
-    scale: var(--pin-scale, 1);
-    will-change: scale, opacity;
+  subscription-grid[data-driven] .subscription__copy--detail {
+    opacity: 0;
+  }
+
+  /* Only the copy that is actually showing takes the click. */
+  subscription-grid[data-driven] .subscription__copy--detail[data-live] {
+    pointer-events: auto;
   }
 
   /* ---- The grid --------------------------------------------------------- */
@@ -263,7 +304,11 @@
     /* Clears the held heading before the first row reaches it, and leaves
        the last row somewhere to travel before the paragraph. */
     margin-block-start: 55lvh;
-    padding-block: 25lvh 30lvh;
+
+    /* The tail is what the second piece of copy is read against: the handover
+       happens with a third of the grid still to come, so the coffees are
+       still passing when it arrives rather than leaving it on a blank page. */
+    padding-block: 25lvh calc(60lvh + var(--subscription-padding-end, 96px));
   }
 
   @media screen and (min-width: 990px) {
@@ -385,26 +430,6 @@
 
   /* ---- What it asks ----------------------------------------------------- */
 
-  .subscription__screen--detail {
-    position: relative;
-    z-index: 1;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100lvh;
-    padding-block-end: var(--subscription-padding-end, 96px);
-  }
-
-  .subscription__inner {
-    display: flex;
-    flex-direction: column;
-    align-items: var(--subscription-items, center);
-    gap: clamp(2.5rem, 6vw, 5rem);
-    width: 100%;
-    text-align: var(--subscription-align, center);
-  }
-
   .subscription__eyebrow {
     margin: 0;
     font-family: var(--subscription-label-font);
@@ -470,11 +495,6 @@
     .subscription-slot__media {
       transform: none;
     }
-
-    .subscription__header {
-      scale: 1;
-      opacity: 1;
-    }
   }
 {% endstylesheet %}
 
@@ -521,17 +541,6 @@
       "id": "collection",
       "label": "Coffees",
       "info": "Their images fill the arrangement in order and repeat, so a short collection still fills it."
-    },
-    {
-      "type": "range",
-      "id": "pin_scale",
-      "label": "Heading size once the grid arrives",
-      "info": "How far the held heading shrinks as the coffees rise over it.",
-      "min": 40,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "default": 60
     },
     {
       "type": "header",
