@@ -247,7 +247,18 @@
   .hero-video__cue {
     position: absolute;
     left: 50%;
-    bottom: 12%;
+
+    /*
+     * Measured off the *small* viewport, not the section.
+     *
+     * The section is 100lvh — the tallest the viewport gets — so a plain 12%
+     * puts the cue 12% above an edge that is behind the browser's bottom bar
+     * whenever that bar is showing. Which is exactly when a reader first
+     * arrives. Adding back the difference between the two viewports lifts it
+     * clear by the height of the bar, and comes to the same 12% on a desktop,
+     * where the two are equal.
+     */
+    bottom: calc(100lvh - 100svh + 12svh);
     z-index: 2;
 
     display: flex;

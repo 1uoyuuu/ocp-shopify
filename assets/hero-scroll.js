@@ -96,6 +96,10 @@ const CUE_START_EPSILON = 0.002;
  */
 const CUE_PLAYOUT_SECONDS = 2;
 
+/** How far a finger may travel and still count as a tap rather than a swipe
+ * that happened to begin on the cue. */
+const TAP_SLOP = 10;
+
 /** Below this much remaining progress there is nothing left to see. */
 const SETTLE = 0.0005;
 
@@ -234,6 +238,13 @@ class HeroScrollComponent extends HTMLElement {
         this.#startEasing();
       },
       preventDefault: true,
+
+      // Without this the cue cannot be tapped. preventDefault on a touch
+      // start cancels the click the browser would have synthesised from it,
+      // so on a phone the button did nothing while the same button worked
+      // with a mouse — the wheel path never needed a click to survive.
+      // Observer re-issues the click itself when the finger did not travel.
+      allowClicks: true,
     });
 
     // Observer starts enabled, and with preventDefault it would swallow the
@@ -248,6 +259,9 @@ class HeroScrollComponent extends HTMLElement {
 
     window.addEventListener('resize', this.#resizeListener);
     this.cue?.addEventListener('click', this.#onCueClick);
+    // A finger's own path to the same handler — see #onCueTouchEnd.
+    this.cue?.addEventListener('touchstart', this.#onCueTouchStart, { passive: true });
+    this.cue?.addEventListener('touchend', this.#onCueTouchEnd, { passive: true });
 
     // Where the video lands depends on the width of the words either side of
     // it, so a timeline built against fallback font metrics goes stale the
@@ -265,7 +279,50 @@ class HeroScrollComponent extends HTMLElement {
     scrollContainerMediaQuery.removeEventListener('change', this.#bindScrollListener);
     window.removeEventListener('resize', this.#resizeListener);
     this.cue?.removeEventListener('click', this.#onCueClick);
+    this.cue?.removeEventListener('touchstart', this.#onCueTouchStart);
+    this.cue?.removeEventListener('touchend', this.#onCueTouchEnd);
   }
+
+  /**
+   * Where a finger went down on the cue, while one is down.
+   * @type {{x: number, y: number} | null}
+   */
+  #tapStart = null;
+
+  /** @param {TouchEvent} event */
+  #onCueTouchStart = (event) => {
+    const touch = event.changedTouches[0];
+    this.#tapStart = touch ? { x: touch.clientX, y: touch.clientY } : null;
+  };
+
+  /**
+   * The cue's second way in, for touch.
+   *
+   * Observer holds the page with `preventDefault`, and preventing a touch
+   * start is what cancels the click the browser would otherwise synthesise
+   * from the tap — so with a finger the button did nothing while the same
+   * button worked with a mouse, whose wheel never needed a click to survive.
+   * `allowClicks` asks Observer to re-issue that click, and this asks for
+   * nothing: it reads the tap itself.
+   *
+   * Both are wired, and both are safe, because #onCueClick returns
+   * immediately once a playout is running — whichever arrives first does the
+   * work and the other is a no-op.
+   *
+   * A swipe that merely began on the cue is not a tap, hence the slop test.
+   *
+   * @param {TouchEvent} event
+   */
+  #onCueTouchEnd = (event) => {
+    const start = this.#tapStart;
+    this.#tapStart = null;
+
+    const touch = event.changedTouches[0];
+    if (!start || !touch) return;
+    if (Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > TAP_SLOP) return;
+
+    this.#onCueClick();
+  };
 
   /**
    * Sends the playhead to the end rather than jumping the page there. The

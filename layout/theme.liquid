@@ -56,7 +56,14 @@
       before anything it is covering, and nothing may become a containing
       block for it.
     {%- endcomment -%}
-    {% if settings.preloader_enabled %}
+    {%- comment -%}
+      The home page only. It is the opening of the site, not a loading screen:
+      arriving on a product from a search result and being held for two seconds
+      by an animation of the logo is a toll, not a welcome. Second visits reach
+      the home page too, but the cover is short and the assets are cached by
+      then, so it is the one place the wait buys something.
+    {%- endcomment -%}
+    {% if settings.preloader_enabled and request.page_type == 'index' %}
       {% render 'preloader' %}
     {% endif %}
 
