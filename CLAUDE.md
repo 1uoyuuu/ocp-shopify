@@ -526,6 +526,20 @@ until a menu is created in Shopify admin and selected.
   `preventDefault` would otherwise swallow the wheel on a page that was never
   locked.
 
+**Inlined SVG**
+- `inline_asset_content` pastes the *same ids* every time it is rendered. Two
+  copies of one SVG on a page (the wordmark is in both `site-logo` and the
+  preloader) means duplicate ids, and every `url(#id)` reference in both
+  copies resolves to whichever is **first in document order**.
+- That is not harmless when the first copy can be hidden. `visibility`
+  inherits into a `<clipPath>`'s children, and a clipPath whose children are
+  hidden clips *everything* — so hiding the preloader clipped the hero logo
+  out of existence. It looks like the logo was deleted, not like a clip.
+- Figma exports a full-viewBox `<clipPath>` on almost everything; it does no
+  work, since the outer `<svg>` already clips at its own viewport. Strip it
+  rather than making the id unique. If a reference is genuinely needed, the
+  snippet has to rewrite the id per render.
+
 **Verification**
 - **Never byte-compare a JSON template against the store.** Shopify rewrites
   `templates/*.json`, `sections/*-group.json` and `config/settings_data.json`
