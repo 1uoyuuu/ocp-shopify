@@ -2,10 +2,16 @@
  * The opening: the arrow alone, then ONLY, then the full lockup, then away.
  *
  * The wordmark is one drawing whose letters are separate paths, so the three
- * states are the same artwork with more of it showing each time — and the
- * arrow, being the Y, never moves on the page. That is the whole idea: the
- * words grow around a mark that stays where it is. Cross-fading three centred
- * lockups would have been simpler and would have thrown that away.
+ * states are the same artwork with more of it showing each time: every letter
+ * is the same size in all three, because there is only ever one drawing at
+ * one scale. Cross-fading three separately sized lockups would have been
+ * simpler and would have thrown that away — the letters would jump size
+ * between states, which is exactly what must not happen.
+ *
+ * Each state is centred on what it is currently showing, so the arrow sits in
+ * the middle alone, then to the right of ONLY, then a third of the way into
+ * the finished lockup. It is the artwork that slides, not the letters that
+ * resize.
  *
  * Everything about the timing is in CSS custom properties, and the cover
  * carries a CSS fallback that hides it whatever happens here — a preloader

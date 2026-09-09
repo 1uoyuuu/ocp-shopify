@@ -92,9 +92,14 @@
     }
   }
 
+  /* Wide, because the first state is one glyph out of twenty-one: at any
+     size where the finished lockup looks modest, the arrow alone is a speck.
+     The letters never change size — the mark is drawn once, this is the size
+     it is drawn at — so this is the only lever on how legible the opening
+     frame is. */
   .preloader__mark {
     display: block;
-    width: min(34rem, 62vw);
+    width: min(64rem, 86vw);
   }
 
   /* The slide that keeps the arrow centred as the words appear either side.
