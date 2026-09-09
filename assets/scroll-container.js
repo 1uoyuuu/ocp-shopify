@@ -75,19 +75,50 @@ function saveScrollPosition() {
 window.addEventListener('pagehide', saveScrollPosition);
 
 /**
+ * How long to keep waiting for the page to reach the height it had.
+ *
+ * Sections here measure themselves — the statement's height is its text plus
+ * however far its products have to travel, which is not known until the cards
+ * have laid out — so on a fresh load the document grows for a moment after
+ * everything has run.
+ */
+const RESTORE_WINDOW_MS = 1200;
+
+/** How often to look again while waiting. Short enough not to be seen. */
+const RESTORE_RETRY_MS = 50;
+
+/**
  * Restores a saved scroll position onto the current scroll container.
  *
+ * Refuses rather than clamps. `Math.min(saved, max)` looks harmless and is
+ * not: while the document is still growing the saved position is beyond its
+ * end, and clamping lands on the last pixel of the page — which is how a
+ * refresh from halfway down arrived in the footer. Waiting for the height is
+ * the answer, and the top is a better wrong answer than the bottom.
+ *
  * @param {number} savedScrollTop
+ * @param {number} [deadline] Retry until this timestamp while the page is short.
  */
-function restoreSavedScrollTop(savedScrollTop) {
+function restoreSavedScrollTop(savedScrollTop, deadline = 0) {
   if (!Number.isFinite(savedScrollTop) || savedScrollTop < 0) return;
 
   const container = getScrollContainer();
   const maxScrollTop = Math.max(0, container.scrollHeight - container.clientHeight);
-  const targetScrollTop = Math.min(savedScrollTop, maxScrollTop);
+
+  if (savedScrollTop > maxScrollTop) {
+    // Only while nobody has moved yet: a reader who has started scrolling has
+    // said where they want to be more recently than the last page did.
+    if (deadline && performance.now() < deadline && container.scrollTop === 0) {
+      // A timer, not a frame: requestAnimationFrame does not run in a hidden
+      // tab, and a restore that quietly never happens is the same bug in a
+      // different coat.
+      setTimeout(() => restoreSavedScrollTop(savedScrollTop, deadline), RESTORE_RETRY_MS);
+    }
+    return;
+  }
 
   // Use scrollTo with 'instant' to override CSS scroll-behavior: smooth on .page-wrapper
-  container.scrollTo({ top: targetScrollTop, behavior: 'instant' });
+  container.scrollTo({ top: savedScrollTop, behavior: 'instant' });
 }
 
 window.addEventListener('pageshow', () => {
@@ -95,7 +126,7 @@ window.addEventListener('pageshow', () => {
   if (scrollTop == null) return;
 
   requestAnimationFrame(() => {
-    restoreSavedScrollTop(scrollTop);
+    restoreSavedScrollTop(scrollTop, performance.now() + RESTORE_WINDOW_MS);
   });
 });
 

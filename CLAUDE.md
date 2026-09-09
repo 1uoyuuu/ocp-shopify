@@ -511,6 +511,21 @@ until a menu is created in Shopify admin and selected.
   a section offers. `sections/product-list.liquid` renders `_product-card`
   without declaring it.
 
+**Scroll restoration**
+- Sections here measure their own height — the statement's is its text plus
+  however far its products have to travel — so the document keeps growing for
+  a moment after everything has run. A restore that clamps
+  (`Math.min(saved, max)`) therefore lands on the **last pixel of the page**
+  when the saved position is beyond a document still settling. That is how a
+  refresh from halfway down arrived in the footer. `restoreSavedScrollTop`
+  waits for the height instead and refuses rather than clamping: the top is a
+  better wrong answer than the bottom.
+- The hero intro locks the page at the top on connect, which would undo any
+  restore. It skips the lock when there is a position to return to, and
+  disables Observer explicitly on that path — Observer starts enabled and
+  `preventDefault` would otherwise swallow the wheel on a page that was never
+  locked.
+
 **Verification**
 - **Never byte-compare a JSON template against the store.** Shopify rewrites
   `templates/*.json`, `sections/*-group.json` and `config/settings_data.json`
