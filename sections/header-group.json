@@ -100,7 +100,8 @@
         "text_color_transparent_product": "",
         "enable_transparent_header_collection": false,
         "collection_inverse_logo": false,
-        "text_color_transparent_collection": ""
+        "text_color_transparent_collection": "",
+        "blend_dark_color": "#ffffff"
       }
     }
   },

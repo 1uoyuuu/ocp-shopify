@@ -1,15 +1,14 @@
 import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-container';
 
 /**
- * Marks the header when what sits behind it is light.
+ * Marks the header when the section behind it is light, so it can take one of
+ * two colours rather than being computed from the backdrop.
  *
- * `mix-blend-mode: difference` turns the header's white into |255 - backdrop|,
- * which over a white section is 0 — black. No blend can be told to do
- * something else there: landing on the brand blue over white would need a
- * source of rgb(240,127,65), and that same source shows as orange over a dark
- * section. One colour cannot produce both, because the blend has no idea what
- * it is over. So the backdrop is measured instead, and the blend is switched
- * off where it would come out black.
+ * It used to switch a `difference` blend off here and leave it on everywhere
+ * else. A blend has no knowledge of what it sits over, so it could not be
+ * asked for a particular colour — over the brand blue it resolved to orange,
+ * and over a pale product card to black. Two colours chosen outright is what
+ * the site wanted; this decides which.
  */
 
 /** Relative luminance past which a backdrop counts as light. Set above the
@@ -22,7 +21,19 @@ const LIGHT_THRESHOLD = 0.72;
  * under one of them doesn't flip the whole row. */
 const SAMPLES = [0.08, 0.5, 0.92];
 
-/** Media has its own colours and is exactly what difference is for. */
+/**
+ * How much of the width something must span to count as the backdrop.
+ *
+ * The header follows the *section* it is over, not whatever happens to be
+ * travelling under one of the sample points. A section background or a
+ * full-screen panel spans the page; a product card, a heading, a scattered
+ * bag does not. Without this the statement's product column voted every time
+ * a card passed under the cart, and the header flickered between the panel
+ * behind it and the card in front.
+ */
+const BACKDROP_MIN_WIDTH = 0.8;
+
+/** Media has colours of its own that cannot be read from a computed style. */
 const MEDIA = new Set(['VIDEO', 'IMG', 'CANVAS', 'SVG', 'PICTURE']);
 
 /** Fixed overlays that sit over the page rather than being part of it. The
@@ -97,6 +108,9 @@ class HeaderTone extends HTMLElement {
   /**
    * The luminance of what is actually visible under a point.
    *
+   * Only something spanning most of the page counts, so the section behind
+   * decides and the content in front of it does not.
+   *
    * This walks the hit stack — every element under the point, nearest
    * first — rather than the ancestor chain of the topmost one. A section's
    * colour is often painted by an absolutely positioned sibling of its
@@ -114,7 +128,15 @@ class HeaderTone extends HTMLElement {
     for (const element of document.elementsFromPoint(x, y)) {
       if (element.closest(OVERLAYS)) continue;
 
-      // Media has its own colours and is what difference is for.
+      // Narrow things are content sitting on the section, not the section.
+      // This has to come before the media test, or a product photograph would
+      // still stop the walk and be read as an unknowable backdrop.
+      if (element.getBoundingClientRect().width < window.innerWidth * BACKDROP_MIN_WIDTH) {
+        continue;
+      }
+
+      // Full-bleed media — the hero's video — cannot be read from a computed
+      // style, and is dark enough in practice to take the dark treatment.
       if (MEDIA.has(element.tagName)) return null;
 
       const colour = parse(getComputedStyle(element).backgroundColor);
@@ -138,8 +160,8 @@ class HeaderTone extends HTMLElement {
     const width = window.innerWidth;
 
     // Every sample has to agree. An unreadable one — media, or nothing but
-    // transparency all the way up — counts as not light, which leaves the
-    // blend doing what it already did.
+    // transparency all the way up — counts as not light, which is the
+    // treatment that works over a video.
     const light = SAMPLES.every((fraction) => {
       const luminance = this.#luminanceAt(width * fraction, y);
       return luminance !== null && luminance >= LIGHT_THRESHOLD;

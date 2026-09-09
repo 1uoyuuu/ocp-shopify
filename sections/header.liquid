@@ -361,11 +361,24 @@
   {% endif %}
   style="
     {%- comment -%}
-      Used where the blend is switched off over a light section — see the
-      [data-over-light] rules below. Declared in the element's one style
-      attribute; a second would simply be dropped.
+      The header's two colours — see the [data-over-light] rules below.
+      Declared in the element's one style attribute; a second would simply be
+      dropped.
     {%- endcomment -%}
     --header-light-color: {{ section.settings.blend_light_color | default: '#0f80be' }};
+    --header-dark-color: {{ section.settings.blend_dark_color | default: '#ffffff' }};
+    {%- comment -%}
+      The same two as component triplets. Shadows and the low-opacity fills
+      inside the header read `--color-foreground-rgb`, so setting only the
+      colour would leave those resolving against whatever the section behind
+      happens to inherit.
+    {%- endcomment -%}
+    --header-light-color-rgb:
+      {%- if section.settings.blend_light_color != blank %} {{ section.settings.blend_light_color.red }} {{ section.settings.blend_light_color.green }} {{ section.settings.blend_light_color.blue }}
+      {%- else %} 15 128 190{% endif %};
+    --header-dark-color-rgb:
+      {%- if section.settings.blend_dark_color != blank %} {{ section.settings.blend_dark_color.red }} {{ section.settings.blend_dark_color.green }} {{ section.settings.blend_dark_color.blue }}
+      {%- else %} 255 255 255{% endif %};
     --color-background-top-row: rgba({{ section.settings.background_color_top.rgba | default: settings.page_background_color.rgba }});
     --color-background-bottom-row: rgba({{ section.settings.background_color_bottom.rgba | default: settings.page_background_color.rgba }});
     {% if transparent and text_color_transparent != blank %}
@@ -656,24 +669,19 @@
     z-index: var(--layer-menu-drawer);
   }
 
-  /* Difference blending inverts the header against whatever is behind it, so
-     it stays readable over both the pale hero video and dark sections
-     without anything having to track the section colours.
+  /* The header takes one of two colours and never anything in between.
 
-     It has to sit on .header-section, not on #header-component: an element
-     blends with the backdrop of its *parent* stacking context, and
-     .header-section is one (position + z-index). Applied inside it, the
-     header would blend against an empty context and do nothing visible. */
-  .header-section:has(#header-component[data-blend]) {
-    mix-blend-mode: difference;
-  }
+     It used to blend: `mix-blend-mode: difference` inverted whatever was
+     behind it, which reads well over a dark video and nowhere else. Over the
+     brand blue it resolved to orange, over the product cards' pale surface to
+     black, and it flickered between the two as a card travelled under the
+     cart — because a blend has no knowledge of what it sits over and cannot
+     be asked for a particular answer. header-tone.js measures the backdrop
+     instead and this picks a colour outright.
 
-  /* Difference is |backdrop - source|, so only a white source inverts
-     cleanly (255 - backdrop); a dark source barely shifts anything.
-
-     `--color` has to be set alongside `--color-foreground`: the row carries
-     a `color-custom-*` class from contrast-override, which renders its
-     colour as `var(--color, var(--color-foreground))` — with `--color`
+     Both are set through `--color` as well as `--color-foreground`: the row
+     carries a `color-custom-*` class from contrast-override, which renders
+     its colour as `var(--color, var(--color-foreground))` — with `--color`
      defined, the fallback never runs and overriding only the foreground
      variable has no effect on the text.
 
@@ -682,55 +690,26 @@
   .header-section:has(#header-component[data-blend]):not(:has(.menu-drawer-container[open]))
     :is(.header__row, .site-logo) {
     /* stylelint-disable declaration-no-important */
-    --color: #ffffff !important;
-    --color-rgb: 255 255 255 !important;
-    --color-foreground: #ffffff !important;
-    --color-foreground-rgb: 255 255 255 !important;
+    --color: var(--header-dark-color) !important;
+    --color-rgb: var(--header-dark-color-rgb) !important;
+    --color-foreground: var(--header-dark-color) !important;
+    --color-foreground-rgb: var(--header-dark-color-rgb) !important;
     /* stylelint-enable declaration-no-important */
   }
 
-  /* Over a light section, difference resolves the header's white to
-     |255 - 255| = 0 — black. No blend can be asked for something else
-     there: landing on the brand blue over white would need a source of
-     rgb(240,127,65), and that same source shows as orange over a dark
-     section. One source colour cannot do both, because a blend has no
-     knowledge of what it sits over.
-
-     So header-tone.js measures the backdrop and flags it, and here the
-     blend is simply turned off and a colour set outright. The extra
-     attribute in the :has() takes this to (1,3,0) against the rule turning
-     difference on at (1,2,0) — and leaves it below the drawer-open rule at
-     (1,4,0), which still has the last word. */
-  .header-section:has(#header-component[data-blend][data-over-light]) {
-    mix-blend-mode: normal;
-  }
-
+  /* Over a light section, the other one. The extra attribute in the :has()
+     takes this to (1,3,0) against the rule above at (1,2,0), so it wins on
+     specificity rather than on being written second. */
   .header-section:has(#header-component[data-blend][data-over-light]):not(
       :has(.menu-drawer-container[open])
     )
     :is(.header__row, .site-logo) {
     /* stylelint-disable declaration-no-important */
     --color: var(--header-light-color) !important;
+    --color-rgb: var(--header-light-color-rgb) !important;
     --color-foreground: var(--header-light-color) !important;
+    --color-foreground-rgb: var(--header-light-color-rgb) !important;
     /* stylelint-enable declaration-no-important */
-  }
-
-  /* Off while the menu panel is open — the panel is a descendant, so it
-     would blend too, and its own background/text colours are already
-     chosen to work together.
-
-     Keyed on [open] rather than .menu-open because the close drops
-     .menu-open up front and only tears down [open] once the panel has
-     finished sliding away. Keyed on the class, difference would switch back
-     on for the whole of that slide and invert the panel on its way out.
-
-     The [data-blend] half is repeated here purely for weight: the rule
-     turning difference *on* scores (1,2,0) through its `#header-component`
-     argument, so a plain `.header-section:has(...)` at (0,3,0) loses to it
-     and the blend never switched off at all. Matching its id and adding
-     this :has() takes it to (1,4,0). */
-  .header-section:has(#header-component[data-blend]):has(.menu-drawer-container[open]) {
-    mix-blend-mode: normal;
   }
 
   /* need default values for non-flash transitions on first overflow menu open */
@@ -1574,17 +1553,25 @@
     },
     {
       "type": "color",
+      "id": "blend_dark_color",
+      "label": "Header colour over dark sections",
+      "info": "Used over dark sections and over video, where the header cannot borrow the page.",
+      "default": "#ffffff",
+      "visible_if": "{{ section.settings.blend_with_page }}"
+    },
+    {
+      "type": "color",
       "id": "blend_light_color",
       "label": "Header colour over light sections",
-      "info": "Blending turns the header black over a white section, since it inverts what is behind it. This colour is used there instead.",
+      "info": "Used wherever the section behind the header is light.",
       "default": "#0f80be",
       "visible_if": "{{ section.settings.blend_with_page }}"
     },
     {
       "type": "checkbox",
       "id": "blend_with_page",
-      "label": "Invert against the page",
-      "info": "Blends the header with whatever is behind it so it stays readable over both light and dark sections. Forces the header text to white, and turns itself off while the menu panel is open.",
+      "label": "Follow the page",
+      "info": "Colours the header from whatever section is behind it, so it stays readable over both light and dark. Turns itself off while the menu panel is open.",
       "default": true
     },
     {
@@ -1717,7 +1704,7 @@
       ],
       "default": "icon"
     },
-{
+    {
       "type": "select",
       "id": "actions_font",
       "label": "t:settings.font",
