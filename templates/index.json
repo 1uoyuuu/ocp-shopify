@@ -88,7 +88,6 @@
         "font": "heading",
         "scrim": 20,
         "scroll_distance": 530,
-        "snap": true,
         "split_direction": "horizontal",
         "part_distance": 100
       }

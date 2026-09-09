@@ -222,11 +222,66 @@ function getIntersectionRoot() {
   return null;
 }
 
+/**
+ * The largest the viewport gets, in pixels — `100lvh`, resolved.
+ *
+ * Every full-screen frame on this site is sized in `lvh` so it always covers
+ * (see CLAUDE.md), but the scroll-driven sections were measuring their
+ * progress against `window.innerHeight`, which is the *current* height. On a
+ * phone those are different numbers, and the difference appears and vanishes
+ * as the address bar hides — mid-scroll, by about ninety pixels. Progress
+ * computed against a height that changes while you scroll lurches every time
+ * it changes.
+ *
+ * Measured rather than parsed: a custom property's computed value is its token
+ * stream, and there is no other way to ask what `lvh` currently means. Cached,
+ * because it only changes when the window really resizes — a bar retracting is
+ * not that, which is the whole point.
+ */
+let viewportHeight = 0;
+
+function measureViewportHeight() {
+  const probe = document.createElement('div');
+
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  const height = probe.getBoundingClientRect().height;
+  probe.remove();
+
+  return height > 0 ? height : window.innerHeight;
+}
+
+/** @returns {number} */
+function getViewportHeight() {
+  if (!viewportHeight) viewportHeight = measureViewportHeight();
+  return viewportHeight;
+}
+
+/*
+ * Dropped on any resize and measured again on next use.
+ *
+ * No attempt is made to tell a real resize from an address bar retracting,
+ * because none is needed: `lvh` is the viewport with all retractable browser
+ * UI already discounted, so it does not change when that UI comes and goes.
+ * Re-measuring during a bar transition returns the same number it had.
+ * Guessing instead — ignoring height changes below some threshold — would
+ * have left a desktop window dragged slightly shorter measuring the old
+ * height until something bigger happened.
+ */
+window.addEventListener(
+  'resize',
+  () => {
+    viewportHeight = 0;
+  },
+  { passive: true }
+);
+
 export {
   getScrollContainer,
   getScrollTop,
   scrollTo,
   getScrollEventTarget,
   getIntersectionRoot,
+  getViewportHeight,
   SQUEEZE_QUERY as scrollContainerMediaQuery,
 };

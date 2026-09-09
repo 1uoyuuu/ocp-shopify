@@ -1,4 +1,4 @@
-import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-container';
+import { getScrollEventTarget, scrollContainerMediaQuery, getViewportHeight } from '@theme/scroll-container';
 
 /**
  * The subscription grid: copy held in the middle of the screen while the
@@ -150,6 +150,13 @@ class SubscriptionGrid extends HTMLElement {
           el,
           travel,
           media,
+          /** The last values written, so an unchanged one is not written
+           * again. A style write invalidates whether or not the value differs,
+           * and the large slots never travel at all — they were being handed
+           * the same `translate3d(0, 0, 0)` on every scroll event. */
+          wroteTravel: '',
+          wroteOpacity: '',
+          wroteDrift: '',
           tier: TIERS[/** @type {keyof typeof TIERS} */ (el.dataset.tier ?? 'm')] ?? TIERS.m,
           // Rolled once, here, rather than per frame: the entrance is meant to
           // be uneven, not unsteady.
@@ -255,15 +262,23 @@ class SubscriptionGrid extends HTMLElement {
    * @returns {boolean}
    */
   #step(now) {
-    const height = window.innerHeight;
+    // The grid is sized in `lvh` and so is everything it is measured against.
+    // window.innerHeight is the *current* height, which on a phone drops by
+    // the address bar's height partway through a scroll — and every offset
+    // here is a multiple of it, so the whole grid would jump when it did.
+    const height = getViewportHeight();
     if (!height) return false;
 
     const elapsed = Math.max(now - this.#lastTime, 0);
     this.#lastTime = now;
 
+    // The stage's rect is taken before anything is written, for the same
+    // reason the two passes below are split: a read after a write is a flush.
+    const stage = this.#stage?.getBoundingClientRect() ?? null;
+
     const settling = this.#drift(elapsed);
     this.#carry(height);
-    this.#hold(height);
+    this.#hold(height, stage);
 
     return settling;
   }
@@ -284,9 +299,13 @@ class SubscriptionGrid extends HTMLElement {
 
     for (const slot of this.#slots) {
       const { drift } = slot.tier;
-      slot.media.style.transform = `translate3d(${this.#pointer.x * drift}px, ${
-        this.#pointer.y * drift
-      }px, 0)`;
+      const transform = `translate3d(${this.#pointer.x * drift}px, ${this.#pointer.y * drift}px, 0)`;
+
+      // Every scroll event runs this pass, and the pointer is usually still.
+      if (transform === slot.wroteDrift) continue;
+
+      slot.media.style.transform = transform;
+      slot.wroteDrift = transform;
     }
 
     return (
@@ -304,21 +323,39 @@ class SubscriptionGrid extends HTMLElement {
    * @param {number} height
    */
   #carry(height) {
+    // Read everything, then write everything.
+    //
+    // Reading a rect flushes whatever styles are pending, so a loop that reads
+    // one slot and writes it before reading the next forces the engine through
+    // that flush fourteen times per scroll event. Interleaved, this was the
+    // most expensive thing on the page during a scroll; split, it is one.
+    const measured = [];
+
     for (const slot of this.#slots) {
       const rect = slot.el.getBoundingClientRect();
 
-      // Nothing to write for a slot that is not on screen, and its transform is
-      // already where it was left.
+      // Nothing to write for a slot that is nowhere near the screen, and its
+      // transform is already where it was left.
       if (rect.bottom < -height || rect.top > height * 2) continue;
 
-      const centre = (rect.top + rect.height / 2) / height;
+      measured.push({ slot, top: rect.top / height, centre: (rect.top + rect.height / 2) / height });
+    }
+
+    for (const { slot, top, centre } of measured) {
       const carried = (1 - 2 * clamp(centre, -0.5, 1.5)) * slot.tier.travel * height;
 
-      slot.travel.style.transform = `translate3d(0, ${carried}px, 0)`;
+      const transform = `translate3d(0, ${carried}px, 0)`;
+      if (transform !== slot.wroteTravel) {
+        slot.travel.style.transform = transform;
+        slot.wroteTravel = transform;
+      }
 
       if (slot.from > slot.to) {
-        const top = rect.top / height;
-        slot.travel.style.opacity = `${clamp((slot.from - top) / (slot.from - slot.to), 0, 1)}`;
+        const opacity = `${clamp((slot.from - top) / (slot.from - slot.to), 0, 1)}`;
+        if (opacity !== slot.wroteOpacity) {
+          slot.travel.style.opacity = opacity;
+          slot.wroteOpacity = opacity;
+        }
       }
     }
   }
@@ -332,11 +369,11 @@ class SubscriptionGrid extends HTMLElement {
    * how far the reader scrolls while it stays put.
    *
    * @param {number} height
+   * @param {DOMRect | null} rect The stage, measured before this pass wrote anything.
    */
-  #hold(height) {
-    if (!this.#stage || !this.#title || !this.#detail) return;
+  #hold(height, rect) {
+    if (!rect || !this.#title || !this.#detail) return;
 
-    const rect = this.#stage.getBoundingClientRect();
     const run = rect.height - height;
     if (run <= 0) return;
 

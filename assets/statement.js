@@ -1,4 +1,4 @@
-import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-container';
+import { getScrollEventTarget, scrollContainerMediaQuery, getViewportHeight } from '@theme/scroll-container';
 
 /**
  * A panel that rises into the viewport carrying a paragraph, which fills in
@@ -55,9 +55,15 @@ const uprightMedia = matchMedia('(min-width: 990px)');
  * word a set delay keeps the pace steady however long the paragraph is. */
 const STAGGER_SPREAD = 0.75;
 
-/** Fraction of the remaining distance closed per 60fps frame, so the fill
- * trails the scroll rather than being welded to it. */
-const EASE = 0.14;
+/**
+ * Fraction of the remaining distance closed per 60fps frame, so the fill
+ * trails the scroll rather than being welded to it.
+ *
+ * 0.14 trailed by about a third of a second, which on a fast flick meant the
+ * animation fell well behind and then rushed to catch up — and the catch-up is
+ * what read as a snap. 0.28 keeps the softness and halves the lag.
+ */
+const EASE = 0.28;
 const BASE_FRAME_MS = 1000 / 60;
 const SETTLE = 0.0005;
 
@@ -185,7 +191,7 @@ class ScrollStatement extends HTMLElement {
 
     // The sticky frame is exactly one screen tall, so measuring it resolves
     // whatever `lvh` currently means without restating the unit here.
-    const screen = this.#viewport?.getBoundingClientRect().height || window.innerHeight;
+    const screen = this.#viewport?.getBoundingClientRect().height || getViewportHeight();
     const units = parseFloat(getComputedStyle(this).getPropertyValue('--statement-tail-units'));
     this.#tail = ((Number.isFinite(units) ? units : 0) / 100) * screen;
 
@@ -197,7 +203,7 @@ class ScrollStatement extends HTMLElement {
     // is the products' place within the panel and nothing else.
     const inset = upright ? columnRect.top - panelRect.top : columnRect.left - panelRect.left;
 
-    const extent = upright ? window.innerHeight : window.innerWidth;
+    const extent = upright ? getViewportHeight() : window.innerWidth;
 
     // Measured off the last card rather than the track's own scroll size.
     // The track is sized to its content, so its scroll size is only ever its
@@ -231,7 +237,11 @@ class ScrollStatement extends HTMLElement {
     const rect = this.getBoundingClientRect();
     if (!rect.height) return;
 
-    this.#target = clamp((window.innerHeight - rect.top) / rect.height, 0, 1);
+    // Measured in the unit the section is sized in. window.innerHeight is the
+    // *current* height, which on a phone changes by the address bar's height
+    // partway through a scroll — and progress computed against a moving
+    // number moves with it.
+    this.#target = clamp((getViewportHeight() - rect.top) / rect.height, 0, 1);
 
     // The section is long enough for three things in order: the read, the
     // products, then a pause. Each beat is placed against what is left after

@@ -1,4 +1,4 @@
-import { getScrollEventTarget, scrollContainerMediaQuery } from '@theme/scroll-container';
+import { getScrollEventTarget, scrollContainerMediaQuery, getViewportHeight } from '@theme/scroll-container';
 
 /**
  * A scroll-driven sequence in four beats: a flat panel rises into the
@@ -78,7 +78,16 @@ const STAGGER_SPREAD = 0.55;
 
 /** Fraction of the remaining distance closed per 60fps frame, so the
  * sequence trails the scroll rather than being welded to it. */
-const EASE = 0.14;
+/**
+ * Fraction of the remaining distance closed per 60fps frame.
+ *
+ * The animation trails the scroll rather than being welded to it, which is
+ * the intended feel — but at 0.14 it took about a third of a second to arrive,
+ * so a fast flick left it a long way behind and then it rushed to catch up.
+ * That catch-up is what read as a snap. At 0.28 it is within a frame or two of
+ * the finger while still arriving softly rather than locking to it.
+ */
+const EASE = 0.28;
 const BASE_FRAME_MS = 1000 / 60;
 const SETTLE = 0.0005;
 
@@ -103,8 +112,6 @@ class PanelReveal extends HTMLElement {
   #words = [];
   /** @type {HTMLElement[]} */
   #slides = [];
-  /** @type {HTMLElement[]} */
-  #snapPoints = [];
 
   connectedCallback() {
     this.#words = /** @type {HTMLElement[]} */ ([...this.querySelectorAll('[data-word]')]);
@@ -119,9 +126,6 @@ class PanelReveal extends HTMLElement {
     this.#read();
     this.#current = this.#target;
     this.#apply();
-
-    this.#buildSnapPoints();
-    this.#placeSnapPoints();
 
     // The clock starts here, not at zero: the first step is a scroll away
     // and would otherwise be handed the whole time since the page loaded.
@@ -159,7 +163,11 @@ class PanelReveal extends HTMLElement {
     const rect = this.getBoundingClientRect();
     if (!rect.height) return;
 
-    const scrolled = (window.innerHeight - rect.top) / rect.height;
+    // The section is sized in `lvh`, so its progress is measured in `lvh`
+    // too. Against window.innerHeight the two disagree by the height of a
+    // phone's address bar, and disagree by a different amount the moment it
+    // retracts — which is mid-scroll, and reads as a lurch.
+    const scrolled = (getViewportHeight() - rect.top) / rect.height;
 
     this.#target = clamp(scrolled / SEQUENCE_END, 0, 1);
   }
@@ -179,7 +187,6 @@ class PanelReveal extends HTMLElement {
   };
 
   #onResize = () => {
-    this.#placeSnapPoints();
     this.#read();
     this.#current = this.#target;
     this.#apply();
@@ -236,53 +243,6 @@ class PanelReveal extends HTMLElement {
     });
 
     this.#applySlides(progress);
-  }
-
-  /**
-   * One snap target per location, so a scroll settles on a shop rather than
-   * between two.
-   *
-   * They are made here rather than written into the markup because their
-   * positions come from the same constants that time the sequence — put
-   * them in Liquid and the two would drift the first time a beat moved.
-   */
-  #buildSnapPoints() {
-    if (this.#snapPoints.length) return;
-
-    this.#snapPoints = this.#slides.map(() => {
-      const point = document.createElement('div');
-      point.className = 'panel-reveal__snap';
-      point.setAttribute('aria-hidden', 'true');
-      this.appendChild(point);
-      return point;
-    });
-  }
-
-  /**
-   * Progress is (viewportHeight - rect.top) / height, so for the sequence to
-   * read `settled` the section's top must sit at `viewportHeight -
-   * settled * height`. A snap target aligned to the top of the screen puts
-   * it exactly there when it sits that far down the section.
-   */
-  #placeSnapPoints() {
-    const height = this.getBoundingClientRect().height;
-    const count = this.#slides.length;
-    if (!height || !count) return;
-
-    const span = (1 - SLIDES_FROM) / count;
-    const fade = span * CROSSFADE;
-    const nameFade = span * NAME_FADE;
-
-    this.#snapPoints.forEach((point, index) => {
-      const from = SLIDES_FROM + index * span;
-
-      // Where that location has fully arrived — image swapped, name up.
-      const settled = index === 0 ? BEATS.media[1] + nameFade : from + fade + nameFade;
-
-      // `settled` is a point in the sequence; the section's own scroll runs
-      // SEQUENCE_END times longer than that.
-      point.style.top = `${settled * SEQUENCE_END * height - window.innerHeight}px`;
-    });
   }
 
   /**

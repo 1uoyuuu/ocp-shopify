@@ -208,7 +208,20 @@ class HeroScrollComponent extends HTMLElement {
     this.#observer = Observer.create({
       target: window,
       type: 'wheel,touch',
+      onDragStart: () => {
+        this.#dragging = true;
+        this.#killFling();
+      },
       onChangeY: (self) => {
+        // The intro is over but the finger that finished it is still down:
+        // scroll the page with what is left of the gesture. See #unlock.
+        if (this.#handingOff) {
+          // Same sign correction as below — a finger moving down reports a
+          // positive deltaY and means "back", so the page goes the other way.
+          scrollTo({ top: getScrollTop() - self.deltaY, behavior: 'instant' });
+          return;
+        }
+
         if (!this.#locked) return;
 
         // Observer does *not* reconcile the two input types: its drag
@@ -228,6 +241,13 @@ class HeroScrollComponent extends HTMLElement {
         this.#startEasing();
       },
       onDragEnd: (self) => {
+        this.#dragging = false;
+
+        if (this.#handingOff) {
+          this.#endHandOff(self);
+          return;
+        }
+
         if (!this.#locked) return;
 
         // Let the flick run on, the way lifting a finger off a scrolling
@@ -271,6 +291,7 @@ class HeroScrollComponent extends HTMLElement {
 
   disconnectedCallback() {
     this.#killPlayout();
+    this.#killFling();
     this.#observer?.kill();
     this.#timeline?.kill();
     this.#unlock();
@@ -694,6 +715,7 @@ class HeroScrollComponent extends HTMLElement {
 
   #startEasing() {
     this.#killPlayout();
+    this.#killFling();
     if (this.#frame) return;
     this.#lastTime = performance.now();
     this.#frame = requestAnimationFrame(this.#ease);
@@ -759,12 +781,66 @@ class HeroScrollComponent extends HTMLElement {
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;
     document.documentElement.classList.remove('hero-intro-locked');
+
+    /*
+     * A finger that is still down cannot simply be handed back to the browser.
+     * The lock holds the page with `touch-action: none`, and touch-action is
+     * decided at touchstart — dropping it now does not change the browser's
+     * mind about the gesture already in flight. So the intro would finish,
+     * the page would stay where it was, and nothing would move until the
+     * reader lifted their finger and swiped a second time. That dead beat is
+     * the whole of why the hero did not feel continuous on a phone; a wheel
+     * never had it, which is why a desktop did not show it.
+     *
+     * Instead the gesture carries on doing what it was already doing, only
+     * against the page rather than the timeline, until the finger lifts.
+     */
+    if (this.#dragging) {
+      this.#handingOff = true;
+      return;
+    }
+
     this.#observer?.disable();
+  }
+
+  /**
+   * Ends a handed-off gesture and lets the fling run on, the way lifting a
+   * finger off a scrolling page does — otherwise the page would stop dead the
+   * instant the finger left it, which is its own kind of wrong.
+   *
+   * @param {{ velocityY: number }} self
+   */
+  #endHandOff(self) {
+    this.#handingOff = false;
+    this.#observer?.disable();
+
+    const gsap = window.gsap;
+    const distance = -self.velocityY * MOMENTUM_SECONDS;
+    if (!gsap || Math.abs(distance) < 1) return;
+
+    const proxy = { top: getScrollTop() };
+
+    this.#fling = gsap.to(proxy, {
+      top: proxy.top + distance,
+      duration: MOMENTUM_SECONDS,
+      ease: 'power2.out',
+      onUpdate: () => scrollTo({ top: proxy.top, behavior: 'instant' }),
+      onComplete: () => {
+        this.#fling = undefined;
+      },
+    });
+  }
+
+  #killFling() {
+    if (!this.#fling) return;
+    this.#fling.kill();
+    this.#fling = undefined;
   }
 
   #resizeListener = () => {
     // The timeline is about to be rebuilt from under it.
     this.#killPlayout();
+    this.#killFling();
     const wasLocked = this.#locked;
     this.#buildTimeline();
     if (!wasLocked) this.#timeline.progress(1);
@@ -775,6 +851,18 @@ class HeroScrollComponent extends HTMLElement {
 
   /** @type {import('gsap/Observer').Observer | undefined} */
   #observer;
+
+  /** Whether a finger is currently down. Observer only reports drags for
+   * touch, so this is never true for a wheel. */
+  #dragging = false;
+
+  /** Whether the intro finished mid-gesture and the rest of that gesture is
+   * being turned into page scrolling from here. */
+  #handingOff = false;
+
+  /** The fling that carries a handed-off gesture on after the finger lifts.
+   * @type {object | undefined} */
+  #fling;
 
   /** The cue's playout, while one is running. @type {object | undefined} */
   #playout;
