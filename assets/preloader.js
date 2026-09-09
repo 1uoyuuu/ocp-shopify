@@ -51,7 +51,11 @@ class SitePreloader extends HTMLElement {
       return;
     }
 
-    this.#show([ONLY_LETTERS - 1]);
+    // The first state is not a move, it is where the sequence starts. Without
+    // this the artwork sits at rest — the whole lockup's centre — and the
+    // arrow visibly slides in from a third of the way left before the words
+    // it belongs to have appeared.
+    this.#show([ONLY_LETTERS - 1], { immediate: true });
 
     const step = this.#ms('--preloader-step', 600);
     this.#after(step, () => this.#show(this.#range(0, ONLY_LETTERS)));
@@ -106,8 +110,9 @@ class SitePreloader extends HTMLElement {
    * it stays right if the wordmark is ever redrawn.
    *
    * @param {number[]} indices
+   * @param {{ immediate?: boolean }} [options]
    */
-  #show(indices) {
+  #show(indices, options = {}) {
     const visible = new Set(indices);
 
     this.#letters.forEach((letter, index) => {
@@ -126,6 +131,17 @@ class SitePreloader extends HTMLElement {
     // drawing is exactly this element wide, so one is the other and the shift
     // holds at whatever size the mark is rendered.
     const shift = (width / 2 - (left + right) / 2) / width;
+
+    if (options.immediate) {
+      this.#stage.style.transition = 'none';
+      this.#stage.style.transform = `translateX(${shift * 100}%)`;
+      // Read something laid out, so the browser cannot fold the two styles
+      // together and animate straight past the state we just set.
+      void this.#stage.offsetWidth;
+      this.#stage.style.transition = '';
+      return;
+    }
+
     this.#stage.style.transform = `translateX(${shift * 100}%)`;
   }
 

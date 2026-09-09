@@ -124,12 +124,24 @@
   }
 
   /*
-   * Before the script has sorted the letters, nothing has been given an
-   * opacity — so the whole lockup would flash up at once. Hidden until it is
-   * driven, and shown outright if it never is.
+   * The escape hatch, if the script never upgrades the element: show the
+   * lockup rather than sit on an empty blue field.
+   *
+   * It has to be on a *delay*. `:not(:defined)` is true on every load, not
+   * only the broken one — a `type="module"` script is deferred by definition,
+   * so a rule that reveals the letters outright reveals ONLY COFFEE PROJECT
+   * for the whole wait, and the sequence then starts by taking letters away.
+   * The delay is the preloader's own duration: a script that has not run by
+   * the time the cover would have finished is not going to run.
    */
   site-preloader:not(:defined) .preloader__art path {
-    opacity: 1;
+    animation: preloader-fallback-letters 0.4s ease var(--preloader-duration, 2000ms) forwards;
+  }
+
+  @keyframes preloader-fallback-letters {
+    to {
+      opacity: 1;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
