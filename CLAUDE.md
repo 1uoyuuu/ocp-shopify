@@ -512,6 +512,20 @@ until a menu is created in Shopify admin and selected.
   without declaring it.
 
 **Scroll restoration**
+- **A refresh always goes to the top.** `scroll-container.js` reads the
+  navigation timing entry, and on `type === 'reload'` it drops `scrollTop`
+  from the history entry and scrolls the container to 0. Back and forward
+  still restore — the reader is returning to somewhere they had reached,
+  where a refresh is starting the page over, and landing halfway down means
+  arriving in the middle of animations meant to be met from the top.
+- Clearing the saved value is deliberately how this is done, rather than
+  teaching each consumer about reloads: `hero-scroll.js` reads the same
+  `history.state.scrollTop` to decide whether to lock the page for its intro,
+  and it imports `scroll-container`, so that module has already run.
+- The `pageshow` guard checks `event.persisted`. A bfcache restore reuses the
+  document, so the navigation entry still says how it was *first* loaded — a
+  page that was once reloaded would otherwise be thrown to the top every time
+  the reader pressed Back into it.
 - Sections here measure their own height — the statement's is its text plus
   however far its products have to travel — so the document keeps growing for
   a moment after everything has run. A restore that clamps
@@ -524,7 +538,8 @@ until a menu is created in Shopify admin and selected.
   restore. It skips the lock when there is a position to return to, and
   disables Observer explicitly on that path — Observer starts enabled and
   `preventDefault` would otherwise swallow the wheel on a page that was never
-  locked.
+  locked. On a refresh there is no saved position any more, so the intro
+  locks and plays as it does on a first visit.
 
 **Inlined SVG**
 - `inline_asset_content` pastes the *same ids* every time it is rendered. Two

@@ -52,13 +52,43 @@ function scrollTo(options) {
  * `pageshow` fires on every navigation (both bfcache and fresh loads). `popstate` is not
  * used because it doesn't fire for cross-document back navigation.
  */
-if (SQUEEZE_QUERY.matches) {
+/**
+ * Whether this document arrived by reloading rather than by navigating.
+ *
+ * A refresh starts the page over: the hero plays its intro, the sections run
+ * their own reveals, and landing halfway down means arriving in the middle of
+ * animations that are meant to be met from the top. Back and forward are the
+ * opposite case — the reader is returning to somewhere they had already got
+ * to — so only the reload is sent to the top.
+ *
+ * `performance.navigation.type` is the old spelling of this and is
+ * deprecated; the navigation timing entry is the current one.
+ */
+const RELOADED = performance.getEntriesByType('navigation')[0]?.type === 'reload';
+
+if (SQUEEZE_QUERY.matches || RELOADED) {
   history.scrollRestoration = 'manual';
 }
 
 SQUEEZE_QUERY.addEventListener('change', () => {
-  history.scrollRestoration = SQUEEZE_QUERY.matches ? 'manual' : 'auto';
+  history.scrollRestoration = SQUEEZE_QUERY.matches || RELOADED ? 'manual' : 'auto';
 });
+
+/**
+ * Drops the position saved on this history entry, so nothing downstream can
+ * act on it. hero-scroll.js reads the same key to decide whether to lock the
+ * page for its intro — clearing it here rather than teaching each reader
+ * about reloads keeps that decision in one place.
+ */
+if (RELOADED) {
+  try {
+    const state = typeof history.state === 'object' && history.state !== null ? { ...history.state } : {};
+    delete state.scrollTop;
+    history.replaceState(state, '');
+  } catch (_) {
+    // replaceState can throw if the state object exceeds the browser's size limit
+  }
+}
 
 /**
  * Saves the current scroll position into the current history entry.
@@ -121,7 +151,19 @@ function restoreSavedScrollTop(savedScrollTop, deadline = 0) {
   container.scrollTo({ top: savedScrollTop, behavior: 'instant' });
 }
 
-window.addEventListener('pageshow', () => {
+window.addEventListener('pageshow', (event) => {
+  // `persisted` is a bfcache restore — the same document coming back through
+  // history. The navigation entry still describes how that document was first
+  // loaded, so a page that was once reloaded would otherwise be thrown to the
+  // top every time the reader pressed Back into it.
+  if (RELOADED && !event.persisted) {
+    // Native restoration is left on below 990px, and turning it off is a
+    // request the browser honours around load rather than a guarantee. Saying
+    // where to be is cheap and settles it.
+    getScrollContainer().scrollTo({ top: 0, behavior: 'instant' });
+    return;
+  }
+
   const scrollTop = history.state?.scrollTop;
   if (scrollTop == null) return;
 
