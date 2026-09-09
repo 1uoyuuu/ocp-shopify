@@ -156,7 +156,20 @@ class HeroScrollComponent extends HTMLElement {
     }
 
     this.#buildTimeline();
-    this.#lock();
+
+    // A refresh should leave the reader where they were. The theme saves the
+    // scroll position on pagehide and puts it back on pageshow — but the
+    // intro locks the page at the top before that happens, and a locked page
+    // has nowhere to restore to. So where there is a position to return to,
+    // the intro is set to its finished state and never takes the page at all.
+    if (this.#hasPositionToRestore()) {
+      this.#progress = 1;
+      this.#target = 1;
+      this.#timeline.progress(1);
+      this.#reflectCue();
+    } else {
+      this.#lock();
+    }
 
     this.#observer = Observer.create({
       target: window,
@@ -192,6 +205,11 @@ class HeroScrollComponent extends HTMLElement {
       },
       preventDefault: true,
     });
+
+    // Observer starts enabled, and with preventDefault it would swallow the
+    // wheel on a page that was never locked. #unlock is what normally stands
+    // it down; on the restore path there is no unlock to do it.
+    if (!this.#locked) this.#observer.disable();
 
     this.#bindScrollListener();
     // Which element actually scrolls (and so which one emits scroll events)
@@ -285,6 +303,21 @@ class HeroScrollComponent extends HTMLElement {
     this.#scrollEventTarget = getScrollEventTarget();
     this.#scrollEventTarget.addEventListener('scroll', this.#scrollListener, { passive: true });
   };
+
+  /**
+   * Whether this load has somewhere to go other than the top.
+   *
+   * Both are checked because the two restore paths run at different moments:
+   * the theme's own runs in a frame after pageshow, so the position is still
+   * only in history state when this asks; a browser restoring natively has
+   * already moved the container by then.
+   *
+   * @returns {boolean}
+   */
+  #hasPositionToRestore() {
+    const saved = Number(history.state?.scrollTop);
+    return (Number.isFinite(saved) && saved > 0) || getScrollTop() > 0;
+  }
 
   /**
    * Scrolling back to the very top re-locks the intro at its end, so it can

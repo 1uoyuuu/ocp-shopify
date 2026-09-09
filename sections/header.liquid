@@ -335,6 +335,29 @@
   .header-section itself only ever goes `position: sticky`, which does not
   create a containing block, so fixed still resolves to the viewport there.
 {%- endcomment -%}
+{%- comment -%}
+  The header's two colours, on the section wrapper rather than on
+  <header-component>.
+
+  Both the header row and the logo are coloured from them, and the logo is a
+  *sibling* of <header-component>, not a descendant — declared there it would
+  inherit to the row and not to the logo, leaving `var(--header-dark-color)`
+  unresolvable on the mark and the whole declaration dropped. The wrapper is
+  the nearest element that is an ancestor of both.
+
+  The rgb triplets come too: shadows and low-opacity fills inside the header
+  read `--color-foreground-rgb`, so setting only the colour would leave those
+  resolving against whatever the section behind happens to inherit.
+{%- endcomment -%}
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --header-light-color: {{ section.settings.blend_light_color | default: '#0f80be' }};
+    --header-dark-color: {{ section.settings.blend_dark_color | default: '#ffffff' }};
+    --header-light-color-rgb: {% if section.settings.blend_light_color != blank %}{{ section.settings.blend_light_color.red }} {{ section.settings.blend_light_color.green }} {{ section.settings.blend_light_color.blue }}{% else %}15 128 190{% endif %};
+    --header-dark-color-rgb: {% if section.settings.blend_dark_color != blank %}{{ section.settings.blend_dark_color.red }} {{ section.settings.blend_dark_color.green }} {{ section.settings.blend_dark_color.blue }}{% else %}255 255 255{% endif %};
+  }
+{% endstyle %}
+
 {% render 'site-logo' %}
 
 <header-component
@@ -360,25 +383,6 @@
     data-transparent-background="{{ background_transparent_color_value }}"
   {% endif %}
   style="
-    {%- comment -%}
-      The header's two colours — see the [data-over-light] rules below.
-      Declared in the element's one style attribute; a second would simply be
-      dropped.
-    {%- endcomment -%}
-    --header-light-color: {{ section.settings.blend_light_color | default: '#0f80be' }};
-    --header-dark-color: {{ section.settings.blend_dark_color | default: '#ffffff' }};
-    {%- comment -%}
-      The same two as component triplets. Shadows and the low-opacity fills
-      inside the header read `--color-foreground-rgb`, so setting only the
-      colour would leave those resolving against whatever the section behind
-      happens to inherit.
-    {%- endcomment -%}
-    --header-light-color-rgb:
-      {%- if section.settings.blend_light_color != blank %} {{ section.settings.blend_light_color.red }} {{ section.settings.blend_light_color.green }} {{ section.settings.blend_light_color.blue }}
-      {%- else %} 15 128 190{% endif %};
-    --header-dark-color-rgb:
-      {%- if section.settings.blend_dark_color != blank %} {{ section.settings.blend_dark_color.red }} {{ section.settings.blend_dark_color.green }} {{ section.settings.blend_dark_color.blue }}
-      {%- else %} 255 255 255{% endif %};
     --color-background-top-row: rgba({{ section.settings.background_color_top.rgba | default: settings.page_background_color.rgba }});
     --color-background-bottom-row: rgba({{ section.settings.background_color_bottom.rgba | default: settings.page_background_color.rgba }});
     {% if transparent and text_color_transparent != blank %}
