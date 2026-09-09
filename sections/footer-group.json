@@ -86,8 +86,7 @@
         "copyright": "",
         "legal_menu": "legal-menu",
         "legal_links": "",
-        "credit": "Made by ycdat.studio",
-        "credit_link": "",
+        "credit": "Made by <a href=\"https://ycdat.studio\" target=\"_blank\" rel=\"noopener\">ycdat.studio</a>",
         "padding-block-start": 60,
         "padding-block-end": 24
       }

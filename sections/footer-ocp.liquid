@@ -79,19 +79,13 @@
         </ul>
       {% endif %}
 
+      {%- comment -%}
+        Rich text rather than a string and a URL beside it, so the link can go
+        on the studio's name instead of round the whole line. "Made by" is not
+        a link to anywhere.
+      {%- endcomment -%}
       {% if section.settings.credit != blank %}
-        <p class="ocp-footer__credit">
-          {%- if section.settings.credit_link != blank -%}
-            <a
-              class="ocp-footer__link"
-              href="{{ section.settings.credit_link }}"
-            >
-              {{- section.settings.credit -}}
-            </a>
-          {%- else -%}
-            {{ section.settings.credit }}
-          {%- endif -%}
-        </p>
+        <p class="ocp-footer__credit">{{ section.settings.credit }}</p>
       {% endif %}
     </div>
 
@@ -235,7 +229,8 @@
   }
 
   .ocp-footer .footer-column__link,
-  .ocp-footer__link {
+  .ocp-footer__link,
+  .ocp-footer__credit a {
     color: inherit;
     text-decoration: none;
     transition: opacity var(--animation-speed, 0.2s) var(--animation-easing, ease);
@@ -248,7 +243,8 @@
    * cursor, and a link with no hover at all is worse than a plain fade.
    */
   .ocp-footer .footer-column__link:not([data-swap-host]):hover,
-  .ocp-footer__link:not([data-swap-host]):hover {
+  .ocp-footer__link:not([data-swap-host]):hover,
+  .ocp-footer__credit a:not([data-swap-host]):hover {
     opacity: 0.65;
   }
 
@@ -514,14 +510,10 @@
       "info": "Used only when no menu is selected. One per line, as: Label | /url"
     },
     {
-      "type": "text",
+      "type": "inline_richtext",
       "id": "credit",
-      "label": "Credit"
-    },
-    {
-      "type": "url",
-      "id": "credit_link",
-      "label": "Credit link"
+      "label": "Credit",
+      "info": "Select the studio's name and use the link button to make just that part a link."
     },
     {
       "type": "header",

@@ -26,6 +26,9 @@ const TARGETS = [
   '.menu-drawer__social-link',
   '.footer-column__link',
   '.ocp-footer__link',
+  // Whatever the credit's rich text makes a link, so the studio's name behaves
+  // like every other link down here rather than being the one that doesn't.
+  '.ocp-footer__credit a',
   '.statement__cta',
   '.subscription__cta',
 ].join(', ');
