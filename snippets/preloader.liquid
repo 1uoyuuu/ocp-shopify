@@ -1,0 +1,141 @@
+{% doc %}
+  The opening cover: the arrow alone, then ONLY, then the full lockup, then
+  it clears to whatever the page is — the hero's video, on the home page.
+
+  Rendered from the layout rather than a section so it covers every page and
+  paints before anything else has a chance to. It is the same wordmark
+  throughout, with more of its letters showing at each step, so the arrow —
+  the Y — holds the centre while the words grow around it.
+{% enddoc %}
+
+{% liquid
+  assign duration = settings.preloader_duration | default: 2000
+  assign step = duration | divided_by: 3
+%}
+
+<site-preloader
+  class="preloader"
+  style="
+    --preloader-background: {{ settings.preloader_background | default: '#0F80BE' }};
+    --preloader-color: {{ settings.preloader_color | default: '#FFFFFF' }};
+    --preloader-duration: {{ duration }}ms;
+    --preloader-step: {{ step }}ms;
+    --preloader-limit: {{ duration | plus: 4000 }}ms;
+  "
+  role="presentation"
+  aria-hidden="true"
+>
+  {%- comment -%}
+    The wordmark whole, not cut apart. Its letters are already separate paths,
+    so the script can show them a group at a time, and the slide that keeps
+    the arrow centred is applied to the <svg> itself — which sidesteps the
+    clip the artwork carries, since a translate inside it would run letters
+    straight into the edge of that clip.
+  {%- endcomment -%}
+  <span class="preloader__mark">
+    <span
+      class="preloader__art"
+      ref="stage"
+    >
+      {% render 'logo-wordmark' %}
+    </span>
+  </span>
+</site-preloader>
+
+<script
+  src="{{ 'preloader.js' | asset_url }}"
+  type="module"
+></script>
+
+{% stylesheet %}
+  /*
+   * Covers everything, including the header and the fixed logo — for the
+   * couple of seconds it is up, it *is* the page. It leaves by fading, so
+   * whatever is behind is already in place underneath rather than arriving
+   * after it.
+   */
+  .preloader {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: var(--preloader-background, #0f80be);
+    color: var(--preloader-color, #ffffff);
+
+    /*
+     * The fallback, and the reason this is an animation rather than a
+     * transition: if the script never runs — it fails, it is blocked, the
+     * element is never upgraded — this still ends. A preloader that cannot
+     * leave is worse than no preloader at all.
+     */
+    animation: preloader-give-up 0.5s ease var(--preloader-limit, 6000ms) forwards;
+  }
+
+  .preloader[data-done] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.5s ease, visibility 0s linear 0.5s;
+
+    /* Done is done: the fallback must not fade it back in. */
+    animation: none;
+  }
+
+  @keyframes preloader-give-up {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  .preloader__mark {
+    display: block;
+    width: min(34rem, 62vw);
+  }
+
+  /* The slide that keeps the arrow centred as the words appear either side.
+     Written as a share of its own width, so it holds at any rendered size —
+     the shift is measured in the drawing's units, and the drawing is exactly
+     this element wide. */
+  .preloader__art {
+    display: block;
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .preloader__art svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .preloader__art path {
+    fill: currentcolor;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+
+  /*
+   * Before the script has sorted the letters, nothing has been given an
+   * opacity — so the whole lockup would flash up at once. Hidden until it is
+   * driven, and shown outright if it never is.
+   */
+  site-preloader:not(:defined) .preloader__art path {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .preloader__art {
+      transition: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .preloader__art path {
+      transition: none;
+    }
+  }
+{% endstylesheet %}

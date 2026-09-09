@@ -104,7 +104,11 @@
       "color1": "#383838",
       "color2": "#f2f2f2"
     },
-    "quick_add": false
+    "quick_add": false,
+    "preloader_enabled": true,
+    "preloader_background": "#0F80BE",
+    "preloader_color": "#FFFFFF",
+    "preloader_duration": 2000
   },
   "presets": {
     "Atelier": {

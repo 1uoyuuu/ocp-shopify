@@ -2116,5 +2116,43 @@
         "default": "equal-width-buttons"
       }
     ]
+  },
+  {
+    "name": "Preloader",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "The opening cover: the arrow, then ONLY, then the full wordmark, before the page appears behind it."
+      },
+      {
+        "type": "checkbox",
+        "id": "preloader_enabled",
+        "label": "Show the preloader",
+        "default": true
+      },
+      {
+        "type": "color",
+        "id": "preloader_background",
+        "label": "Background",
+        "default": "#0F80BE"
+      },
+      {
+        "type": "color",
+        "id": "preloader_color",
+        "label": "Wordmark",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "range",
+        "id": "preloader_duration",
+        "label": "How long it holds",
+        "info": "The least it stays up. It waits for the page as well, so a slow load holds it longer.",
+        "min": 1000,
+        "max": 4000,
+        "step": 250,
+        "unit": "ms",
+        "default": 2000
+      }
+    ]
   }
 ]

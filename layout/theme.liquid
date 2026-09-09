@@ -51,6 +51,15 @@
   </head>
 
   <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
+    {%- comment -%}
+      First thing in the body, and outside .page-wrapper: it has to paint
+      before anything it is covering, and nothing may become a containing
+      block for it.
+    {%- endcomment -%}
+    {% if settings.preloader_enabled %}
+      {% render 'preloader' %}
+    {% endif %}
+
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
 
     {% render 'chat-drawer' %}
