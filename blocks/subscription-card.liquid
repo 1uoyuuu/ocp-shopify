@@ -16,6 +16,20 @@
   if image == blank
     assign image = block.settings.product.featured_image
   endif
+
+  # Where this card sits once the screen is too narrow for the scatter and the
+  # copy to share the middle of it. The arrangement is not restated — the same
+  # Down setting is folded into a band at the top or the bottom, whichever half
+  # it was already in, so the heading has the middle to itself. One set of
+  # positions for a merchant to keep, and a card moved on a wide screen moves
+  # on a narrow one too.
+  assign band = 0.34
+  if block.settings.y < 50
+    assign y_small = block.settings.y | times: band
+  else
+    assign y_small = 100 | minus: block.settings.y | times: band
+    assign y_small = 100 | minus: y_small
+  endif
 %}
 
 <div
@@ -26,6 +40,7 @@
   style="
     --card-x: {{ block.settings.x }}%;
     --card-y: {{ block.settings.y }}%;
+    --card-y-small: {{ y_small }}%;
     --card-width: {{ block.settings.width }}%;
     --card-rotation: {{ block.settings.rotation }}deg;
   "

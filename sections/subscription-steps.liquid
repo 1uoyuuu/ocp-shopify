@@ -425,10 +425,16 @@
    * fixed maximum. Below about 1300px the copy is the wider of the two and
    * the scatter starts landing on it.
    *
-   * So above that the copy is held inside the band, and below 990px, where
-   * doing that would leave it too narrow to read, the cards step aside
-   * instead. Rearranging them would mean a second set of positions to keep
-   * in step with the first, for decoration.
+   * Above 990px the copy is held inside the band. Below it, holding the copy
+   * would leave it too narrow to read, so the scatter moves instead: each
+   * card keeps its place across the screen and folds into a band at the top
+   * or the bottom (--card-y-small, derived in blocks/subscription-card.liquid
+   * from the same Down setting), leaving the middle to the heading.
+   *
+   * They also have to grow. The widths are a share of the viewport, so a bag
+   * set to 8% is a comfortable object on a laptop and a 30px speck on a
+   * phone. The two steps are written as ranges that do not overlap, so
+   * neither depends on coming after the other.
    */
   @media screen and (min-width: 990px) {
     .subscription .subscription__header {
@@ -438,7 +444,20 @@
 
   @media screen and (max-width: 989px) {
     .subscription .subscription-card {
-      display: none;
+      top: var(--card-y-small, var(--card-y, 50%));
+      width: calc(var(--card-width, 12%) * var(--card-scale-small, 1));
+    }
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .subscription .subscription-card {
+      --card-scale-small: 1.6;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .subscription .subscription-card {
+      --card-scale-small: 2.2;
     }
   }
 {% endstylesheet %}
