@@ -33,6 +33,20 @@ const SAMPLES = [0.08, 0.5, 0.92];
  */
 const BACKDROP_MIN_WIDTH = 0.8;
 
+/**
+ * The class hero-scroll.js puts on <html> while the intro holds the page.
+ *
+ * Everything else that changes what sits behind the header does it by
+ * scrolling, and a scroll event is what prompts a fresh reading. The intro is
+ * the exception: it is driven by gestures against a page pinned with
+ * `overflow: clip`, so the stage can grow from a badge back to full-bleed
+ * video without a single scroll event. Left to the scroll listener alone the
+ * header keeps whatever it decided on the way in — blue, from the hero's own
+ * white background at the end of the intro — and holds it while the video
+ * fills the screen behind it.
+ */
+const INTRO_LOCK_CLASS = 'hero-intro-locked';
+
 /** Media has colours of its own that cannot be read from a computed style. */
 const MEDIA = new Set(['VIDEO', 'IMG', 'CANVAS', 'SVG', 'PICTURE']);
 
@@ -66,6 +80,11 @@ function parse(colour) {
 
 class HeaderTone extends HTMLElement {
   #frame = 0;
+  /** While the intro is playing, the reading is retaken every frame. */
+  #introFrame = 0;
+  #watchingIntro = false;
+  /** @type {MutationObserver | null} */
+  #introWatcher = null;
   /** @type {EventTarget | null} */
   #scrollTarget = null;
   /** @type {HTMLElement} The header itself — this element is a marker with
@@ -82,6 +101,16 @@ class HeaderTone extends HTMLElement {
     scrollContainerMediaQuery.addEventListener('change', this.#bindScroll);
     window.addEventListener('resize', this.#schedule);
 
+    // The intro announces itself with a class, so that is what is watched
+    // rather than the hero component, which this has no other reason to know
+    // about.
+    this.#introWatcher = new MutationObserver(this.#syncIntroWatch);
+    this.#introWatcher.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    this.#syncIntroWatch();
+
     this.#schedule();
   }
 
@@ -90,9 +119,45 @@ class HeaderTone extends HTMLElement {
     scrollContainerMediaQuery.removeEventListener('change', this.#bindScroll);
     window.removeEventListener('resize', this.#schedule);
 
+    this.#introWatcher?.disconnect();
+    this.#introWatcher = null;
+    this.#watchingIntro = false;
+
+    cancelAnimationFrame(this.#introFrame);
+    this.#introFrame = 0;
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;
   }
+
+  /**
+   * Starts and stops the per-frame reading as the intro takes and gives back
+   * the page. One more reading on the way out, so the settled composition is
+   * what the header ends on.
+   */
+  #syncIntroWatch = () => {
+    const locked = document.documentElement.classList.contains(INTRO_LOCK_CLASS);
+    if (locked === this.#watchingIntro) return;
+
+    this.#watchingIntro = locked;
+
+    if (locked) {
+      this.#readWhileIntroPlays();
+      return;
+    }
+
+    cancelAnimationFrame(this.#introFrame);
+    this.#introFrame = 0;
+    this.#schedule();
+  };
+
+  #readWhileIntroPlays = () => {
+    // Cleared first, so a starved frame leaves nothing latched behind it.
+    this.#introFrame = 0;
+    if (!this.#watchingIntro) return;
+
+    this.#measure();
+    this.#introFrame = requestAnimationFrame(this.#readWhileIntroPlays);
+  };
 
   #bindScroll = () => {
     this.#scrollTarget?.removeEventListener('scroll', this.#schedule);
