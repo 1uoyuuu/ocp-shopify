@@ -87,7 +87,7 @@
         {% endif %}
 
         {% if section.settings.heading != blank %}
-          <h2 class="subscription__heading">{{ section.settings.heading }}</h2>
+          <h1 class="subscription__heading">{{ section.settings.heading }}</h1>
         {% endif %}
       </header>
 
@@ -242,6 +242,14 @@
     text-align: var(--subscription-align, center);
   }
 
+  /* Tighter than the gap the other copy needs. There it separates a paragraph
+     from a button, two things; here it sets a label over the line it belongs
+     to, which reads as one. Scoped through the section so it beats the rule
+     above on specificity rather than on order. */
+  .subscription .subscription__copy--title {
+    gap: clamp(0.5rem, 1.5vh, 1rem);
+  }
+
   /*
    * Driven: held in the middle of the screen, its own height taken back out
    * of the flow so the grid below decides where the first row lands rather
@@ -260,12 +268,26 @@
     display: grid;
     place-items: center;
     height: 100lvh;
-    margin-block-end: -100lvh;
     padding-block: 0;
 
     /* Decoration behaves: whichever copy is faded out must not eat clicks
        meant for the one that is showing. */
     pointer-events: none;
+  }
+
+  /*
+   * The screen the held copy occupies is taken back here rather than with a
+   * negative margin on the sticky element itself, which is where it used to
+   * be and was wrong: a sticky element's range is its containing block inset
+   * by its own margins, so a -100lvh bottom margin bought it another screen
+   * of sticking *past* the end of the stage — which is how the copy came to
+   * sit over the footer instead of leaving with the section.
+   *
+   * Same arithmetic, on the element that has no say in where the sticking
+   * stops: a screen back, then the offset the first row wants.
+   */
+  subscription-grid[data-driven] .subscription__grid {
+    margin-block-start: -45lvh;
   }
 
   /* One cell, both in it — so the handover is a cross-fade in place rather
@@ -439,13 +461,16 @@
     text-transform: uppercase;
   }
 
+  /* The hero's treatment, to the letter — same size, weight, leading, tracking
+     and case. It is the same voice saying the next thing. */
   .subscription__heading {
-    margin: 0.5em 0 0;
+    margin: 0;
     font-family: var(--subscription-heading-font);
     font-weight: 700;
     font-size: var(--ocp-display-size);
     line-height: var(--ocp-leading-display);
     letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
   }
 
   .subscription__intro {
