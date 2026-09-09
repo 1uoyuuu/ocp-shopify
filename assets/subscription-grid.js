@@ -64,7 +64,35 @@ const DRIFT_EASE = 0.09;
  * is actually held for — the stage less one screen — so it lands in the same
  * place however tall the grid turns out to be.
  */
-const HANDOVER = [0.5, 0.68];
+const HANDOVER = [0.44, 0.74];
+
+/**
+ * The handover is a sequence, not a dissolve: the first line is gone before
+ * the second starts.
+ *
+ * Cross-fading them meant a long stretch with both at half opacity, which
+ * does not read as one line replacing another — it reads as two ghosts on top
+ * of each other, and with the grid moving behind them neither was legible.
+ * These are shares of the window: out by 0.42, nothing until 0.58, then in.
+ * The beat between is about an eighth of a screen of scrolling, short enough
+ * to be a breath and long enough that the two are never both on screen.
+ */
+const COPY_OUT_END = 0.42;
+const COPY_IN_START = 0.58;
+
+/**
+ * How far each line travels while it goes, as a share of the viewport height.
+ *
+ * Both rise: the one leaving lifts away, the one arriving comes up into the
+ * place it left. A fade alone at this size reads as a light being switched;
+ * the movement is what makes it read as one thing giving way to another, and
+ * upward is the direction everything else on this page already moves.
+ */
+const COPY_LIFT = 0.04;
+
+/** Slow at both ends, quickest in the middle. Applied to the opacity and the
+ * travel alike so they arrive together. */
+const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 const BASE_FRAME_MS = 1000 / 60;
 
@@ -314,15 +342,22 @@ class SubscriptionGrid extends HTMLElement {
 
     const [from, to] = HANDOVER;
     const held = clamp(-rect.top / run, 0, 1);
-    const swapped = clamp((held - from) / (to - from), 0, 1);
+    const through = clamp((held - from) / (to - from), 0, 1);
 
-    this.#title.style.opacity = `${1 - swapped}`;
-    this.#detail.style.opacity = `${swapped}`;
+    const leaving = easeInOut(clamp(through / COPY_OUT_END, 0, 1));
+    const arriving = easeInOut(clamp((through - COPY_IN_START) / (1 - COPY_IN_START), 0, 1));
+    const lift = height * COPY_LIFT;
 
-    // Whichever is more present is the one that takes a click. Toggling an
+    this.#title.style.opacity = `${1 - leaving}`;
+    this.#title.style.transform = `translate3d(0, ${-leaving * lift}px, 0)`;
+
+    this.#detail.style.opacity = `${arriving}`;
+    this.#detail.style.transform = `translate3d(0, ${(1 - arriving) * lift}px, 0)`;
+
+    // Only the one that has actually arrived takes a click. Toggling an
     // attribute rather than writing pointer-events keeps the rule in the
     // stylesheet with the rest of the layout.
-    this.#detail.toggleAttribute('data-live', swapped > 0.5);
+    this.#detail.toggleAttribute('data-live', arriving > 0.5);
   }
 }
 
