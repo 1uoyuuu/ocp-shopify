@@ -144,6 +144,18 @@
       --ocp-page-margin: 32px;
     }
 
+    /* How wide the wordmark is drawn when it is the thing on screen rather
+       than a mark in a corner: the preloader's finished lockup, and the
+       hero's opening logo before the intro docks it. One value, because the
+       preloader hands straight over to the hero — if the two disagree the
+       logo visibly jumps size at the moment the cover clears, which is
+       exactly what it did on narrow screens.
+
+       The preloader reads it in CSS; hero-scroll.js resolves it by
+       measurement, since a custom property's computed value is the token
+       `min(64rem, 86vw)` rather than a length. */
+    --ocp-logo-lockup-width: min(64rem, 86vw);
+
     /* Section Heights */
     --section-height-small: 15rem;
     --section-height-medium: 25rem;

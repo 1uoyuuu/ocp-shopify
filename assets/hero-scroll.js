@@ -16,6 +16,10 @@ const DOCKED_SCALE = 0.1;
  * CSS fallback in site-logo.liquid. */
 const DOCKED_CENTER_FALLBACK = 30;
 
+/** Share of the viewport the opening logo falls back to if
+ * --ocp-logo-lockup-width cannot be resolved at all. */
+const LOCKUP_WIDTH_FALLBACK = 0.86;
+
 /**
  * Where the docked logo's centre sits: half the header's height, which is
  * what site-logo.liquid positions it at. Read rather than restated, so the
@@ -28,6 +32,32 @@ function dockedCenterY() {
   const height = parseFloat(getComputedStyle(document.body).getPropertyValue('--header-height'));
 
   return Number.isFinite(height) && height > 0 ? height / 2 : DOCKED_CENTER_FALLBACK;
+}
+
+/**
+ * How wide the wordmark is drawn when it is the thing on screen:
+ * --ocp-logo-lockup-width, which the preloader's finished lockup also uses.
+ * The hero takes over from the cover, so the two have to be one number, and
+ * reading it here is what keeps them from drifting.
+ *
+ * It has to be measured rather than parsed. A custom property's computed
+ * value is its token stream, so getPropertyValue hands back the literal
+ * `min(64rem, 86vw)`; only laying something out at that width resolves the
+ * rem and the vw. Called from #buildTimeline — on connect, on resize, and
+ * once fonts land — never per frame.
+ *
+ * @returns {number}
+ */
+function lockupWidth() {
+  const probe = document.createElement('div');
+
+  probe.style.cssText =
+    'position:fixed;top:0;left:0;visibility:hidden;pointer-events:none;width:var(--ocp-logo-lockup-width)';
+  document.body.appendChild(probe);
+  const width = probe.getBoundingClientRect().width;
+  probe.remove();
+
+  return width > 0 ? width : window.innerWidth * LOCKUP_WIDTH_FALLBACK;
 }
 
 /** How much accumulated gesture distance plays the intro from start to
@@ -337,12 +367,18 @@ class HeroScrollComponent extends HTMLElement {
    * multiplying on top of the CSS default — see LOGO_NATIVE_WIDTH's doc
    * comment for why this is always ≤ ~1, never the docked scale stretched up.
    *
+   * The width is the shared lockup width, so the logo the preloader leaves
+   * on screen is the same size as the one the hero opens with. It used to be
+   * a flat 70% of the viewport, which was smaller than the cover's lockup at
+   * every width below about 1200px — the mark shrank the instant the cover
+   * cleared.
+   *
    * @returns {{y: number, scale: number}}
    */
   #computeOpeningTarget() {
     return {
       y: window.innerHeight / 2 - dockedCenterY(),
-      scale: (window.innerWidth * 0.7) / LOGO_NATIVE_WIDTH,
+      scale: lockupWidth() / LOGO_NATIVE_WIDTH,
     };
   }
 
