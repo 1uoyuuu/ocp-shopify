@@ -1,36 +1,53 @@
 {% comment %}
-  "How the subscription works", built as three choices rather than a block
-  of prose: pick a coffee, a rhythm and an amount, and a summary line
-  assembles what that adds up to.
+  The subscription pitch, built as a grid the reader falls through.
 
-  It explains rather than sells. The store has no selling plans configured,
-  so nothing here can add to cart — the summary is a preview and the call to
-  action hands off to whichever page the merchant points it at.
+  Three beats in one section: the heading alone on a full screen; a broken
+  grid of the coffees drifting up over it while it holds and shrinks; then
+  what the subscription actually asks, and the way in.
 
-  Steps are blocks, so one can be renamed, reordered or added without
-  touching this file. Their numbers come from a CSS counter for the same
-  reason: `content_for 'blocks'` gives no loop index, and hardcoding them
-  would go stale the moment a step moved.
+  The grid is deliberately not a product list. Every slot is a fixed-ratio
+  box placed on an explicit column, so the composition does not depend on the
+  photographs — a bag can be swapped for a taller one and nothing moves. The
+  irregularity is authored in PATTERN below, not random, and products fill it
+  in order and cycle, so a collection of four reads as a wall of fourteen and
+  adding a fifth does not break the arrangement.
+
+  The file is still named for the steps it used to hold. Renaming it would
+  mean changing the section type in templates/index.json in the same commit,
+  which is the one thing this theme's sync is worst at — see CLAUDE.md.
 {% endcomment %}
 
 {% liquid
   assign heading_font = section.settings.heading_font | default: 'heading'
   assign label_font = section.settings.label_font | default: 'subheading'
 
-  # `content_for 'block'` only takes literal strings, so the two kinds can't
-  # be rendered in separate passes — they come out together and are
-  # separated by CSS instead: cards position themselves absolutely and leave
-  # the flow, steps stay in it.
-  assign step_blocks = section.blocks | where: 'type', 'subscription-step'
-
   assign align = section.settings.text_alignment | default: 'center'
   assign items = 'center'
   if align == 'left'
     assign items = 'start'
   endif
+
+  assign products = collections[section.settings.collection].products
+  assign product_count = products.size
+
+  comment
+    One slot per entry: row, column, size, vertical shift as a share of its
+    own height, horizontal nudge as a share of its own width, resting
+    opacity, then the row and column it takes on a narrow screen. A narrow
+    row of 0 drops it there — below 990px the grid is re-composed out of nine
+    of these rather than squeezed into six columns.
+
+    Size decides the span on both grids, but not the same span: three of
+    twelve wide, four of six narrow. A tier that is a quarter of a laptop is
+    two thirds of a phone — held to its share of twelve, the small bags come
+    out at sixty-odd pixels, which is a thumbnail of a coffee bag rather than
+    a coffee bag.
+  endcomment
+  assign pattern = '1,1,l,0,-14,100,1,1|1,4,s,50,0,100,1,5|1,6,m,10,0,40,0,0|1,9,m,-50,0,100,2,2|1,12,s,-50,0,20,0,0|2,1,m,-25,-20,100,3,1|2,3,s,50,0,20,0,0|2,5,m,0,0,100,6,1|2,8,s,-50,0,20,0,0|2,10,l,0,0,100,4,3|3,1,l,0,-10,100,5,1|3,4,s,-50,0,20,0,0|3,9,m,30,0,100,6,4|3,12,s,0,0,20,3,5'
+  assign slots = pattern | split: '|'
 %}
 
-<subscription-steps
+<subscription-grid
   class="subscription"
   style="
     --subscription-background: {{ section.settings.background_color }};
@@ -42,22 +59,24 @@
     --subscription-label-weight: var(--font-{{ label_font }}--weight);
     --subscription-padding-start: {{ section.settings.padding-block-start }}px;
     --subscription-padding-end: {{ section.settings.padding-block-end }}px;
-    --subscription-min-height: {{ section.settings.min_height }}svh;
     --subscription-align: {{ align }};
     --subscription-items: {{ items }};
+    --subscription-pin-scale: {{ section.settings.pin_scale | divided_by: 100.0 }};
   "
 >
   {%- comment -%}
-    Two screens, not two sections: the title and the scatter fill the first,
-    and what the subscription actually asks of the reader waits on the
-    second. One thing in the editor, two beats on the page.
+    The stage is what the heading is sticky within, so it lets go at the end
+    of the grid rather than riding into the paragraph below.
   {%- endcomment -%}
   <div
-    class="subscription__screen subscription__screen--title"
-    ref="scatter"
+    class="subscription__stage"
+    ref="stage"
   >
-    <div class="subscription__inner">
-      <header class="subscription__header">
+    <div class="subscription__pin">
+      <header
+        class="subscription__header"
+        ref="pin"
+      >
         {% if section.settings.eyebrow != blank %}
           <p class="subscription__eyebrow">{{ section.settings.eyebrow }}</p>
         {% endif %}
@@ -68,19 +87,76 @@
       </header>
     </div>
 
-    {%- comment -%}
-      The cards live on this screen so they resolve their position against
-      it. Placed against the whole section they would spread over both, and
-      the paragraph below would be read through coffee bags.
+    <div class="subscription__grid">
+      {% for slot in slots %}
+        {% liquid
+          assign f = slot | split: ','
+          assign row = f[0]
+          assign col = f[1]
+          assign tier = f[2]
+          assign shift = f[3]
+          assign nudge = f[4]
+          assign rest = f[5]
+          assign row_sm = f[6]
+          assign col_sm = f[7]
 
-      With no steps among them the wrapper is `display: contents`, so it adds
-      neither a row nor a gap to the column.
-    {%- endcomment -%}
-    {% if section.blocks.size > 0 %}
-      <div class="subscription__blocks{% if step_blocks.size > 0 %} subscription__steps{% endif %}">
-        {% content_for 'blocks' %}
-      </div>
-    {% endif %}
+          assign image = ''
+          if product_count > 0
+            assign index = forloop.index0 | modulo: product_count
+            assign image = products[index].featured_image
+          endif
+        %}
+        <div
+          class="subscription-slot"
+          data-slot
+          data-tier="{{ tier }}"
+          {% if row_sm == '0' %}
+            data-small="off"
+          {% endif %}
+          aria-hidden="true"
+          style="
+            --slot-row: {{ row }};
+            --slot-col: {{ col }};
+            --slot-row-sm: {{ row_sm }};
+            --slot-col-sm: {{ col_sm }};
+            --slot-shift: {{ shift }}%;
+            --slot-nudge: {{ nudge }}%;
+            --slot-rest: {{ rest | plus: 0 | divided_by: 100.0 }};
+          "
+        >
+          <div class="subscription-slot__frame">
+            {%- comment -%}
+              Two layers, because two things move it: the scroll writes a
+              transform on the first, the pointer writes one on the second.
+              One element would mean the two fighting over one property.
+            {%- endcomment -%}
+            <div
+              class="subscription-slot__travel"
+              data-travel
+            >
+              <div
+                class="subscription-slot__media"
+                data-media
+              >
+                {% if image != blank %}
+                  {{
+                    image
+                    | image_url: width: 900
+                    | image_tag:
+                      class: 'subscription-slot__image',
+                      loading: 'lazy',
+                      sizes: '(min-width: 990px) 25vw, 50vw',
+                      widths: '200,300,450,600,900'
+                  }}
+                {% else %}
+                  <div class="subscription-slot__placeholder"></div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
   </div>
 
   <div class="subscription__screen subscription__screen--detail">
@@ -89,58 +165,33 @@
         <div class="subscription__intro">{{ section.settings.intro }}</div>
       {% endif %}
 
-      <div class="subscription__summary">
-        {% if step_blocks.size > 0 %}
-          {% if section.settings.summary_label != blank %}
-            <p class="subscription__summary-label">{{ section.settings.summary_label }}</p>
-          {% endif %}
-
+      {% if section.settings.cta_label != blank %}
+        {% if section.settings.cta_link != blank %}
+          <a
+            class="subscription__cta"
+            href="{{ section.settings.cta_link }}"
+          >
+            {{- section.settings.cta_label -}}
+          </a>
+        {% else %}
           {%- comment -%}
-            Filled in by subscription-steps.js. Hidden until the element is
-            defined so it can't sit empty if the module never loads — the
-            steps above still read correctly on their own.
+            No destination set yet, so this renders as plain text rather than
+            a link that would reload the page. The layout still reads as
+            finished in the editor.
           {%- endcomment -%}
-          <p
-            class="subscription__summary-line"
-            ref="summary"
-            role="status"
-          ></p>
+          <span class="subscription__cta subscription__cta--inert">
+            {{- section.settings.cta_label -}}
+          </span>
         {% endif %}
-
-        {% if section.settings.cta_label != blank %}
-          {% if section.settings.cta_link != blank %}
-            <a
-              class="subscription__cta"
-              href="{{ section.settings.cta_link }}"
-            >
-              {{- section.settings.cta_label -}}
-            </a>
-          {% else %}
-            {%- comment -%}
-              No destination set yet, so this renders as plain text rather
-              than a link that would reload the page. The layout still reads
-              as finished in the editor.
-            {%- endcomment -%}
-            <span class="subscription__cta subscription__cta--inert">
-              {{- section.settings.cta_label -}}
-            </span>
-          {% endif %}
-        {% endif %}
-      </div>
+      {% endif %}
     </div>
   </div>
-</subscription-steps>
+</subscription-grid>
 
-{%- comment -%}
-  Drives the step picking and the cards' drift, so a section with neither
-  doesn't pay for it.
-{%- endcomment -%}
-{% if section.blocks.size > 0 %}
-  <script
-    src="{{ 'subscription-steps.js' | asset_url }}"
-    type="module"
-  ></script>
-{% endif %}
+<script
+  src="{{ 'subscription-grid.js' | asset_url }}"
+  type="module"
+></script>
 
 {% stylesheet %}
   .subscription {
@@ -150,33 +201,198 @@
     padding-inline: var(--ocp-page-margin);
   }
 
+  /* ---- The heading, held ----------------------------------------------- */
+
   /*
-   * A screen each. The title screen is the positioning context for the
-   * scatter, which is why it and not the section carries `position:
-   * relative` — placed against the section the cards would spread over both
-   * screens, and the paragraph would be read through coffee bags.
-   *
-   * The section's own padding lives on the screens rather than around the
-   * pair, so the first screen keeps its breathing room at the top and the
-   * last keeps it at the bottom without either gaining a seam in between.
+   * The stage is the sticky heading's containing block, so it is released at
+   * the end of the grid instead of riding down into the paragraph.
    */
-  .subscription__screen {
+  .subscription__stage {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: var(--subscription-min-height, 100svh);
-
-    /* Cards are placed by their centre, so one near an edge hangs past it.
-       Clipping here keeps that from widening the page. */
-    overflow: clip;
-  }
-
-  .subscription__screen--title {
     padding-block-start: var(--subscription-padding-start, 96px);
   }
 
+  /*
+   * Its own height is taken back out of the flow, so the grid below decides
+   * where the first row lands rather than starting a screen down. It is the
+   * grid that moves; this only ever sits in the middle of the viewport.
+   */
+  .subscription__pin {
+    position: sticky;
+    top: 0;
+    z-index: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100lvh;
+    margin-block-end: -100lvh;
+
+    /* Decoration behaves, but the heading must not eat clicks meant for the
+       page underneath it once it has faded out. */
+    pointer-events: none;
+  }
+
+  .subscription__header {
+    text-align: var(--subscription-align, center);
+
+    /* Written by subscription-grid.js. Stated here so the composition is
+       right before it runs, and stays right if it never does. */
+    opacity: var(--pin-opacity, 1);
+    scale: var(--pin-scale, 1);
+    will-change: scale, opacity;
+  }
+
+  /* ---- The grid --------------------------------------------------------- */
+
+  /*
+   * Six columns, twelve on a wide screen — and every slot is placed on an
+   * explicit column line rather than flowed. That is what makes an irregular
+   * arrangement survive a change of content: nothing is packed against
+   * anything else, so nothing reflows when a bag is swapped.
+   */
+  .subscription__grid {
+    position: relative;
+    z-index: 1;
+
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    column-gap: var(--ocp-page-margin);
+    row-gap: clamp(5rem, 16vh, 16rem);
+
+    /* Clears the held heading before the first row reaches it, and leaves
+       the last row somewhere to travel before the paragraph. */
+    margin-block-start: 55lvh;
+    padding-block: 25lvh 30lvh;
+  }
+
+  @media screen and (min-width: 990px) {
+    .subscription .subscription__grid {
+      grid-template-columns: repeat(12, 1fr);
+    }
+  }
+
+  /*
+   * The size tier is one decision with three consequences: how many columns
+   * the slot spans, how far it travels on scroll, and how far it drifts under
+   * the pointer. The last two are in subscription-grid.js; only the span is a
+   * matter of layout.
+   */
+  .subscription-slot {
+    --slot-span: 2;
+
+    grid-row: var(--slot-row-sm);
+    grid-column: var(--slot-col-sm) / span var(--slot-span);
+
+    /* The authored break in the rhythm — a share of the slot's own box, so it
+       holds at every width without a second set of numbers. */
+    transform: translate(var(--slot-nudge, 0%), var(--slot-shift, 0%));
+    opacity: var(--slot-rest, 1);
+  }
+
+  /*
+   * One rule per tier at each width rather than a base plus overrides: three
+   * selectors that cannot both match are three selectors that cannot tie, and
+   * a tie here would be settled by source order in a bundle this theme
+   * concatenates in an order we do not control.
+   */
+  .subscription-slot[data-tier='l'] {
+    --slot-span: 3;
+  }
+
+  .subscription-slot[data-tier='m'] {
+    --slot-span: 2;
+  }
+
+  .subscription-slot[data-tier='s'] {
+    --slot-span: 1;
+  }
+
+  @media screen and (max-width: 989px) {
+    .subscription .subscription-slot[data-tier='l'] {
+      --slot-span: 4;
+    }
+
+    .subscription .subscription-slot[data-tier='m'] {
+      --slot-span: 3;
+    }
+
+    .subscription .subscription-slot[data-tier='s'] {
+      --slot-span: 2;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    .subscription .subscription-slot {
+      grid-row: var(--slot-row);
+      grid-column: var(--slot-col) / span var(--slot-span);
+    }
+  }
+
+  /* Nine of the fourteen make the narrow composition. Dropping the rest is
+     the point — squeezing all of them into six columns is a product list, not
+     an arrangement. */
+  @media screen and (max-width: 989px) {
+    .subscription .subscription-slot[data-small='off'] {
+      display: none;
+    }
+
+    /*
+     * And the heading changes sides. On a wide screen the coffees passing in
+     * front of it is the whole gesture and the type is big enough to survive
+     * it; at 390px the heading is two short lines and a single bag is most of
+     * the width, so the same gesture just buries it. Above, here — the bags
+     * pass behind instead, which still reads as depth and always reads as
+     * words.
+     */
+    .subscription .subscription__pin {
+      z-index: 2;
+    }
+  }
+
+  /*
+   * A box of fixed proportion, so the grid's geometry owes nothing to the
+   * photographs. The bags are cut-outs, so they are contained rather than
+   * cropped — a slot is somewhere for one to sit, not a frame around it.
+   */
+  .subscription-slot__frame {
+    position: relative;
+    padding-block-start: 130%;
+  }
+
+  .subscription-slot__travel,
+  .subscription-slot__media {
+    position: absolute;
+    inset: 0;
+  }
+
+  .subscription-slot__travel {
+    will-change: transform;
+  }
+
+  .subscription-slot__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .subscription-slot__placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: color-mix(in srgb, currentcolor 8%, transparent);
+  }
+
+  /* ---- What it asks ----------------------------------------------------- */
+
   .subscription__screen--detail {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100lvh;
     padding-block-end: var(--subscription-padding-end, 96px);
   }
 
@@ -189,60 +405,7 @@
     text-align: var(--subscription-align, center);
   }
 
-  /* Lifted over the cards. Done on the copy itself rather than on
-     .subscription__inner, which has to stay unpositioned so the cards
-     resolve against the screen and can spread across all of it. */
-  .subscription__header,
-  .subscription__summary {
-    position: relative;
-    z-index: 1;
-  }
-
-  .subscription__header {
-    max-width: 46rem;
-  }
-
-  /* ---- The scatter ---------------------------------------------------- */
-
-  /* Adds nothing to the column when it holds only cards, which are out of
-     flow anyway. The steps modifier below overrides it on two classes, so it
-     wins on specificity rather than on order. */
-  .subscription__blocks {
-    display: contents;
-  }
-
-  .subscription-card {
-    position: absolute;
-    left: var(--card-x, 50%);
-    top: var(--card-y, 50%);
-    width: var(--card-width, 12%);
-
-    /* The -50% pair is what makes --card-x/--card-y address the card's
-       centre; the drift and the tilt compose after it. --card-shift-* are
-       written by subscription-steps.js and default to nothing, so the
-       resting arrangement stands on its own without the script. */
-    transform: translate(-50%, -50%) translate3d(var(--card-shift-x, 0px), var(--card-shift-y, 0px), 0)
-      rotate(var(--card-rotation, 0deg));
-    will-change: transform;
-
-    /* Decoration only — the call to action has to stay clickable wherever a
-       card happens to land over it. */
-    pointer-events: none;
-  }
-
-  .subscription-card__image {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  .subscription-card__placeholder {
-    aspect-ratio: 4 / 5;
-    background-color: color-mix(in srgb, currentcolor 8%, transparent);
-  }
-
-  .subscription__eyebrow,
-  .subscription__summary-label {
+  .subscription__eyebrow {
     margin: 0;
     font-family: var(--subscription-label-font);
     font-weight: var(--subscription-label-weight);
@@ -258,138 +421,26 @@
     font-size: var(--ocp-display-size);
     line-height: var(--ocp-leading-display);
     letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
   }
 
-  /*
-   * The paragraph carries this section on its own now that the steps are
-   * gone, so it takes the same size the statement's does — the small display
-   * step, not the text one. At 14px under a 128px heading there was nothing
-   * between the two, and the eye skipped it.
-   */
   .subscription__intro {
-    margin: 0;
-    max-width: 32ch;
-    font-family: var(--subscription-heading-font);
-    font-weight: 700;
-    font-size: var(--ocp-display-size-sm);
-    line-height: var(--ocp-leading-snug);
-    letter-spacing: var(--ocp-letter-spacing);
-  }
-
-  /* The step numbers are drawn from this counter rather than written into
-     the blocks, so reordering or adding a step renumbers the rest. */
-  .subscription__blocks.subscription__steps {
-    counter-reset: subscription-step;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-    gap: clamp(2rem, 4vw, 3.5rem);
-    align-items: start;
-  }
-
-  .subscription-step__index::before {
-    counter-increment: subscription-step;
-    content: counter(subscription-step, decimal-leading-zero);
-  }
-
-  .subscription-step__index {
-    display: block;
-    font-family: var(--subscription-label-font);
-    font-weight: var(--subscription-label-weight);
-    font-size: var(--ocp-text-size);
-    letter-spacing: var(--ocp-letter-spacing);
-    color: var(--subscription-accent);
-  }
-
-  .subscription-step__title {
-    margin: 0.75rem 0 0;
-    padding-block-end: 0.75rem;
-    border-block-end: 1px solid currentcolor;
-    font-family: var(--subscription-label-font);
-    font-weight: var(--subscription-label-weight);
-    font-size: var(--ocp-text-size);
-    letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
-  }
-
-  .subscription-step__options {
-    margin: 1.25rem 0 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    gap: 0.75rem;
-  }
-
-  .subscription-step__option {
-    /* Reset rather than inherit the theme's button chrome — these read as
-       lines of type, not as controls. */
-    appearance: none;
-    border: 0;
-    background: none;
-    padding: 0;
-    margin: 0;
-    text-align: start;
-    cursor: pointer;
-
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.4em;
-
+    max-width: 30ch;
     font-family: var(--subscription-heading-font);
     font-weight: var(--subscription-heading-weight);
-    font-size: var(--ocp-text-size);
-    line-height: var(--ocp-leading-snug);
+    font-size: var(--ocp-display-size-sm);
+    line-height: var(--ocp-leading-display);
     letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
-
-    /* Unchosen options recede rather than disappear, so the full range of
-       what's on offer still reads at a glance. */
-    color: color-mix(in srgb, currentcolor 45%, transparent);
-    transition: color 0.2s ease;
   }
 
-  .subscription-step__option[aria-pressed='true'] {
-    color: var(--subscription-accent);
+  .subscription__intro > :first-child {
+    margin-block-start: 0;
   }
 
-  .subscription-step__option:hover {
-    color: color-mix(in srgb, var(--subscription-accent) 70%, currentcolor);
-  }
-
-  .subscription-step__option-note {
-    font-family: var(--subscription-label-font);
-    font-weight: var(--subscription-label-weight);
-    font-size: var(--ocp-text-size);
-  }
-
-  .subscription__summary {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    gap: 0.75rem;
-  }
-
-  .subscription__summary-line {
-    margin: 0;
-    font-family: var(--subscription-heading-font);
-    font-weight: 700;
-    font-size: var(--ocp-text-size);
-    line-height: var(--ocp-leading-snug);
-    letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
-    color: var(--subscription-accent);
-  }
-
-  /* Nothing has filled it in yet — and if the module never loads, nothing
-     will. */
-  subscription-steps:not(:defined) .subscription__summary-line {
-    display: none;
+  .subscription__intro > :last-child {
+    margin-block-end: 0;
   }
 
   .subscription__cta {
-    margin-block-start: 0.5rem;
     font-family: var(--subscription-label-font);
     font-weight: var(--subscription-label-weight);
     font-size: var(--ocp-text-size);
@@ -412,80 +463,37 @@
     opacity: 0.45;
   }
 
-  @media screen and (max-width: 749px) {
-    .subscription__blocks.subscription__steps {
-      grid-template-columns: 1fr;
+  /* Everything the script does is motion. Left alone, the composition above
+     is already the finished one. */
+  @media (prefers-reduced-motion: reduce) {
+    .subscription-slot__travel,
+    .subscription-slot__media {
+      transform: none;
     }
 
-  }
-
-  /*
-   * The cards are laid out around a clear band through the middle of the
-   * section — but that band is a share of the width, while the copy has a
-   * fixed maximum. Below about 1300px the copy is the wider of the two and
-   * the scatter starts landing on it.
-   *
-   * Above 990px the copy is held inside the band. Below it, holding the copy
-   * would leave it too narrow to read, so the scatter moves instead: each
-   * card keeps its place across the screen and folds into a band at the top
-   * or the bottom (--card-y-small, derived in blocks/subscription-card.liquid
-   * from the same Down setting), leaving the middle to the heading.
-   *
-   * They also have to grow. The widths are a share of the viewport, so a bag
-   * set to 8% is a comfortable object on a laptop and a 30px speck on a
-   * phone. The two steps are written as ranges that do not overlap, so
-   * neither depends on coming after the other.
-   */
-  @media screen and (min-width: 990px) {
-    .subscription .subscription__header {
-      max-width: min(46rem, 52vw);
-    }
-  }
-
-  @media screen and (max-width: 989px) {
-    .subscription .subscription-card {
-      top: var(--card-y-small, var(--card-y, 50%));
-      width: calc(var(--card-width, 12%) * var(--card-scale-small, 1));
-    }
-  }
-
-  @media screen and (min-width: 750px) and (max-width: 989px) {
-    .subscription .subscription-card {
-      --card-scale-small: 1.6;
-    }
-  }
-
-  @media screen and (max-width: 749px) {
-    .subscription .subscription-card {
-      --card-scale-small: 2.2;
+    .subscription__header {
+      scale: 1;
+      opacity: 1;
     }
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "Subscription steps",
+  "name": "Subscription grid",
   "tag": "section",
-  "blocks": [
-    {
-      "type": "subscription-card"
-    },
-    {
-      "type": "subscription-step"
-    }
-  ],
   "settings": [
     {
       "type": "text",
       "id": "eyebrow",
       "label": "Label above the heading",
-      "default": "(How it works)"
+      "default": "(Subscriptions)"
     },
     {
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Build your subscription"
+      "default": "Coffee on repeat."
     },
     {
       "type": "richtext",
@@ -493,27 +501,37 @@
       "label": "Intro"
     },
     {
-      "type": "header",
-      "content": "Summary"
-    },
-    {
-      "type": "text",
-      "id": "summary_label",
-      "label": "Summary label",
-      "info": "Sits above the line that assembles the chosen options. Only shown when the section has steps.",
-      "default": "(Your box)"
-    },
-    {
       "type": "text",
       "id": "cta_label",
       "label": "Button label",
-      "default": "Start a subscription"
+      "default": "Subscribe now"
     },
     {
       "type": "url",
       "id": "cta_link",
       "label": "Button link",
       "info": "Until this is set the label shows as plain text rather than a link."
+    },
+    {
+      "type": "header",
+      "content": "The grid"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Coffees",
+      "info": "Their images fill the arrangement in order and repeat, so a short collection still fills it."
+    },
+    {
+      "type": "range",
+      "id": "pin_scale",
+      "label": "Heading size once the grid arrives",
+      "info": "How far the held heading shrinks as the coffees rise over it.",
+      "min": 40,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 60
     },
     {
       "type": "header",
@@ -530,17 +548,6 @@
       "default": "center"
     },
     {
-      "type": "range",
-      "id": "min_height",
-      "label": "Minimum height",
-      "info": "The scatter needs room to spread out.",
-      "min": 60,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "default": 100
-    },
-    {
       "type": "color",
       "id": "background_color",
       "label": "Background",
@@ -550,12 +557,12 @@
       "type": "color",
       "id": "text_color",
       "label": "Text",
-      "default": "#111111"
+      "default": "#0f80be"
     },
     {
       "type": "color",
       "id": "accent_color",
-      "label": "Selected option and numbers",
+      "label": "Accent",
       "default": "#0f80be"
     },
     {
@@ -609,30 +616,7 @@
   ],
   "presets": [
     {
-      "name": "Subscription steps",
-      "blocks": [
-        {
-          "type": "subscription-step",
-          "settings": {
-            "title": "Your coffee",
-            "options": "Blend | Australian roaster\nRotation single origin | Australian roaster\nRotation single origin | International roaster"
-          }
-        },
-        {
-          "type": "subscription-step",
-          "settings": {
-            "title": "Your rhythm",
-            "options": "Weekly\nFortnightly\nMonthly"
-          }
-        },
-        {
-          "type": "subscription-step",
-          "settings": {
-            "title": "Your amount",
-            "options": "1 bag\n2 bags\n3 bags\n4 bags"
-          }
-        }
-      ]
+      "name": "Subscription grid"
     }
   ]
 }
