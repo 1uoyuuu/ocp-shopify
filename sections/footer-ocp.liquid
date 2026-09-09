@@ -28,25 +28,12 @@
       {% content_for 'blocks' %}
     </div>
 
-    {% if section.settings.show_wordmark %}
-      {%- comment -%}
-        Decorative — the shop name is already in the copyright line below, so
-        announcing this again would just be a repeat.
-      {%- endcomment -%}
-      <div
-        class="ocp-footer__mark"
-        aria-hidden="true"
-      >
-        {% render 'logo-only' %}
-      </div>
-    {% endif %}
-
     <div class="ocp-footer__bottom">
       <p class="ocp-footer__copyright">
         {%- if section.settings.copyright != blank -%}
           {{ section.settings.copyright }}
         {%- else -%}
-          © {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.
+          All rights reserved © {{ shop.name }} {{ 'now' | date: '%Y' }}
         {%- endif -%}
       </p>
 
@@ -107,6 +94,22 @@
         </p>
       {% endif %}
     </div>
+
+    {% if section.settings.show_wordmark %}
+      {%- comment -%}
+        Last, and the last thing on the page: the mark signs off rather than
+        introducing what follows it.
+
+        Decorative — the shop name is already in the copyright line above, so
+        announcing this again would just be a repeat.
+      {%- endcomment -%}
+      <div
+        class="ocp-footer__mark"
+        aria-hidden="true"
+      >
+        {% render 'logo-only' %}
+      </div>
+    {% endif %}
   </div>
 </footer>
 
