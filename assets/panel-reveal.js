@@ -22,11 +22,11 @@ import { getScrollEventTarget, scrollContainerMediaQuery, getViewportHeight } fr
  * and the image starts opening while the lines are still parting.
  */
 const BEATS = {
-  panel: [0.0, 0.09],
-  reveal: [0.09, 0.24],
-  split: [0.26, 0.34],
+  panel: [0.0, 0.05],
+  reveal: [0.05, 0.14],
+  split: [0.15, 0.2],
   // The frame opening, overlapping the parting lines it opens between.
-  media: [0.28, 0.36],
+  media: [0.16, 0.21],
 };
 
 /**
@@ -37,8 +37,15 @@ const BEATS = {
  *
  * Everything from here to the end belongs to them, split evenly, so adding
  * one lengthens the sequence rather than squeezing the rest.
+ *
+ * These shares were rebalanced once the section was lengthened. The opening
+ * had a third of the sequence and the five shops shared the rest, which came
+ * to half a screen each — less scroll than the hold at the end was given, and
+ * little enough that an ordinary flick crossed three of them. The beats above
+ * were scaled down by the same factor as this number, so the opening takes
+ * the same distance it always did and every pixel added went to the shops.
  */
-const SLIDES_FROM = 0.36;
+const SLIDES_FROM = 0.21;
 
 /** Share of a location's own span spent cross-fading into it. Low enough to
  * read as a change rather than a dissolve, high enough not to snap. */
@@ -52,8 +59,12 @@ const CROSSFADE = 0.32;
  * Without it the sequence ends at the exact scroll position where the
  * sticky frame lets go, so the last photo starts moving away at the very
  * moment the next section arrives — and there is nothing left to rise over.
+ *
+ * A quarter of the section was more than that needs: it was a screen and a
+ * third of holding one photograph, while each shop got half a screen to
+ * arrive, be looked at and leave. A fifth is still over a screen.
  */
-const SEQUENCE_END = 0.75;
+const SEQUENCE_END = 0.85;
 
 /**
  * Share of a span a name takes to change. Short enough to read as the name

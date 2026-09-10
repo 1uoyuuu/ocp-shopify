@@ -87,7 +87,7 @@
         "text_color": "#ffffff",
         "font": "heading",
         "scrim": 20,
-        "scroll_distance": 530,
+        "scroll_distance": 800,
         "split_direction": "horizontal",
         "part_distance": 100
       }
