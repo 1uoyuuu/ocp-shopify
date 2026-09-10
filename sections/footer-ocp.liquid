@@ -28,6 +28,19 @@
       {% content_for 'blocks' %}
     </div>
 
+    {% if section.settings.show_wordmark %}
+      {%- comment -%}
+        Decorative — the shop name is already in the copyright line below,
+        so announcing this again would just be a repeat.
+      {%- endcomment -%}
+      <div
+        class="ocp-footer__mark"
+        aria-hidden="true"
+      >
+        {% render 'logo-only' %}
+      </div>
+    {% endif %}
+
     <div class="ocp-footer__bottom">
       <p class="ocp-footer__copyright">
         {%- if section.settings.copyright != blank -%}
@@ -89,21 +102,6 @@
       {% endif %}
     </div>
 
-    {% if section.settings.show_wordmark %}
-      {%- comment -%}
-        Last, and the last thing on the page: the mark signs off rather than
-        introducing what follows it.
-
-        Decorative — the shop name is already in the copyright line above, so
-        announcing this again would just be a repeat.
-      {%- endcomment -%}
-      <div
-        class="ocp-footer__mark"
-        aria-hidden="true"
-      >
-        {% render 'logo-only' %}
-      </div>
-    {% endif %}
   </div>
 </footer>
 
@@ -114,8 +112,17 @@
   .ocp-footer {
     box-sizing: border-box;
 
-    /* Exactly one screen — no more — while the columns sit side by side. */
-    height: 100svh;
+    /*
+     * One screen wherever it fits, and taller than one where it does not.
+     *
+     * A fixed height does not make content fit, it makes it spill: the
+     * overflow simply painted past the bottom of the footer's own colour, at
+     * the one size where there was nothing below to hide it. A minimum plus a
+     * stretching child is the same layout at every size that has the room,
+     * and degrades into a slightly taller footer at the sizes that do not.
+     */
+    display: flex;
+    min-height: 100svh;
     background-color: var(--ocp-footer-background);
     color: var(--ocp-footer-text);
     font-family: var(--ocp-footer-font);
@@ -128,7 +135,7 @@
 
   .ocp-footer__inner {
     box-sizing: border-box;
-    height: 100%;
+    flex: 1;
     display: flex;
     flex-direction: column;
     /* Tight floor so the full-width mark has room; any height left over is
@@ -193,17 +200,51 @@
     }
   }
 
+  /*
+   * Still two columns at the narrowest width, because one is taller than the
+   * screen: the four blocks stacked came to a fixed 727px before gaps or
+   * padding, so anything shorter than about 860px overflowed a footer that is
+   * meant to be exactly one.
+   *
+   * Placement is by sequence rather than by column number — the blocks flow in
+   * their narrow order and the wide ones take the row. Shop and Contact are
+   * the two short lists, so they sit side by side; OCP carries five shops and
+   * their hours, so it keeps a row of its own.
+   */
   @media screen and (max-width: 599px) {
     .ocp-footer__columns {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem 2rem;
     }
 
-    /* One column, so placement is only a question of sequence — and the
-       sequence that reads best here is not the one the blocks are listed in.
-       The span has to go: two of one column would invent a second. */
     .ocp-footer .footer-column {
-      grid-column: auto;
+      grid-column: auto / span var(--footer-column-span, 1);
       order: var(--footer-order-sm, 0);
+    }
+
+    /* The one block whose width is not a matter of taste: it holds a field. */
+    .ocp-footer .footer-newsletter {
+      grid-column: 1 / -1;
+    }
+
+    /* Headings sit closer to their lists here, where height is the thing in
+       short supply.
+
+       Scoped through the grid as well as the footer: the rule this overrides
+       has the same weight and sits further down the file, and in a bundle
+       this theme concatenates in an order we do not control, later wins. */
+    .ocp-footer .ocp-footer__columns .footer-column__heading {
+      margin-block-end: 1em;
+    }
+
+    /*
+     * The policies and the credit come to 301px of the 343 there is, and a
+     * 3rem gap between them made 349 — so they wrapped onto a line each by
+     * six pixels, and that wrap alone was most of what pushed the footer past
+     * the screen. Half the gap fits them on one line with room to spare.
+     */
+    .ocp-footer .ocp-footer__bottom {
+      gap: 0.5rem 1.5rem;
     }
   }
 
