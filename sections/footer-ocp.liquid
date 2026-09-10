@@ -262,11 +262,31 @@
   }
 
   .ocp-footer .footer-column__link,
-  .ocp-footer__link,
-  .ocp-footer__credit a {
+  /*
+   * Scoped through the footer, which is not decoration: the credit's link is
+   * the only one down here that is a direct child of a <p>, so two stock rules
+   * in base.css reach it and no other —
+   *
+   *   :is(h1…p) > a:hover      { color: rgb(var(--color-foreground-rgb) / .7) }
+   *   p:not(…) a:where(…)      { text-decoration-color: currentcolor }
+   *
+   * — and both weigh (0,1,2), which beat `.ocp-footer__credit a` at (0,1,1).
+   * The page's foreground is the brand blue, so hovering the credit painted it
+   * brand blue at seventy percent on a brand blue footer. It did not fade; it
+   * became the background. Through `.ocp-footer` these are (0,2,x) and win.
+   */
+  .ocp-footer .ocp-footer__link,
+  .ocp-footer .ocp-footer__credit a {
     color: inherit;
     text-decoration: none;
     transition: opacity var(--animation-speed, 0.2s) var(--animation-easing, ease);
+  }
+
+  /* The colour is the footer's, hovered or not. Everything that answers the
+     cursor down here does it by rolling the word over, or by fading. */
+  .ocp-footer .ocp-footer__credit a:hover,
+  .ocp-footer .ocp-footer__credit a:focus-visible {
+    color: inherit;
   }
 
   /*
@@ -276,8 +296,8 @@
    * cursor, and a link with no hover at all is worse than a plain fade.
    */
   .ocp-footer .footer-column__link:not([data-swap-host]):hover,
-  .ocp-footer__link:not([data-swap-host]):hover,
-  .ocp-footer__credit a:not([data-swap-host]):hover {
+  .ocp-footer .ocp-footer__link:not([data-swap-host]):hover,
+  .ocp-footer .ocp-footer__credit a:not([data-swap-host]):hover {
     opacity: 0.65;
   }
 
