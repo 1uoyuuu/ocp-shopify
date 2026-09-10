@@ -318,6 +318,18 @@
     position: relative;
     z-index: 1;
 
+    /*
+     * Decoration, and it sits over the copy — so it must not take the click.
+     *
+     * The grid is the full height of the stage and paints above the held
+     * copy, which is what puts the coffees in front of the heading. That also
+     * put it in front of "Subscribe now": a click anywhere on the button
+     * landed on this element instead, at every scroll position where the
+     * button was legible. Nothing in here is interactive — every slot is
+     * aria-hidden — so nothing is lost by letting clicks through.
+     */
+    pointer-events: none;
+
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     column-gap: var(--ocp-page-margin);
