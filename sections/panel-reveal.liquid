@@ -141,7 +141,12 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.28em;
+
+    /* Nothing between the rows, the word gap between words. At this size the
+       words wrap to a row each, so a single `gap` was setting the space
+       between the lines of the slogan rather than between its words — which
+       is not what it was written for. */
+    gap: 0 0.28em;
 
     /* Deliberately not clipping: this is the element that parts, and a clip
        here would cut the words off as it carried them away. */
