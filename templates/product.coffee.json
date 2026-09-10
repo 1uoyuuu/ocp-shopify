@@ -326,12 +326,18 @@
             }
           },
           "block_order": [
+            "coffee_roaster",
             "text_9WaLn7",
+            "coffee_notes",
             "price_a7krng",
             "divider_HrJgFt",
             "variant_picker_R3rGDr",
+            "coffee_grind",
             "buy_buttons_eYQEYi",
-            "accordion_NKWPiW",
+            "ocp_note",
+            "divider_spec",
+            "coffee_spec",
+            "coffee_roaster_notes",
             "disclosures_hFEnPD"
           ]
         }
