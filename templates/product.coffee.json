@@ -7,6 +7,10 @@
  * made to this file may be overwritten.
  * ------------------------------------------------------------
  */{
+  "order": [
+    "main",
+    "product_recommendations_qnzPkn"
+  ],
   "sections": {
     "main": {
       "type": "product-information",
@@ -638,9 +642,5 @@
         "padding-block-end": 48
       }
     }
-  },
-  "order": [
-    "main",
-    "product_recommendations_qnzPkn"
-  ]
+  }
 }

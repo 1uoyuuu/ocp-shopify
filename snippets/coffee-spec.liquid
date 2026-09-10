@@ -36,6 +36,8 @@ roast_profile: Roast
 roast_date: Roasted
 {%- endcapture -%}
 
+{%- comment -%} sync probe 202011 {%- endcomment -%}
+
 {% liquid
   assign mf = product.metafields.coffee
   assign block_settings = block.settings
