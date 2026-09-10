@@ -20,7 +20,6 @@
             "heading": "Sign up for our newsletter",
             "placeholder": "Email",
             "success_message": "Thanks for subscribing.",
-            "column_md": 1,
             "order_sm": 1,
             "column": 1
           },
@@ -33,7 +32,6 @@
             "menu": "",
             "links": "Email | mailto:onlycoffeeproject@gmail.com\n\nInstagram | https://www.instagram.com/onlycoffeeproject\nFacebook | https://www.facebook.com/onlycoffeeproject",
             "hours": "",
-            "column_md": 1,
             "order_sm": 3,
             "span": 1,
             "layout": "vertical",
@@ -48,7 +46,6 @@
             "menu": "footer-menu-shop",
             "links": "Shop all | /collections/all\nCoffee | /collections/coffee\nEquipment | /collections/equipment\nSubscription | /pages/subscriptions",
             "hours": "",
-            "column_md": 2,
             "order_sm": 2,
             "span": 1,
             "layout": "vertical",
@@ -63,7 +60,6 @@
             "menu": "footer-menu-locations",
             "links": "",
             "hours": "OCP Crows Nest | 6:30–15:00\nOCP Artarmon | 6:00–14:30 (Sat–Sun 7:00–15:30)\nOCP Victoria Cross | 6:30–15:00 (Sat–Sun 8:00–14:00)\nOCP George St | 7:30–16:00 (closed weekends)\nOCP Docklands | 7:00–16:00 (Sat 8:00–14:00)",
-            "column_md": 1,
             "order_sm": 4,
             "span": 2,
             "layout": "vertical",
@@ -86,7 +82,7 @@
         "copyright": "",
         "legal_menu": "legal-menu",
         "legal_links": "",
-        "credit": "Made by <a href=\"https://ycdat.studio\" target=\"_blank\" rel=\"noopener\">ycdat.studio</a>",
+        "credit": "Made by <a href=\"https://yuthebest.framer.website\" target=\"_blank\" rel=\"noopener\">ycdat.studio</a>",
         "padding-block-start": 60,
         "padding-block-end": 24
       }

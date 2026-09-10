@@ -179,42 +179,22 @@
     min-width: 0;
   }
 
-  @media screen and (max-width: 989px) {
-    /* Once the columns stack there is more of them than a screen holds, and
-       a fixed height would cut the last ones off. It becomes a floor. */
-    .ocp-footer {
-      height: auto;
-      min-height: 100svh;
-    }
-
-    .ocp-footer__columns {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    /* Two columns want their own arrangement rather than the four-column one
-       folded in half — which is why each block carries a second column
-       number for this width. A block wide on the full layout stays wide
-       here, where spanning two of two is the whole row. */
-    .ocp-footer .footer-column {
-      grid-column: var(--footer-column-index-md, auto) / span var(--footer-column-span, 1);
-    }
-  }
-
   /*
-   * Still two columns at the narrowest width, because one is taller than the
-   * screen: the four blocks stacked came to a fixed 727px before gaps or
-   * padding, so anything shorter than about 860px overflowed a footer that is
-   * meant to be exactly one.
+   * Two columns from here down, and one arrangement for the whole of it:
+   * the newsletter takes the first row because it holds a field, Shop and
+   * Contact share the second because they are the two short lists, and OCP
+   * takes the third because it carries five shops and their hours.
    *
-   * Placement is by sequence rather than by column number — the blocks flow in
-   * their narrow order and the wide ones take the row. Shop and Contact are
-   * the two short lists, so they sit side by side; OCP carries five shops and
-   * their hours, so it keeps a row of its own.
+   * Placed by sequence rather than by column number. There used to be a
+   * second column setting for this width, so the two-column layout could be
+   * arranged separately from the narrow one — but they now want the same
+   * shape, and two ways of placing the same four blocks is two things to keep
+   * in step. Order and span say it all: flow puts them where they go, and a
+   * block spanning two of two columns is a block taking the row.
    */
-  @media screen and (max-width: 599px) {
+  @media screen and (max-width: 989px) {
     .ocp-footer__columns {
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem 2rem;
     }
 
     .ocp-footer .footer-column {
@@ -225,6 +205,18 @@
     /* The one block whose width is not a matter of taste: it holds a field. */
     .ocp-footer .footer-newsletter {
       grid-column: 1 / -1;
+    }
+  }
+
+  /*
+   * The same arrangement, drawn tighter. Nothing moves here — the width is
+   * simply short of what the spacing above assumes, and four blocks at that
+   * spacing came to more than a phone's screen holds.
+   */
+  @media screen and (max-width: 599px) {
+    .ocp-footer__columns {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem 2rem;
     }
 
     /* Headings sit closer to their lists here, where height is the thing in
