@@ -288,7 +288,6 @@
                 "spec_label_width": 11,
                 "spec_dividers": false,
                 "spec_date_format": "%d %b %Y",
-                "spec_label_color": "",
                 "padding-block-start": 0,
                 "padding-block-end": 0
               }
