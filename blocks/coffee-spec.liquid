@@ -1,0 +1,133 @@
+{%- doc -%}
+  Editor wrapper for the coffee spec table. All the logic lives in
+  `snippets/coffee-spec.liquid`; this exists so the table can be placed,
+  reordered and configured in the theme editor like any other block.
+{%- enddoc -%}
+
+<div
+  class="coffee-spec-block spacing-style"
+  style="{% render 'spacing-style', settings: block.settings %}"
+  {{ block.shopify_attributes }}
+>
+  {% render 'coffee-spec', product: closest.product, block: block %}
+</div>
+
+{% schema %}
+{
+  "name": "Coffee spec",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Reads the product's coffee metafields. Rows with nothing in them are left out, so this block is safe on any product."
+    },
+    {
+      "type": "header",
+      "content": "Rows"
+    },
+    {
+      "type": "textarea",
+      "id": "spec_rows",
+      "label": "Rows",
+      "info": "One per line, written as field: Label. Reorder or delete lines to change the table. Fields: roaster, origin, region, producer, variety, process, altitude, harvest, roast_profile, roast_date.",
+      "default": "roaster: Roaster\norigin: Origin\nregion: Region\nproducer: Producer\nvariety: Variety\nprocess: Process\naltitude: Altitude\nharvest: Harvest\nroast_profile: Roast\nroast_date: Roasted"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "spec_label_width",
+      "label": "Label column width",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "ch",
+      "default": 11
+    },
+    {
+      "type": "checkbox",
+      "id": "spec_dividers",
+      "label": "Rule between rows",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Roast date"
+    },
+    {
+      "type": "select",
+      "id": "spec_date_format",
+      "label": "Date format",
+      "options": [
+        { "value": "%d %b %Y", "label": "13 Aug 2026" },
+        { "value": "%b %d, %Y", "label": "Aug 13, 2026" },
+        { "value": "%d/%m/%Y", "label": "13/08/2026" },
+        { "value": "%d %B %Y", "label": "13 August 2026" }
+      ],
+      "default": "%d %b %Y"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "spec_label_color",
+      "label": "Label color",
+      "placeholder": "Default"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Left",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Right",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Coffee spec",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}

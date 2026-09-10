@@ -1,0 +1,146 @@
+{%- doc -%}
+  Grind selector, carried on the order as a line item property rather
+  than a variant.
+
+  Grinding does not split a bag: we sell the roaster's sealed bag whole,
+  and a bag that has been ground is still one bag. As a variant this
+  would fork the inventory — "100g Whole bean" and "100g Filter" would
+  each claim the three bags we actually have. As a property the choice
+  rides along on the order and the stock count stays true.
+
+  The cost is that grind never appears in variant-level reporting; it is
+  visible on the order and the packing slip instead.
+
+  Styled with the variant picker's own classes so it is indistinguishable
+  from the weight dropdown sitting above it — different mechanism, same
+  control.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+
+  assign product_form_id = 'BuyButtons-ProductForm-' | append: section.id
+  assign element_id = 'CoffeeGrind-' | append: block.id
+
+  assign property_key = block_settings.property_key | default: 'Grind'
+  assign options = block_settings.grind_options | split: ','
+  assign label = block_settings.grind_label | default: 'Grind'
+%}
+
+{%- if options.size > 0 -%}
+  <div
+    class="coffee-grind spacing-style"
+    style="{% render 'spacing-style', settings: block_settings %}"
+    {{ block.shopify_attributes }}
+  >
+    <div class="variant-option variant-option--dropdowns">
+      <label for="{{ element_id }}">{{ label | escape }}</label>
+      <div class="variant-option__select-wrapper">
+        <select
+          id="{{ element_id }}"
+          name="properties[{{ property_key | escape }}]"
+          class="variant-option__select"
+          form="{{ product_form_id }}"
+        >
+          {%- for option in options -%}
+            {%- assign option_label = option | strip -%}
+            <option value="{{ option_label | escape }}">{{ option_label }}</option>
+          {%- endfor -%}
+        </select>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          class="icon icon-caret"
+          viewBox="0 0 10 6"
+        >
+          {%- render 'icon', icon: 'caret' -%}
+        </svg>
+      </div>
+    </div>
+
+    {%- if block_settings.grind_help != blank -%}
+      <p class="coffee-grind__help">{{ block_settings.grind_help | escape }}</p>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Grind",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Sent with the order as a line item property, so choosing a grind never splits the stock count for a bag."
+    },
+    {
+      "type": "text",
+      "id": "grind_label",
+      "label": "Label",
+      "default": "Grind"
+    },
+    {
+      "type": "textarea",
+      "id": "grind_options",
+      "label": "Options",
+      "info": "Comma separated. The first one is selected by default.",
+      "default": "Whole bean, Filter, Espresso, AeroPress, Moka"
+    },
+    {
+      "type": "text",
+      "id": "grind_help",
+      "label": "Help text",
+      "default": "Ground to order. Whole bean keeps longest."
+    },
+    {
+      "type": "text",
+      "id": "property_key",
+      "label": "Order property name",
+      "info": "What this choice is called on the order and packing slip.",
+      "default": "Grind"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Grind",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-grind__help {
+    margin-block: 0.4rem 0;
+
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-text);
+    letter-spacing: var(--ocp-letter-spacing);
+    opacity: 0.55;
+  }
+{% endstylesheet %}

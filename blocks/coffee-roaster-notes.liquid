@@ -1,0 +1,230 @@
+{%- doc -%}
+  The roaster's own copy about this coffee, kept verbatim and attributed.
+
+  This is the loose half of the product page. Roasters write to wildly
+  different lengths — one supplies seven labelled lines, another three
+  paragraphs on fermentation plus FOB and DDP pricing — and normalising
+  that away would throw out most of what makes each lot interesting.
+
+  Attribution is what makes the variation work. The long copy belongs to
+  the roaster, so OCP is not obliged to match its length on every other
+  coffee, and a roaster who writes nothing does not make the page look
+  unfinished: the block simply does not render.
+
+  The heading interpolates the roaster's name, so it reads "Terraform on
+  this coffee" without anyone typing that per product.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign mf = closest.product.metafields.coffee
+
+  assign notes = mf.roaster_notes.value
+  assign transparency = mf.transparency.value
+  assign lot_name = mf.roaster_lot_name.value
+
+  # [roaster] rather than a Liquid tag: setting values are not re-parsed
+  # as Liquid, so a literal placeholder is the only thing that survives.
+  assign roaster_name = mf.roaster.value.name.value
+  if roaster_name != blank
+    assign heading_template = block_settings.heading_template | default: '[roaster] on this coffee'
+    assign heading = heading_template | replace: '[roaster]', roaster_name
+  else
+    assign heading = block_settings.fallback_heading | default: 'About this coffee'
+  endif
+%}
+
+{%- if notes != blank or transparency != blank or lot_name != blank -%}
+  <div
+    class="coffee-roaster-notes spacing-style"
+    style="{% render 'spacing-style', settings: block_settings %}"
+    {{ block.shopify_attributes }}
+  >
+    <details class="coffee-roaster-notes__details" {% if block_settings.open_by_default %}open{% endif %}>
+      <summary class="coffee-roaster-notes__summary">
+        <span>{{ heading }}</span>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          class="icon icon-caret coffee-roaster-notes__caret"
+          viewBox="0 0 10 6"
+        >
+          {%- render 'icon', icon: 'caret' -%}
+        </svg>
+      </summary>
+
+      <div class="coffee-roaster-notes__body">
+        {%- if lot_name != blank and block_settings.show_lot_name -%}
+          <p class="coffee-roaster-notes__lot">
+            {{ block_settings.lot_name_label | default: "Roaster's name for this lot" }}:
+            <span>{{ lot_name }}</span>
+          </p>
+        {%- endif -%}
+
+        {%- if notes != blank -%}
+          <div class="coffee-roaster-notes__rte rte">{{ notes }}</div>
+        {%- endif -%}
+
+        {%- if transparency != blank -%}
+          <div class="coffee-roaster-notes__transparency">
+            <p class="coffee-roaster-notes__transparency-heading">
+              {{ block_settings.transparency_heading | default: 'Price transparency' }}
+            </p>
+            <div class="rte">{{ transparency | newline_to_br }}</div>
+          </div>
+        {%- endif -%}
+      </div>
+    </details>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Roaster notes",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "The roaster's own words, shown under their name. Renders nothing when the metafield is empty."
+    },
+    {
+      "type": "checkbox",
+      "id": "open_by_default",
+      "label": "Open by default",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_lot_name",
+      "label": "Show the roaster's own name for the lot",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading_template",
+      "label": "Heading",
+      "info": "[roaster] is replaced with the roaster's name.",
+      "default": "[roaster] on this coffee"
+    },
+    {
+      "type": "text",
+      "id": "fallback_heading",
+      "label": "Heading when there is no roaster",
+      "default": "About this coffee"
+    },
+    {
+      "type": "text",
+      "id": "lot_name_label",
+      "label": "Lot name label",
+      "default": "Roaster's name for this lot"
+    },
+    {
+      "type": "text",
+      "id": "transparency_heading",
+      "label": "Price transparency heading",
+      "default": "Price transparency"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Roaster notes",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-roaster-notes__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    padding-block: 0.75rem;
+    cursor: pointer;
+    list-style: none;
+
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .coffee-roaster-notes__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .coffee-roaster-notes__caret {
+    flex: 0 0 auto;
+    width: 0.625rem;
+    transition: transform 0.2s ease;
+  }
+
+  .coffee-roaster-notes__details[open] .coffee-roaster-notes__caret {
+    transform: rotate(180deg);
+  }
+
+  /*
+   * Scoped through the block rather than left as a bare `.rte` rule: the
+   * stock rich text styles are declared further down the generated
+   * bundle, and a tie on specificity would go to whichever came last.
+   */
+  .coffee-roaster-notes .coffee-roaster-notes__body {
+    padding-block-end: 1rem;
+
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-text);
+    letter-spacing: var(--ocp-letter-spacing);
+  }
+
+  .coffee-roaster-notes .coffee-roaster-notes__lot {
+    margin-block: 0 1rem;
+    opacity: 0.55;
+  }
+
+  .coffee-roaster-notes .coffee-roaster-notes__transparency {
+    margin-block-start: 1.5rem;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  .coffee-roaster-notes .coffee-roaster-notes__transparency-heading {
+    margin-block: 0 0.5rem;
+    font-family: var(--font-subheading--family);
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .coffee-roaster-notes__caret {
+      transition: none;
+    }
+  }
+{% endstylesheet %}

@@ -1,0 +1,176 @@
+{%- doc -%}
+  The spec table on a coffee product page — what we call the spine.
+
+  Every row is optional. A roaster who supplies five fields and one who
+  supplies ten render the same shape, because a row whose metafield is
+  blank is skipped rather than drawn empty. That is the entire point of
+  this snippet: the granularity varies by roaster and the layout must
+  not. A fixed grid of eight slots would show empty cells on the first
+  coffee that arrived with six.
+
+  Reads `product.metafields.coffee.*`. Nothing at all renders when none
+  of them are filled in, so gear and merch pass through untouched.
+
+  Which rows appear, in what order, and what each is called all come from
+  one `spec_rows` setting — `key: Label`, one per line. Storefront locale
+  keys were the obvious home for the labels, but theme check requires a
+  new key to exist in all 57 locale files, so ten labels meant editing
+  fifty-seven translation files. One setting is both less work and more
+  control: the owner can reorder the spine or drop a row without touching
+  code.
+
+  @param {object} product - The product to read
+  @param {object} [block] - The block whose settings configure the table
+{%- enddoc -%}
+
+{%- capture default_rows -%}
+roaster: Roaster
+origin: Origin
+region: Region
+producer: Producer
+variety: Variety
+process: Process
+altitude: Altitude
+harvest: Harvest
+roast_profile: Roast
+roast_date: Roasted
+{%- endcapture -%}
+
+{% liquid
+  assign mf = product.metafields.coffee
+  assign block_settings = block.settings
+
+  assign date_format = block_settings.spec_date_format | default: '%d %b %Y'
+
+  # Roaster leads because on a curator's site it is the first thing a
+  # reader wants to know. A row whose key is misspelt simply does not
+  # render, the same as one whose metafield is empty.
+  assign row_defs = block_settings.spec_rows | default: default_rows | newline_to_br | split: '<br />'
+%}
+
+{%- capture rows -%}
+  {%- for row_def in row_defs -%}
+    {%- liquid
+      assign row_def = row_def | strip
+      assign key = row_def | split: ':' | first | strip
+      assign label = row_def | remove_first: key | remove_first: ':' | strip
+
+      assign value = ''
+      assign url = ''
+
+      case key
+        when 'roaster'
+          assign roaster = mf.roaster.value
+          if roaster != blank
+            assign value = roaster.name.value
+            # Blank until the roaster metaobject is published to the
+            # storefront, in which case the name simply renders unlinked.
+            assign url = roaster.system.url
+          endif
+        when 'origin'
+          assign value = mf.origin.value | join: ', '
+        when 'variety'
+          assign value = mf.variety.value | join: ', '
+        when 'process'
+          # The controlled word and the roaster's own qualifier share one
+          # row: "Washed · Mosto Fermentation 48h". Splitting them into
+          # two rows made every washed coffee look like it had more
+          # information than it does.
+          assign value = mf.process.value
+          if value != blank and mf.process_detail.value != blank
+            assign value = value | append: ' · ' | append: mf.process_detail.value
+          endif
+        when 'roast_date'
+          if mf.roast_date.value != blank
+            assign value = mf.roast_date.value | date: date_format
+          endif
+        else
+          assign value = mf[key].value
+      endcase
+    -%}
+    {%- if key != blank and value != blank -%}
+      <div class="coffee-spec__row">
+        <dt class="coffee-spec__label">{{ label }}</dt>
+        <dd class="coffee-spec__value">
+          {%- if url != blank -%}
+            <a class="coffee-spec__link" href="{{ url }}">{{ value }}</a>
+          {%- else -%}
+            {{- value -}}
+          {%- endif -%}
+        </dd>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if rows != blank -%}
+  <dl
+    class="coffee-spec{% if block_settings.spec_dividers %} coffee-spec--dividers{% endif %}"
+    style="
+      {% if block_settings.spec_label_color != blank %}--coffee-spec-label-color: {{ block_settings.spec_label_color }};{% endif %}
+      {% if block_settings.spec_label_width != blank %}--coffee-spec-label-width: {{ block_settings.spec_label_width }}ch;{% endif %}
+    "
+  >
+    {{ rows }}
+  </dl>
+{%- endif -%}
+
+{% stylesheet %}
+  /*
+   * Two columns on a fixed label measure so the values line up down the
+   * page regardless of how long each label is — the alignment is what
+   * makes seven roasters read as one shop.
+   *
+   * Sizes come from the house tokens. There is deliberately no size
+   * control on the block: a spec row is body text, and the type scale
+   * owns what that means.
+   */
+  .coffee-spec {
+    margin: 0;
+
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-text);
+    letter-spacing: var(--ocp-letter-spacing);
+  }
+
+  .coffee-spec__row {
+    display: grid;
+    grid-template-columns: var(--coffee-spec-label-width, 11ch) 1fr;
+    gap: 0 1.5rem;
+    padding-block: 0.45rem;
+  }
+
+  .coffee-spec--dividers .coffee-spec__row + .coffee-spec__row {
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  .coffee-spec__label {
+    margin: 0;
+    color: var(--coffee-spec-label-color, var(--color-foreground));
+    opacity: 0.55;
+    text-transform: uppercase;
+  }
+
+  .coffee-spec__value {
+    margin: 0;
+  }
+
+  .coffee-spec__link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  /*
+   * At phone widths the label measure eats most of the line and long
+   * values (a producer's full name, a variety list) wrap into a narrow
+   * column. Stacking gives the value the full width back.
+   */
+  @media screen and (max-width: 749px) {
+    .coffee-spec .coffee-spec__row {
+      grid-template-columns: 1fr;
+      gap: 0.1rem;
+    }
+  }
+{% endstylesheet %}

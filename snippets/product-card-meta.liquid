@@ -2,6 +2,10 @@
   The hover strip that rides over a product card's image: roaster on the
   left, roast date on the right, both read from product metafields.
 
+  The roaster arrives through the `coffee.roaster` metaobject rather than
+  a text field, so the name here is the same string the product page and
+  the roaster's own page use — it cannot drift into a second spelling.
+
   Rendered inside `.card-gallery`, which is already `position: relative`
   with `overflow: hidden` — so the strip can be absolutely positioned
   against the image and is clipped rather than spilling out of the card.
@@ -16,12 +20,12 @@
 {% liquid
   assign block_settings = block.settings
 
-  assign roaster = product.metafields.custom.roaster_name.value
+  assign roaster = product.metafields.coffee.roaster.value.name.value
   if roaster != blank
     assign roaster = '(' | append: roaster | append: ')'
   endif
 
-  assign roast_date_value = product.metafields.custom.roast_date.value
+  assign roast_date_value = product.metafields.coffee.roast_date.value
 
   assign date_format = block_settings.card_meta_date_format | default: '%d %b %Y'
   assign roast_date = ''

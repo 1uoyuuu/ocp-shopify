@@ -1,0 +1,141 @@
+{%- doc -%}
+  The tasting notes, set large and directly under the title.
+
+  These are the words people actually buy on, and on the old Square site
+  they were buried mid-paragraph in a spec dump. Four is the ceiling: the
+  metafield enforces it, and the slice below holds the line if a fifth
+  ever arrives through an import. Choosing which four is OCP's editorial
+  call, not a transcription of whatever the roaster wrote.
+
+  Set at the text size, not a display one. `--ocp-display-size-sm` is
+  what `h2` resolves to, which is where the title sits — two lines at
+  that size stacked on top of each other read as two headlines rather
+  than a headline and its notes. The prominence comes from case and
+  colour instead, which is how the rest of this theme builds hierarchy
+  below the display sizes.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+
+  assign notes = closest.product.metafields.coffee.tasting_notes.value
+  if notes != blank
+    assign notes = notes | slice: 0, 4
+  endif
+
+  assign separator = block_settings.separator | default: ' · '
+%}
+
+{%- if notes != blank and notes.size > 0 -%}
+  <div
+    class="coffee-notes spacing-style"
+    style="
+      --coffee-notes-font: var(--font-{{ block_settings.font | default: 'subheading' }}--family);
+      {% if block_settings.text_color != blank %}--coffee-notes-color: {{ block_settings.text_color }};{% endif %}
+      --coffee-notes-align: {{ block_settings.alignment | default: 'left' }};
+      --coffee-notes-case: {{ block_settings.case | default: 'none' }};
+      {% render 'spacing-style', settings: block_settings %}
+    "
+    {{ block.shopify_attributes }}
+  >
+    <p class="coffee-notes__list">{{ notes | join: separator }}</p>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Tasting notes",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Reads the product's tasting notes metafield, up to four."
+    },
+    {
+      "type": "text",
+      "id": "separator",
+      "label": "Separator",
+      "default": " · "
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "Alignment",
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "subheading"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "Case",
+      "options": [
+        { "value": "none", "label": "As written" },
+        { "value": "uppercase", "label": "Uppercase" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color",
+      "placeholder": "Default"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tasting notes",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-notes__list {
+    margin: 0;
+
+    font-family: var(--coffee-notes-font, var(--font-subheading--family));
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-align: var(--coffee-notes-align, left);
+    text-transform: var(--coffee-notes-case, none);
+    text-wrap: balance;
+    color: var(--coffee-notes-color, var(--color-foreground));
+  }
+{% endstylesheet %}

@@ -1,0 +1,137 @@
+{%- doc -%}
+  The roaster credit that sits above the product title.
+
+  OCP stocks other people's coffee, so the roaster is not decoration —
+  it is half of what the reader is choosing between. It renders as a
+  link when the roaster metaobject is published to the storefront and as
+  plain text when it is not, so turning roaster pages on later is a
+  setting rather than a code change.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign roaster = closest.product.metafields.coffee.roaster.value
+
+  assign name = roaster.name.value
+  assign url = roaster.system.url
+  assign location = roaster.location.value
+%}
+
+{%- if name != blank -%}
+  <div
+    class="coffee-roaster spacing-style"
+    style="
+      --coffee-roaster-font: var(--font-{{ block_settings.font | default: 'subheading' }}--family);
+      {% if block_settings.text_color != blank %}--coffee-roaster-color: {{ block_settings.text_color }};{% endif %}
+      {% render 'spacing-style', settings: block_settings %}
+    "
+    {{ block.shopify_attributes }}
+  >
+    {%- if url != blank -%}
+      <a class="coffee-roaster__name" href="{{ url }}">{{ name }}</a>
+    {%- else -%}
+      <span class="coffee-roaster__name">{{ name }}</span>
+    {%- endif -%}
+
+    {%- if block_settings.show_location and location != blank -%}
+      <span class="coffee-roaster__location">{{ location }}</span>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Roaster",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Reads the product's roaster metafield. Nothing renders on products without one."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_location",
+      "label": "Show the roaster's city",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "subheading"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color",
+      "placeholder": "Default"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Roaster",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-roaster {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+
+    font-family: var(--coffee-roaster-font, var(--font-subheading--family));
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    color: var(--coffee-roaster-color, var(--color-foreground));
+  }
+
+  .coffee-roaster__name {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .coffee-roaster a.coffee-roaster__name {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .coffee-roaster__location {
+    opacity: 0.55;
+  }
+{% endstylesheet %}
