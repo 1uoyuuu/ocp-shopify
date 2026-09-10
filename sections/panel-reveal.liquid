@@ -127,8 +127,9 @@
     font-family: var(--reveal-font);
     font-weight: 700;
 
-    /* Half the hero's, so two lines of a long slogan fit across a screen. */
-    font-size: var(--ocp-display-size-sm);
+    /* The hero's own size. The slogan is the second thing the page says at
+       that scale, not a note under it. */
+    font-size: var(--ocp-display-size);
     line-height: var(--ocp-leading-display);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
@@ -138,6 +139,7 @@
 
   .panel-reveal__line {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 0.28em;
 

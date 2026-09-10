@@ -476,7 +476,10 @@
   .subscription__intro {
     max-width: 30ch;
     font-family: var(--subscription-heading-font);
-    font-weight: var(--subscription-heading-weight);
+
+    /* The same weight the heading it replaces is set in, so the handover is
+       a change of words rather than a change of voice. */
+    font-weight: 700;
     font-size: var(--ocp-display-size-sm);
     line-height: var(--ocp-leading-display);
     letter-spacing: var(--ocp-letter-spacing);
