@@ -67,7 +67,7 @@ couple of files and reports success (should be ~361 files).
 | `config/` | 2 | `settings_schema.json` (global settings definition) + `settings_data.json` (their values). |
 | `layout/` | 2 | `theme.liquid` (the HTML shell) + `password.liquid`. |
 | `locales/` | 57 | Translations. `en.default.json` (storefront) and `en.default.schema.json` (editor labels). |
-| `tools/` | 3 | Local scripts for preparing catalogue data — not part of the theme. Shopify only syncs the directories above, so this one is ignored the same way `offline-graphic-assets/` is. See `tools/README.md`. |
+| `tools/` | 4 | Local scripts for preparing catalogue data — not part of the theme. Shopify only syncs the directories above, so this one is ignored the same way `offline-graphic-assets/` is. See `tools/README.md`. |
 
 ## How the theme editor connection actually works
 
@@ -137,6 +137,81 @@ block, `@app` = app blocks.
 ```json
 "visible_if": "{{ block.settings.menu_trigger_style == 'text' }}"
 ```
+
+## The catalogue — naming and data
+
+OCP resells other people's coffee and other people's equipment, so every
+product has a maker who is not OCP. That is the shape the whole catalogue
+is built around, and it is why `vendor` names the roaster or the brand
+rather than OCP: vendor is a native Shopify filter, a native admin
+filter, and the axis of the built-in sales report, which is how you find
+out which roaster actually sells.
+
+### Titles
+
+```
+coffee   {Roaster} - {Country} / {Lot} / {Variety} ({Process})
+gear     {Brand} - {Model} / {Category} ({Material})
+merch    OCP {Item}
+```
+
+Real ones:
+
+```
+Rose - Ecuador / La Florida / Sidra (Honey)
+Terraform - Ethiopia / Elto Elora / Ethiopian Landrace (Washed)
+Hario - Switch / Immersion dripper (Glass)
+OCP Tote Bag
+```
+
+The separator is a plain hyphen between maker and product, and forward
+slashes inside the product. The tail carries the selling point and the
+search terms — nobody searches "coffee", they search "sidra honey" or
+"hario switch".
+
+- **Everything variable is a variant, never the title.** Weight, size and
+  colour all move; a title that names one of them has to be rewritten when
+  a second arrives, and the URL goes with it. Square had Origami's Air S
+  as five separate products because the colour was in the name.
+- **Roast date never goes in the title** — it changes every batch.
+  `coffee.roast_date` owns it.
+- **Drop the category word only when the brand already is the category.**
+  `AeroPress - Original`, not `AeroPress - Original / Brewer`. But keep it
+  everywhere else: `Kalita - Wave` alone does not say whether it is the
+  dripper or the filter papers, and Kalita sells both.
+- **Collisions take the smallest distinguishing word.** Two Elto Elora
+  lots from Terraform separate on `(Washed)` and `(Anaerobic)` without
+  anything being added.
+- A blend that crosses origins uses `Blend` where the country goes. Three
+  or four cultivars is a spec sheet, not a selling point — name the first
+  two.
+
+### Metafields
+
+`coffee.*` (17 definitions) and `gear.*` are separate namespaces because
+they describe different things; do not try to share one. The Shopify
+category metafields (`Coffee roast`, `Coffee product form`, `Country`,
+`Grind size`) are deliberately **left empty** — `coffee.*` owns those
+concepts and two sources of truth is how the values drift apart.
+
+Required on a coffee, or it does not go up: `roaster`, `origin`,
+`process`, `roast_profile`, `tasting_notes`. Everything else renders only
+when present, which is the entire point — roasters supply anywhere from
+five fields to ten plus two pages of prose, and the page has to look the
+same either way. See `snippets/coffee-spec.liquid`.
+
+The product Category is `fb-1-3-1` (Coffee Beans & Ground Coffee). It is
+not cosmetic: the **Coffee collection is automated on exactly that rule**,
+so setting the category is what puts a coffee in the collection. It also
+drives tax and the channel mappings.
+
+### Grind is a line item property, not a variant
+
+We sell the roaster's sealed bag and grind to order, so a ground bag is
+still one bag. As a variant it would split "100g Whole bean" and "100g
+Filter" into separate stock buckets for the three bags that exist. The
+cost is that grind never appears in variant-level reporting; it is on the
+order and the packing slip instead. `blocks/coffee-grind.liquid`.
 
 ## Design tokens — never hardcode these
 
@@ -344,7 +419,7 @@ Created by us:
 | `snippets/logo-wordmark.liquid` + `assets/logo-wordmark.svg` | Inlined wordmark. |
 | `snippets/logo-arrow.liquid` + `assets/logo-arrow.svg` | Inlined arrow mark (fill = `currentColor`). |
 | `assets/gsap.min.js`, `assets/gsap-observer.min.js` | GSAP core + Observer plugin. |
-| `tools/bgremove.swift` + `tools/bgremove-check.py` | Cuts product photography out of its background locally, via Vision's foreground mask, and verifies the result by alpha channel. The roasters' bags are mostly white on white, so the checker is not optional — a failed cut looks identical to a good one. |
+| `tools/bgremove.swift` + `bgkey.py` + `bgremove-check.py` | Cuts product photography out of its background locally, via Vision's foreground mask, with a luminance key for the images it cannot segment. Check every batch **twice**: the alpha checker catches a cut that removed nothing or everything, but it passed a cut that kept the artwork printed on a box and threw the box away. Only a contact sheet finds that. |
 
 Modified by us: `blocks/_header-logo.liquid`, `blocks/_header-menu.liquid`,
 `sections/header.liquid`, `sections/header-group.json`,

@@ -32,15 +32,35 @@ nothing (subject lost).
 
 ### Where it does not work
 
-It segments a *photographed subject*. Line art on a flat ground — a
-roaster's logo used as a placeholder where there is no product shot —
-has no subject to find, and `bgremove` fails on it cleanly rather than
-guessing. Those want a luminance key instead: make near-white
-transparent, and ramp the alpha across the last ~30 levels so the strokes
-keep their anti-aliasing instead of turning into a jagged outline.
+`bgremove` segments a *photographed subject*, and there are two ways that
+goes wrong. Only one of them announces itself.
 
-One image in the first import needed this: Terraform's San Sebastian,
-which has the Terraform wordmark in place of a photograph.
+**It finds nothing.** Line art on a flat ground — a roaster's wordmark
+standing in for a missing product shot — has no subject, and `bgremove`
+fails cleanly rather than guessing. Terraform's San Sebastian and the
+SUPERGIANT drip bag are both this.
+
+**It finds the wrong thing.** A dark box on a pale grey ground: Vision
+locked on to the mountain range *printed on* the APAX Lab box and cut
+that out, discarding the box. It reported success, the alpha check
+passed — transparent corners, opaque middle, a plausible ratio — and only
+looking at the picture caught it. **Run your eyes over a contact sheet as
+well as the checker.** The checker catches arithmetic failures; it cannot
+tell a box from the artwork on a box.
+
+Both want the luminance key:
+
+```bash
+python3 bgkey.py cut/ src/00-apax.png --threshold 208 --ramp 26
+```
+
+Measure the background before choosing a threshold — it is often not
+white. APAX's ground ran 214–229 across the frame, so the 243 default
+removed nothing and 228 left an opaque corner.
+
+**Neither tool handles a lifestyle shot.** The OCP tote is photographed
+held by a person, and `bgremove` faithfully kept the trousers along with
+the bag. Crop to the product first, then run `bgremove` on the crop.
 
 ### Uploading the results
 
