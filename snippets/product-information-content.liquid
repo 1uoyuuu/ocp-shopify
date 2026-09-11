@@ -338,6 +338,15 @@
     .product-information__grid--one-screen {
       height: 100%;
       align-items: stretch;
+
+      /*
+       * The section is itself a grid, and a grid item's automatic minimum
+       * size is its content — so without this the row grows to the
+       * column's content, `height: 100%` measures that grown row, and the
+       * frame settles one padding taller than the screen. Measured: 797
+       * where 737 was wanted, every time.
+       */
+      min-height: 0;
     }
 
     .product-information__grid--one-screen .product-information__media {
