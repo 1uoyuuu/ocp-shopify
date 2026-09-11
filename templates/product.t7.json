@@ -375,14 +375,31 @@
               },
               "blocks": {}
             },
-            "probe_t2": {
-              "type": "coffee-roaster",
+            "text_two": {
+              "type": "text",
+              "name": "t:names.title",
               "settings": {
-                "show_location": true,
-                "font": "subheading",
-                "padding-block-start": 0,
-                "padding-block-end": 0
-              }
+                "text": "{{ closest.product.metafields.coffee.ocp_note }}",
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "center",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "text_color": "",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 50,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
             }
           },
           "block_order": [
@@ -393,7 +410,7 @@
             "buy_buttons_eYQEYi",
             "accordion_NKWPiW",
             "disclosures_hFEnPD",
-            "probe_t2"
+            "text_two"
           ]
         }
       },
