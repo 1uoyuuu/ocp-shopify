@@ -155,6 +155,11 @@ gear     {Brand} - {Model} / {Category} ({Material})
 merch    OCP {Item}
 ```
 
+Namespaces follow the same split: `coffee.*` (17 definitions, `roaster`
+metaobject) and `gear.*` (7 definitions, `brand` metaobject). Merch uses
+`gear.*` too — it is four products, and a third namespace for them would
+be structure for its own sake.
+
 Real ones:
 
 ```
@@ -204,6 +209,36 @@ The product Category is `fb-1-3-1` (Coffee Beans & Ground Coffee). It is
 not cosmetic: the **Coffee collection is automated on exactly that rule**,
 so setting the category is what puts a coffee in the collection. It also
 drives tax and the channel mappings.
+
+### Building products through the Admin API
+
+Two things that look like they worked and did not:
+
+- **`productCreate` makes one variant, not the cartesian product.** Give
+  it `productOptions` with five colours and it creates the option with
+  five values and exactly one variant — the first combination. Counting
+  option values and reporting "5 variants" is wrong; query the variants
+  back. The rest are added with `productVariantsBulkCreate`, matched by
+  option value rather than by position, since Shopify returns them in its
+  own order.
+- **`inventorySetQuantities` reconciles against the stored quantity.**
+  `changeFromQuantity` must equal what is currently on the shelf, so a
+  second pass over items that were already set fails with "no longer
+  matches the persisted quantity". Read the current level first and send
+  that. It also needs an `@idempotent(key: "...")` directive **on the
+  field**, and the key has to change between genuinely different runs.
+- Prices cannot be set at create time at all — `productVariantsBulkUpdate`
+  afterwards, or every variant sits at 0.00.
+
+Taxonomy category ids are not guessable: query
+`taxonomy { categories(search: "socks") { nodes { id fullName } } }`
+rather than inventing `aa-1-12`. A wrong one fails the whole batch with
+`Invalid product_taxonomy_node_id` and no indication of which.
+
+Collections differ in kind and it matters: **Coffee is automated** on
+`PRODUCT_CATEGORY_ID = fb-1-3-1`, so setting a coffee's category is what
+files it. **Equipment and Merch are manual** — membership has to be set
+with `collectionAddProducts`.
 
 ### Grind is a line item property, not a variant
 
