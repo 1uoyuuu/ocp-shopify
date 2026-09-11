@@ -320,22 +320,23 @@
    */
   @media screen and (min-width: 750px) {
     /*
-     * The section carries its own block padding, and the grid sits inside
-     * it — so a grid of 100lvh ends up one screen tall starting below that
-     * padding, and overhangs the fold by exactly the padding. The frame is
-     * the section, not the grid: zero its padding here and let the grid
-     * have the screen.
+     * The frame is the section, and its own block padding counts inside
+     * it — `border-box`, not a grid of 100lvh sitting below the padding,
+     * which overhangs the fold by exactly that padding.
      *
-     * `--header-group-height` is 0 on this page. The header is fixed and
-     * forced transparent by site-logo.liquid, so it takes no layout height
-     * and owes the frame nothing.
+     * The padding has to stay. `--header-group-height` is 0 here and that
+     * is correct — the header is fixed and forced transparent by
+     * site-logo.liquid, so it takes no layout height — but it is still
+     * drawn over the top of the page, and without the inset the roaster
+     * line renders underneath the wordmark.
      */
     .product-information.product-information--one-screen {
-      padding-block: 0;
+      height: 100lvh;
+      box-sizing: border-box;
     }
 
     .product-information__grid--one-screen {
-      height: 100lvh;
+      height: 100%;
       align-items: stretch;
     }
 
