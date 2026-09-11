@@ -7,10 +7,6 @@
  * made to this file may be overwritten.
  * ------------------------------------------------------------
  */{
-  "order": [
-    "main",
-    "product_recommendations_qnzPkn"
-  ],
   "sections": {
     "main": {
       "type": "product-information",
@@ -639,5 +635,9 @@
         "heading": "You may like"
       }
     }
-  }
+  },
+  "order": [
+    "main",
+    "product_recommendations_qnzPkn"
+  ]
 }
