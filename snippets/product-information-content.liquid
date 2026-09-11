@@ -90,7 +90,7 @@
   class="section-background{% if settings.background_color != blank %} color-custom-{{ section_id }}{% endif %}"
 ></div>
 <div
-  class="product-information section section--{{ content_width }} spacing-style{% if settings.background_color != blank %} color-custom-{{ section_id }}{% endif %} relative"
+  class="product-information section section--{{ content_width }} spacing-style{% if settings.full_height_columns %} product-information--one-screen{% endif %}{% if settings.background_color != blank %} color-custom-{{ section_id }}{% endif %} relative"
   style="
     {% render 'spacing-style', settings: settings %}
     --gap: {{ settings.gap }}px;
@@ -319,11 +319,23 @@
    * the top loses to a stock rule further down at equal specificity.
    */
   @media screen and (min-width: 750px) {
-    .product-information__grid--one-screen {
-      /* The header is fixed over the page, so the frame owes it height. */
-      --one-screen-height: calc(100lvh - var(--header-group-height, 0px));
+    /*
+     * The section carries its own block padding, and the grid sits inside
+     * it — so a grid of 100lvh ends up one screen tall starting below that
+     * padding, and overhangs the fold by exactly the padding. The frame is
+     * the section, not the grid: zero its padding here and let the grid
+     * have the screen.
+     *
+     * `--header-group-height` is 0 on this page. The header is fixed and
+     * forced transparent by site-logo.liquid, so it takes no layout height
+     * and owes the frame nothing.
+     */
+    .product-information.product-information--one-screen {
+      padding-block: 0;
+    }
 
-      height: var(--one-screen-height);
+    .product-information__grid--one-screen {
+      height: 100lvh;
       align-items: stretch;
     }
 
