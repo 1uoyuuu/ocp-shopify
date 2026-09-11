@@ -511,6 +511,33 @@ until a menu is created in Shopify admin and selected.
   a section offers. `sections/product-list.liquid` renders `_product-card`
   without declaring it.
 
+**Sync — a JSON template refused for one bad setting value**
+- Shopify validates each block setting in `templates/*.json` against its
+  type in the block's schema. A value that is invalid for its type makes
+  the **whole template file** invalid, and it is refused exactly as a bad
+  `{% schema %}` is: clean push, every other file lands, the template is
+  simply absent from the store. **Theme check does not look at template
+  JSON setting values at all.**
+- The one that cost an afternoon: the stock `text` block's `text` setting
+  is type **`richtext`**, and a richtext value has to be wrapped in a
+  block-level tag. `"<h1>{{ closest.product.title }}</h1>"` is fine;
+  `"{{ closest.product.metafields.coffee.ocp_note }}"` is not, because it
+  is bare. Wrapping it in `<p>` satisfies the validator but then nests a
+  `<p>` inside the one a `rich_text_field` renders for itself — so a
+  metafield that carries its own markup wants its own block, not a `text`
+  block. `blocks/coffee-note.liquid` exists for that reason.
+- `block_order` is validated too: an entry naming a block that is not in
+  `blocks` invalidates the file. Static blocks (`"static": true`) must be
+  **left out** of `block_order` — compare `buy_buttons` in
+  `templates/product.json`, whose `block_order` is `[]` while its three
+  children are all static.
+- Bisect it rather than guessing, and do it in one sync cycle rather than
+  five: push several throwaway `templates/product.<probe>.json` files in
+  one commit, each a copy of the known-good `product.json` plus one
+  suspect, then pull and see which arrived. A control that is a byte-copy
+  of `product.json` tells you first whether the problem is the content at
+  all or the file being new.
+
 **Scroll restoration**
 - **A refresh always goes to the top.** `scroll-container.js` reads the
   navigation timing entry, and on `type === 'reload'` it drops `scrollTop`

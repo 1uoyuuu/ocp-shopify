@@ -1,0 +1,117 @@
+{%- doc -%}
+  OCP's own line about a coffee — the curator's voice, as opposed to the
+  roaster's words in `coffee-roaster-notes`.
+
+  This exists as a block rather than as a stock `text` block holding
+  `{{ ... }}` because the text block's `text` setting is of type
+  `richtext`, and a richtext value has to be wrapped in a block-level tag.
+  A bare Liquid output tag is an invalid value, which silently invalidates
+  the whole template JSON — Shopify refuses the file and says nothing.
+  Wrapping it in `<p>` would satisfy the validator and then nest `<p>`
+  inside the `<p>` that a rich_text_field renders for itself.
+
+  Optional by design: an empty metafield renders nothing, because a
+  curator with nothing to add should not be made to write filler.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign note = closest.product.metafields.coffee.ocp_note.value
+%}
+
+{%- if note != blank -%}
+  <div
+    class="coffee-note spacing-style"
+    style="
+      {% if block_settings.text_color != blank %}--coffee-note-color: {{ block_settings.text_color }};{% endif %}
+      {% render 'spacing-style', settings: block_settings %}
+    "
+    {{ block.shopify_attributes }}
+  >
+    {%- if block_settings.label != blank -%}
+      <p class="coffee-note__label">{{ block_settings.label | escape }}</p>
+    {%- endif -%}
+    <div class="coffee-note__body rte">{{ note }}</div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "OCP note",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "A sentence or two in OCP's voice about why we stock this coffee. Renders nothing when the metafield is empty."
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "info": "Leave empty for no label.",
+      "default": "Why we stock it"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color",
+      "placeholder": "Default"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "OCP note",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-note {
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-text);
+    letter-spacing: var(--ocp-letter-spacing);
+    color: var(--coffee-note-color, var(--color-foreground));
+  }
+
+  .coffee-note .coffee-note__label {
+    margin-block: 0 0.35rem;
+    font-family: var(--font-subheading--family);
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+
+  .coffee-note .coffee-note__body > :first-child {
+    margin-block-start: 0;
+  }
+
+  .coffee-note .coffee-note__body > :last-child {
+    margin-block-end: 0;
+  }
+{% endstylesheet %}

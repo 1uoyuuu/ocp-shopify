@@ -7,6 +7,10 @@
  * made to this file may be overwritten.
  * ------------------------------------------------------------
  */{
+  "order": [
+    "main",
+    "product_recommendations_qnzPkn"
+  ],
   "sections": {
     "main": {
       "type": "product-information",
@@ -67,6 +71,15 @@
             "padding-inline-end": 0
           },
           "blocks": {
+            "coffee_roaster": {
+              "type": "coffee-roaster",
+              "settings": {
+                "show_location": true,
+                "font": "subheading",
+                "padding-block-start": 0,
+                "padding-block-end": 8
+              }
+            },
             "text_9WaLn7": {
               "type": "text",
               "name": "t:names.title",
@@ -75,7 +88,7 @@
                 "width": "100%",
                 "max_width": "normal",
                 "alignment": "center",
-                "type_preset": "h3",
+                "type_preset": "h2",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
@@ -92,6 +105,17 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "coffee_notes": {
+              "type": "coffee-tasting-notes",
+              "settings": {
+                "separator": " · ",
+                "alignment": "left",
+                "font": "subheading",
+                "case": "uppercase",
+                "padding-block-start": 8,
+                "padding-block-end": 0
+              }
             },
             "price_a7krng": {
               "type": "price",
@@ -149,6 +173,17 @@
                 "padding-inline-end": 0
               },
               "blocks": {}
+            },
+            "coffee_grind": {
+              "type": "coffee-grind",
+              "settings": {
+                "grind_label": "Grind",
+                "grind_options": "Whole bean, Filter, Espresso, AeroPress, Moka",
+                "grind_help": "Ground to order. Whole bean keeps longest.",
+                "property_key": "Grind",
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              }
             },
             "buy_buttons_eYQEYi": {
               "type": "buy-buttons",
@@ -211,150 +246,50 @@
               },
               "block_order": []
             },
-            "accordion_NKWPiW": {
-              "type": "accordion",
-              "name": "t:names.accordion",
+            "ocp_note": {
+              "type": "coffee-note",
               "settings": {
-                "icon": "caret",
-                "dividers": true,
+                "label": "Why we stock it",
+                "padding-block-start": 12,
+                "padding-block-end": 0
+              }
+            },
+            "divider_spec": {
+              "type": "_divider",
+              "name": "t:names.divider",
+              "settings": {
+                "thickness": 1,
+                "corner_radius": "square",
                 "divider_color": "{{ settings.color_palette.color2 }}",
-                "type_preset": "h6",
-                "background_color": "",
-                "text_color": "",
-                "border": "none",
-                "border_width": 1,
-                "border_opacity": 100,
-                "border_color": "",
-                "border_radius": 0,
+                "width_percent": 100,
+                "padding-block-start": 12,
+                "padding-block-end": 12
+              },
+              "blocks": {}
+            },
+            "coffee_spec": {
+              "type": "coffee-spec",
+              "settings": {
+                "spec_rows": "roaster: Roaster\norigin: Origin\nregion: Region\nproducer: Producer\nvariety: Variety\nprocess: Process\naltitude: Altitude\nharvest: Harvest\nroast_profile: Roast\nroast_date: Roasted",
+                "spec_label_width": 11,
+                "spec_dividers": false,
+                "spec_date_format": "%d %b %Y",
                 "padding-block-start": 0,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {
-                "accordion_row_NdBezV": {
-                  "type": "_accordion-row",
-                  "settings": {
-                    "heading": "Description",
-                    "open_by_default": false,
-                    "icon": "none",
-                    "width": 20
-                  },
-                  "blocks": {
-                    "text_n7A9da": {
-                      "type": "text",
-                      "settings": {
-                        "text": "{{ closest.product.description }}",
-                        "width": "100%",
-                        "max_width": "normal",
-                        "alignment": "left",
-                        "type_preset": "custom",
-                        "font": "var(--font-subheading--family)",
-                        "font_size": "1.125rem",
-                        "line_height": "normal",
-                        "letter_spacing": "normal",
-                        "case": "none",
-                        "wrap": "pretty",
-                        "text_color": "",
-                        "background": false,
-                        "background_color": "#00000026",
-                        "corner_radius": 0,
-                        "padding-block-start": 12,
-                        "padding-block-end": 0,
-                        "padding-inline-start": 0,
-                        "padding-inline-end": 0
-                      },
-                      "blocks": {}
-                    }
-                  },
-                  "block_order": [
-                    "text_n7A9da"
-                  ]
-                },
-                "accordion_row_iJM37V": {
-                  "type": "_accordion-row",
-                  "settings": {
-                    "heading": "Care",
-                    "open_by_default": false,
-                    "icon": "none",
-                    "width": 20
-                  },
-                  "blocks": {
-                    "text_VdG98J": {
-                      "type": "text",
-                      "settings": {
-                        "text": "<p>To maintain the beauty and integrity of your purchase, we recommend treating it with care. Simple maintenance practices, such as gentle washing and proper storage, can effectively preserve the longevity of your favorites. We encourage you to refer to the care instructions included with each item, designed to help you keep your purchase in top condition.</p>",
-                        "width": "100%",
-                        "max_width": "normal",
-                        "alignment": "left",
-                        "type_preset": "custom",
-                        "font": "var(--font-subheading--family)",
-                        "font_size": "1.125rem",
-                        "line_height": "normal",
-                        "letter_spacing": "normal",
-                        "case": "none",
-                        "wrap": "pretty",
-                        "text_color": "",
-                        "background": false,
-                        "background_color": "#00000026",
-                        "corner_radius": 0,
-                        "padding-block-start": 12,
-                        "padding-block-end": 0,
-                        "padding-inline-start": 0,
-                        "padding-inline-end": 0
-                      },
-                      "blocks": {}
-                    }
-                  },
-                  "block_order": [
-                    "text_VdG98J"
-                  ]
-                },
-                "accordion_row_pLFDcD": {
-                  "type": "_accordion-row",
-                  "settings": {
-                    "heading": "Design",
-                    "open_by_default": false,
-                    "icon": "none",
-                    "width": 20
-                  },
-                  "blocks": {
-                    "text_qLGEN9": {
-                      "type": "text",
-                      "settings": {
-                        "text": "<p>Our dedication to excellence extends beyond materials; it encompasses the artistry and craftsmanship illustrated in every piece we create.</p>",
-                        "width": "100%",
-                        "max_width": "normal",
-                        "alignment": "left",
-                        "type_preset": "custom",
-                        "font": "var(--font-subheading--family)",
-                        "font_size": "1.125rem",
-                        "line_height": "normal",
-                        "letter_spacing": "normal",
-                        "case": "none",
-                        "wrap": "pretty",
-                        "text_color": "",
-                        "background": false,
-                        "background_color": "#00000026",
-                        "corner_radius": 0,
-                        "padding-block-start": 12,
-                        "padding-block-end": 0,
-                        "padding-inline-start": 0,
-                        "padding-inline-end": 0
-                      },
-                      "blocks": {}
-                    }
-                  },
-                  "block_order": [
-                    "text_qLGEN9"
-                  ]
-                }
-              },
-              "block_order": [
-                "accordion_row_NdBezV",
-                "accordion_row_iJM37V",
-                "accordion_row_pLFDcD"
-              ]
+                "padding-block-end": 0
+              }
+            },
+            "coffee_roaster_notes": {
+              "type": "coffee-roaster-notes",
+              "settings": {
+                "open_by_default": false,
+                "show_lot_name": true,
+                "heading_template": "[roaster] on this coffee",
+                "fallback_heading": "About this coffee",
+                "lot_name_label": "Roaster's name for this lot",
+                "transparency_heading": "Price transparency",
+                "padding-block-start": 8,
+                "padding-block-end": 0
+              }
             },
             "disclosures_hFEnPD": {
               "type": "disclosures",
@@ -377,12 +312,18 @@
             }
           },
           "block_order": [
+            "coffee_roaster",
             "text_9WaLn7",
+            "coffee_notes",
             "price_a7krng",
             "divider_HrJgFt",
             "variant_picker_R3rGDr",
+            "coffee_grind",
             "buy_buttons_eYQEYi",
-            "accordion_NKWPiW",
+            "ocp_note",
+            "divider_spec",
+            "coffee_spec",
+            "coffee_roaster_notes",
             "disclosures_hFEnPD"
           ]
         }
@@ -683,9 +624,5 @@
         "padding-block-end": 48
       }
     }
-  },
-  "order": [
-    "main",
-    "product_recommendations_qnzPkn"
-  ]
+  }
 }
