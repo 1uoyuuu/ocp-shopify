@@ -67,7 +67,7 @@ couple of files and reports success (should be ~361 files).
 | `config/` | 2 | `settings_schema.json` (global settings definition) + `settings_data.json` (their values). |
 | `layout/` | 2 | `theme.liquid` (the HTML shell) + `password.liquid`. |
 | `locales/` | 57 | Translations. `en.default.json` (storefront) and `en.default.schema.json` (editor labels). |
-| `tools/` | 4 | Local scripts for preparing catalogue data — not part of the theme. Shopify only syncs the directories above, so this one is ignored the same way `offline-graphic-assets/` is. See `tools/README.md`. |
+| `tools/` | 5 | Local scripts for preparing catalogue data — not part of the theme. Shopify only syncs the directories above, so this one is ignored the same way `offline-graphic-assets/` is. See `tools/README.md`. |
 
 ## How the theme editor connection actually works
 
@@ -624,20 +624,31 @@ until a menu is created in Shopify admin and selected.
   without declaring it.
 
 **Sync — a JSON template refused for one bad setting value**
-- Shopify validates each block setting in `templates/*.json` against its
-  type in the block's schema. A value that is invalid for its type makes
-  the **whole template file** invalid, and it is refused exactly as a bad
-  `{% schema %}` is: clean push, every other file lands, the template is
-  simply absent from the store. **Theme check does not look at template
-  JSON setting values at all.**
-- The one that cost an afternoon: the stock `text` block's `text` setting
-  is type **`richtext`**, and a richtext value has to be wrapped in a
-  block-level tag. `"<h1>{{ closest.product.title }}</h1>"` is fine;
-  `"{{ closest.product.metafields.coffee.ocp_note }}"` is not, because it
-  is bare. Wrapping it in `<p>` satisfies the validator but then nests a
-  `<p>` inside the one a `rich_text_field` renders for itself — so a
-  metafield that carries its own markup wants its own block, not a `text`
-  block. `blocks/coffee-note.liquid` exists for that reason.
+- Shopify validates each setting value in `templates/*.json` against its
+  type in the section or block schema. A value that is invalid for its
+  type makes the **whole template file** invalid, and it is refused
+  exactly as a bad `{% schema %}` is: clean push, every other file lands,
+  the template is simply absent from the store. **Theme check does not
+  look at template JSON setting values at all.**
+- **Run `python3 tools/check-template-settings.py` before pushing a
+  hand-built or generated template.** It compares every value against the
+  schema it names. It is the only thing that catches this class.
+- The proven killer is a **`range` value off the step grid**. The
+  product-information `gap` range is `min 0, max 48, step 4`, so `10` is
+  a legal number, inside the bounds, and fatal — the nearest legal values
+  are 8 and 12. Same rule as a `range` default, but for values, and just
+  as invisible.
+- `block_order` is validated too: an entry naming a block that is not in
+  `blocks` invalidates the file, and static blocks (`"static": true`)
+  must be **left out** of it — compare `buy_buttons` in
+  `templates/product.json`, whose `block_order` is `[]` while its three
+  children are all static.
+- **A richtext value with no block-level wrapper is *not* fatal**, despite
+  looking like it should be. `templates/product.json` carries a bare
+  `{{ closest.product.description }}` in a `richtext` setting and is live
+  on the store. An earlier round here blamed that for a refusal and was
+  wrong — the bisect had changed two things at once. Check the ranges
+  first.
 - `block_order` is validated too: an entry naming a block that is not in
   `blocks` invalidates the file. Static blocks (`"static": true`) must be
   **left out** of `block_order` — compare `buy_buttons` in
@@ -755,7 +766,10 @@ from one commit on the store, others not.
 
 ## Before pushing
 
-1. `shopify theme check` from the repo root (~361 files).
+1. `shopify theme check` from the repo root (~361 files), and
+   `python3 tools/check-template-settings.py` if any `templates/*.json`
+   changed — theme check does not read those values and a single bad
+   one silently drops the whole template.
 2. `git fetch origin` — check for "Update from Shopify" commits and **rebase
    before pushing**, not after being rejected.
 3. `git diff --stat` — confirm there is actually a change to commit.
