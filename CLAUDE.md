@@ -67,6 +67,7 @@ couple of files and reports success (should be ~361 files).
 | `config/` | 2 | `settings_schema.json` (global settings definition) + `settings_data.json` (their values). |
 | `layout/` | 2 | `theme.liquid` (the HTML shell) + `password.liquid`. |
 | `locales/` | 57 | Translations. `en.default.json` (storefront) and `en.default.schema.json` (editor labels). |
+| `tools/` | 3 | Local scripts for preparing catalogue data — not part of the theme. Shopify only syncs the directories above, so this one is ignored the same way `offline-graphic-assets/` is. See `tools/README.md`. |
 
 ## How the theme editor connection actually works
 
@@ -343,6 +344,7 @@ Created by us:
 | `snippets/logo-wordmark.liquid` + `assets/logo-wordmark.svg` | Inlined wordmark. |
 | `snippets/logo-arrow.liquid` + `assets/logo-arrow.svg` | Inlined arrow mark (fill = `currentColor`). |
 | `assets/gsap.min.js`, `assets/gsap-observer.min.js` | GSAP core + Observer plugin. |
+| `tools/bgremove.swift` + `tools/bgremove-check.py` | Cuts product photography out of its background locally, via Vision's foreground mask, and verifies the result by alpha channel. The roasters' bags are mostly white on white, so the checker is not optional — a failed cut looks identical to a good one. |
 
 Modified by us: `blocks/_header-logo.liquid`, `blocks/_header-menu.liquid`,
 `sections/header.liquid`, `sections/header-group.json`,
