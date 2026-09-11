@@ -59,6 +59,10 @@
     assign product_grid_class = product_grid_class | append: ' product-information--media-left'
   endif
 
+  if settings.full_height_columns
+    assign product_grid_class = product_grid_class | append: ' product-information__grid--one-screen'
+  endif
+
   if settings.equal_columns
     assign product_grid_class = product_grid_class | append: ' product-information__grid--half'
 
@@ -87,7 +91,11 @@
 ></div>
 <div
   class="product-information section section--{{ content_width }} spacing-style{% if settings.background_color != blank %} color-custom-{{ section_id }}{% endif %} relative"
-  style="{% render 'spacing-style', settings: settings %} --gap: {{ settings.gap }}px;"
+  style="
+    {% render 'spacing-style', settings: settings %}
+    --gap: {{ settings.gap }}px;
+    --product-media-background: {{ settings.media_background | default: '#f6f6f6' }};
+  "
   data-testid="product-information"
 >
   {% if settings.desktop_media_position == 'left' and product_has_media and request.page_type == 'product' %}
@@ -290,6 +298,68 @@
           }
         }
       }
+    }
+  }
+
+  /*
+   * One screen, two columns: the media holds still and the details
+   * column scrolls inside itself.
+   *
+   * `lvh`, not `svh` or `vh` — the largest the viewport gets, so the
+   * frame still covers when a mobile address bar retracts. Every
+   * full-screen frame in this theme is on `lvh` for that reason.
+   *
+   * Only from 750px up. Below that the columns stack and the page
+   * scrolls normally; pinning a column on a phone would trap the reader
+   * in a box the height of their screen.
+   *
+   * Every rule is scoped through `.product-information__grid--one-screen`
+   * rather than relying on sitting later in the generated bundle than
+   * the stock rules it overrides — within one file, a rule added near
+   * the top loses to a stock rule further down at equal specificity.
+   */
+  @media screen and (min-width: 750px) {
+    .product-information__grid--one-screen {
+      /* The header is fixed over the page, so the frame owes it height. */
+      --one-screen-height: calc(100lvh - var(--header-group-height, 0px));
+
+      height: var(--one-screen-height);
+      align-items: stretch;
+    }
+
+    .product-information__grid--one-screen .product-information__media {
+      height: 100%;
+      min-height: 0; /* a grid child will not shrink below content without this */
+      overflow: hidden;
+      background-color: var(--product-media-background, #f6f6f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-information__grid--one-screen .product-information__media img,
+    .product-information__grid--one-screen .product-information__media .media {
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .product-information__grid--one-screen .product-details {
+      height: 100%;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain; /* do not hand the scroll back mid-column */
+      scrollbar-width: thin;
+    }
+  }
+
+  /*
+   * Below 750px the columns stack. The media keeps its ground so a
+   * cut-out on transparency still has something to sit on — most of this
+   * catalogue is white or frosted packaging, which vanishes on white.
+   */
+  @media screen and (max-width: 749px) {
+    .product-information__grid--one-screen .product-information__media {
+      background-color: var(--product-media-background, #f6f6f6);
     }
   }
 

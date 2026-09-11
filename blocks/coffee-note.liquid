@@ -12,6 +12,10 @@
 
   Optional by design: an empty metafield renders nothing, because a
   curator with nothing to add should not be made to write filler.
+
+  Collapsed, like the roaster's notes beside it. The product page is
+  meant to hold everything that decides a purchase inside one screen, and
+  prose is the part a reader opens when they have already decided to care.
 {%- enddoc -%}
 
 {% liquid
@@ -28,10 +32,20 @@
     "
     {{ block.shopify_attributes }}
   >
-    {%- if block_settings.label != blank -%}
-      <p class="coffee-note__label">{{ block_settings.label | escape }}</p>
-    {%- endif -%}
-    <div class="coffee-note__body rte">{{ note }}</div>
+    <details class="coffee-note__details" {% if block_settings.open_by_default %}open{% endif %}>
+      <summary class="coffee-note__summary">
+        <span>{{ block_settings.label | default: 'Why we stock it' | escape }}</span>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          class="icon icon-caret coffee-note__caret"
+          viewBox="0 0 10 6"
+        >
+          {%- render 'icon', icon: 'caret' -%}
+        </svg>
+      </summary>
+      <div class="coffee-note__body rte">{{ note }}</div>
+    </details>
   </div>
 {%- endif -%}
 
@@ -47,9 +61,14 @@
     {
       "type": "text",
       "id": "label",
-      "label": "Label",
-      "info": "Leave empty for no label.",
+      "label": "Heading",
       "default": "Why we stock it"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_by_default",
+      "label": "Open by default",
+      "default": false
     },
     {
       "type": "color",
@@ -100,11 +119,42 @@
     color: var(--coffee-note-color, var(--color-foreground));
   }
 
-  .coffee-note .coffee-note__label {
-    margin-block: 0 0.35rem;
+  .coffee-note__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    padding-block: 0.75rem;
+    cursor: pointer;
+    list-style: none;
+
     font-family: var(--font-subheading--family);
     text-transform: uppercase;
-    opacity: 0.55;
+  }
+
+  .coffee-note__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .coffee-note__caret {
+    flex: 0 0 auto;
+    width: 0.625rem;
+    transition: transform 0.2s ease;
+  }
+
+  .coffee-note__details[open] .coffee-note__caret {
+    transform: rotate(180deg);
+  }
+
+  .coffee-note .coffee-note__body {
+    padding-block-end: 1rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .coffee-note__caret {
+      transition: none;
+    }
   }
 
   .coffee-note .coffee-note__body > :first-child {

@@ -29,11 +29,11 @@
             "thumbnail_position": "left",
             "thumbnail_width": 57,
             "thumbnail_radius": 0,
-            "aspect_ratio": "1/1.25",
-            "constrain_to_viewport": false,
-            "media_fit": "cover",
+            "aspect_ratio": "adapt",
+            "constrain_to_viewport": true,
+            "media_fit": "contain",
             "media_radius": 0,
-            "extend_media": true,
+            "extend_media": false,
             "zoom": true,
             "video_loop": false,
             "hide_variants": true,
@@ -52,10 +52,10 @@
             "custom_width": 100,
             "width_mobile": "fill",
             "custom_width_mobile": 100,
-            "height": "fit",
+            "height": "fill",
             "details_position": "flex-start",
-            "gap": 12,
-            "sticky_details_desktop": true,
+            "gap": 14,
+            "sticky_details_desktop": false,
             "background_media": "none",
             "background_color": "",
             "video_position": "cover",
@@ -106,6 +106,16 @@
               },
               "blocks": {}
             },
+            "coffee_roast_date": {
+              "type": "coffee-roast-date",
+              "settings": {
+                "label": "Roasted",
+                "date_format": "%d %b %Y",
+                "font": "subheading",
+                "padding-block-start": 2,
+                "padding-block-end": 0
+              }
+            },
             "coffee_notes": {
               "type": "coffee-tasting-notes",
               "settings": {
@@ -116,6 +126,43 @@
                 "padding-block-start": 8,
                 "padding-block-end": 0
               }
+            },
+            "divider_HrJgFt": {
+              "type": "_divider",
+              "name": "t:names.divider",
+              "settings": {
+                "thickness": 1,
+                "corner_radius": "square",
+                "divider_color": "{{ settings.color_palette.color2 }}",
+                "width_percent": 100,
+                "padding-block-start": 12,
+                "padding-block-end": 12
+              },
+              "blocks": {}
+            },
+            "coffee_spec": {
+              "type": "coffee-spec",
+              "settings": {
+                "spec_rows": "roaster: Roaster\norigin: Origin\nregion: Region\nproducer: Producer\nvariety: Variety\nprocess: Process\naltitude: Altitude\nharvest: Harvest\nroast_profile: Roast",
+                "spec_label_width": 11,
+                "spec_dividers": false,
+                "spec_date_format": "%d %b %Y",
+                "padding-block-start": 0,
+                "padding-block-end": 0
+              }
+            },
+            "divider_spec": {
+              "type": "_divider",
+              "name": "t:names.divider",
+              "settings": {
+                "thickness": 1,
+                "corner_radius": "square",
+                "divider_color": "{{ settings.color_palette.color2 }}",
+                "width_percent": 100,
+                "padding-block-start": 12,
+                "padding-block-end": 12
+              },
+              "blocks": {}
             },
             "price_a7krng": {
               "type": "price",
@@ -136,19 +183,6 @@
                 "padding-block-end": 50,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
-              },
-              "blocks": {}
-            },
-            "divider_HrJgFt": {
-              "type": "_divider",
-              "name": "t:names.divider",
-              "settings": {
-                "thickness": 1,
-                "corner_radius": "square",
-                "divider_color": "{{ settings.color_palette.color2 }}",
-                "width_percent": 100,
-                "padding-block-start": 12,
-                "padding-block-end": 12
               },
               "blocks": {}
             },
@@ -246,38 +280,6 @@
               },
               "block_order": []
             },
-            "ocp_note": {
-              "type": "coffee-note",
-              "settings": {
-                "label": "Why we stock it",
-                "padding-block-start": 12,
-                "padding-block-end": 0
-              }
-            },
-            "divider_spec": {
-              "type": "_divider",
-              "name": "t:names.divider",
-              "settings": {
-                "thickness": 1,
-                "corner_radius": "square",
-                "divider_color": "{{ settings.color_palette.color2 }}",
-                "width_percent": 100,
-                "padding-block-start": 12,
-                "padding-block-end": 12
-              },
-              "blocks": {}
-            },
-            "coffee_spec": {
-              "type": "coffee-spec",
-              "settings": {
-                "spec_rows": "roaster: Roaster\norigin: Origin\nregion: Region\nproducer: Producer\nvariety: Variety\nprocess: Process\naltitude: Altitude\nharvest: Harvest\nroast_profile: Roast\nroast_date: Roasted",
-                "spec_label_width": 11,
-                "spec_dividers": false,
-                "spec_date_format": "%d %b %Y",
-                "padding-block-start": 0,
-                "padding-block-end": 0
-              }
-            },
             "coffee_roaster_notes": {
               "type": "coffee-roaster-notes",
               "settings": {
@@ -289,6 +291,15 @@
                 "transparency_heading": "Price transparency",
                 "padding-block-start": 8,
                 "padding-block-end": 0
+              }
+            },
+            "ocp_note": {
+              "type": "coffee-note",
+              "settings": {
+                "label": "Why we stock it",
+                "padding-block-start": 12,
+                "padding-block-end": 0,
+                "open_by_default": false
               }
             },
             "disclosures_hFEnPD": {
@@ -314,16 +325,17 @@
           "block_order": [
             "coffee_roaster",
             "text_9WaLn7",
+            "coffee_roast_date",
             "coffee_notes",
-            "price_a7krng",
             "divider_HrJgFt",
+            "coffee_spec",
+            "divider_spec",
+            "price_a7krng",
             "variant_picker_R3rGDr",
             "coffee_grind",
             "buy_buttons_eYQEYi",
-            "ocp_note",
-            "divider_spec",
-            "coffee_spec",
             "coffee_roaster_notes",
+            "ocp_note",
             "disclosures_hFEnPD"
           ]
         }
@@ -332,12 +344,14 @@
         "content_width": "content-full-width",
         "desktop_media_position": "left",
         "equal_columns": true,
-        "limit_details_width": true,
-        "gap": 0,
+        "limit_details_width": false,
+        "gap": 10,
         "enable_sticky_add_to_cart": true,
         "background_color": "{{ settings.color_palette.background }}",
         "padding-block-start": 0,
-        "padding-block-end": 0
+        "padding-block-end": 0,
+        "full_height_columns": true,
+        "media_background": "#f6f6f6"
       }
     },
     "product_recommendations_qnzPkn": {
@@ -621,7 +635,8 @@
         "gap": 28,
         "background_color": "{{ settings.color_palette.background }}",
         "padding-block-start": 48,
-        "padding-block-end": 48
+        "padding-block-end": 48,
+        "heading": "You may like"
       }
     }
   }

@@ -1,0 +1,140 @@
+{%- doc -%}
+  The roast date, set apart from the spec table.
+
+  It sat as the tenth row of `coffee-spec` and that was the wrong place
+  for it. Roast date is freshness, and on a shop where most of the
+  catalogue is a small lot that will sell out and not come back, it is
+  the line that says how long this one has left — not a fact of the same
+  kind as altitude or harvest.
+
+  Renders nothing without a date, so gear and merch are untouched.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign value = closest.product.metafields.coffee.roast_date.value
+
+  assign date_format = block_settings.date_format | default: '%d %b %Y'
+  if value != blank
+    assign formatted = value | date: date_format
+  endif
+%}
+
+{%- if formatted != blank -%}
+  <div
+    class="coffee-roast-date spacing-style"
+    style="
+      --coffee-roast-date-font: var(--font-{{ block_settings.font | default: 'subheading' }}--family);
+      {% if block_settings.text_color != blank %}--coffee-roast-date-color: {{ block_settings.text_color }};{% endif %}
+      {% render 'spacing-style', settings: block_settings %}
+    "
+    {{ block.shopify_attributes }}
+  >
+    {%- if block_settings.label != blank -%}
+      <span class="coffee-roast-date__label">{{ block_settings.label | escape }}</span>
+    {%- endif -%}
+    <time class="coffee-roast-date__value" datetime="{{ value | date: '%Y-%m-%d' }}">
+      {{- formatted -}}
+    </time>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Roast date",
+  "tag": null,
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Reads the product's roast date metafield. Renders nothing on products without one."
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label",
+      "info": "Leave empty to show only the date.",
+      "default": "Roasted"
+    },
+    {
+      "type": "select",
+      "id": "date_format",
+      "label": "Date format",
+      "options": [
+        { "value": "%d %b %Y", "label": "13 Aug 2026" },
+        { "value": "%b %d, %Y", "label": "Aug 13, 2026" },
+        { "value": "%d/%m/%Y", "label": "13/08/2026" },
+        { "value": "%d %B %Y", "label": "13 August 2026" }
+      ],
+      "default": "%d %b %Y"
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "subheading"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color",
+      "placeholder": "Default"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Roast date",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-roast-date {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+
+    font-family: var(--coffee-roast-date-font, var(--font-subheading--family));
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    color: var(--coffee-roast-date-color, var(--color-foreground));
+  }
+
+  .coffee-roast-date__label {
+    opacity: 0.55;
+  }
+{% endstylesheet %}
