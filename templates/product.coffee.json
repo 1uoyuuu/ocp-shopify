@@ -189,8 +189,8 @@
               "settings": {
                 "stacking": false,
                 "text_color": "",
-                "show_pickup_availability": false,
-                "gift_card_form": true,
+                "show_pickup_availability": true,
+                "gift_card_form": false,
                 "recipient_button_style": "default",
                 "recipient_button_background": "{{ settings.color_palette.background }}",
                 "recipient_button_text": "{{ settings.color_palette.foreground }}",
@@ -213,7 +213,6 @@
               "blocks": {
                 "quantity": {
                   "type": "quantity",
-                  "disabled": true,
                   "static": true,
                   "settings": {
                     "input_style": "custom",
@@ -238,6 +237,7 @@
                 },
                 "accelerated-checkout": {
                   "type": "accelerated-checkout",
+                  "disabled": true,
                   "static": true,
                   "settings": {},
                   "blocks": {}
