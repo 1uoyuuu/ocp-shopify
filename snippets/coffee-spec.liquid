@@ -11,6 +11,12 @@
   Reads `product.metafields.coffee.*`. Nothing at all renders when none
   of them are filled in, so gear and merch pass through untouched.
 
+  Two layouts. `rows` is a label/value table. `stacked` puts the label
+  above its value with the OCP arrow in front of it — the same mark as the
+  logo, reused as a list bullet, which is what the design brief asks of it.
+  Stacked is what the three-column page uses: the columns are narrow, and a
+  label column wide enough for "PRODUCER" leaves nothing for the value.
+
   `roast_date` is deliberately absent from the default rows — it has its
   own block above the table, because freshness is not a fact of the same
   kind as altitude. It still works as a row for anyone who wants it there.
@@ -51,6 +57,11 @@ roast_profile: Roast
   # reader wants to know. A row whose key is misspelt simply does not
   # render, the same as one whose metafield is empty.
   assign row_defs = block_settings.spec_rows | default: default_rows | newline_to_br | split: '<br />'
+
+  assign stacked = false
+  if block_settings.spec_layout == 'stacked'
+    assign stacked = true
+  endif
 %}
 
 {%- capture rows -%}
@@ -95,7 +106,12 @@ roast_profile: Roast
     -%}
     {%- if key != blank and value != blank -%}
       <div class="coffee-spec__row">
-        <dt class="coffee-spec__label">{{ label }}</dt>
+        <dt class="coffee-spec__label">
+          {%- if stacked -%}
+            <span class="coffee-spec__mark">{% render 'logo-arrow' %}</span>
+          {%- endif -%}
+          {{ label }}
+        </dt>
         <dd class="coffee-spec__value">
           {%- if url != blank -%}
             <a class="coffee-spec__link" href="{{ url }}">{{ value }}</a>
@@ -110,7 +126,7 @@ roast_profile: Roast
 
 {%- if rows != blank -%}
   <dl
-    class="coffee-spec{% if block_settings.spec_dividers %} coffee-spec--dividers{% endif %}"
+    class="coffee-spec coffee-spec--{{ block_settings.spec_layout | default: 'rows' }}{% if block_settings.spec_dividers %} coffee-spec--dividers{% endif %}"
     style="
       {% if block_settings.spec_label_color != blank %}--coffee-spec-label-color: {{ block_settings.spec_label_color }};{% endif %}
       {% if block_settings.spec_label_width != blank %}--coffee-spec-label-width: {{ block_settings.spec_label_width }}ch;{% endif %}
@@ -139,11 +155,40 @@ roast_profile: Roast
     letter-spacing: var(--ocp-letter-spacing);
   }
 
-  .coffee-spec__row {
+  .coffee-spec--rows .coffee-spec__row {
     display: grid;
     grid-template-columns: var(--coffee-spec-label-width, 11ch) 1fr;
     gap: 0 1.5rem;
     padding-block: 0.2rem;
+  }
+
+  /*
+   * Stacked: label over value, arrow in front of the label. The value is
+   * the thing being read, so it takes the foreground while the label
+   * stays quiet — the same weight-and-colour hierarchy the rest of the
+   * theme uses in place of a second type size.
+   */
+  .coffee-spec--stacked .coffee-spec__row {
+    display: block;
+    padding-block: 0 0.6rem;
+  }
+
+  .coffee-spec--stacked .coffee-spec__value {
+    text-transform: uppercase;
+    opacity: 1;
+  }
+
+  .coffee-spec__mark {
+    display: inline-block;
+    width: 0.6em;
+    margin-inline-end: 0.35em;
+    vertical-align: baseline;
+  }
+
+  .coffee-spec__mark svg {
+    width: 100%;
+    height: auto;
+    display: block;
   }
 
   .coffee-spec--dividers .coffee-spec__row + .coffee-spec__row {

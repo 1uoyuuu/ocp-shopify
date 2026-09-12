@@ -1,0 +1,263 @@
+{% comment %}
+  The coffee product page: three columns on one screen.
+
+  Left holds the accordions — what the coffee is, what the roaster says
+  about it, why OCP bought it — all closed, so the column is three lines
+  until someone wants more. Middle is the bag on its own ground with the
+  tasting notes beneath. Right is everything needed to order.
+
+  Purpose-built rather than bent out of the stock product section, which
+  is a two-column grid of media and details wrapped three deep. Splitting
+  that into three would mean flattening those wrappers with
+  `display: contents` and losing the settings they carry.
+
+  Cart correctness is not reimplemented: the variant picker, quantity and
+  buy buttons are the stock blocks, placed in the right-hand column and
+  restyled. They only need `closest.product` and `section.id`.
+
+  Columns stack below 750px, in source order — information, bag, order —
+  and the page scrolls normally. Holding a column to the viewport on a
+  phone would trap the reader inside a box the height of their screen.
+{% endcomment %}
+
+{% liquid
+  assign product = closest.product
+  if request.visual_preview_mode and product == blank
+    assign product = collections.all.products.first
+  endif
+%}
+
+<div
+  class="coffee-product{% if section.settings.one_screen %} coffee-product--one-screen{% endif %}"
+  style="
+    --coffee-media-background: {{ section.settings.media_background }};
+    --coffee-column-gap: {{ section.settings.column_gap }}px;
+    --coffee-grid-gap: {{ section.settings.grid_gap }}px;
+    --coffee-media-width: {{ section.settings.media_width }}fr;
+    {% render 'spacing-style', settings: section.settings %}
+  "
+  {{ section.shopify_attributes }}
+>
+  <div class="coffee-product__grid">
+    <div class="coffee-product__col coffee-product__col--info">
+      {% content_for 'block', type: '_coffee-column', id: 'info', closest.product: product %}
+    </div>
+
+    <div class="coffee-product__col coffee-product__col--media">
+      {% content_for 'block', type: '_coffee-column', id: 'media', closest.product: product %}
+    </div>
+
+    <div class="coffee-product__col coffee-product__col--buy">
+      {% content_for 'block', type: '_coffee-column', id: 'buy', closest.product: product %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Coffee product",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "one_screen",
+      "label": "Hold the three columns to one screen",
+      "info": "Each column scrolls inside itself if it runs long. Desktop only; below 750px the columns stack and the page scrolls.",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "media_background",
+      "label": "Behind the product image",
+      "info": "Shows through cut-out images that have no background of their own.",
+      "default": "#f6f6f6"
+    },
+    {
+      "type": "range",
+      "id": "media_width",
+      "label": "Middle column width",
+      "info": "Relative to the two side columns, which are 1 each.",
+      "min": 1,
+      "max": 3,
+      "step": 0.1,
+      "unit": "x",
+      "default": 1.4
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Between columns",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Between blocks in a column",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 40
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-product {
+    padding-inline: var(--ocp-page-margin);
+    box-sizing: border-box;
+  }
+
+  .coffee-product__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--coffee-grid-gap, 48px);
+  }
+
+  .coffee-product__col {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .coffee-product__col--media {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /*
+   * Three columns from 750px up, the middle one wider because the bag is
+   * the only thing on the page with a shape of its own.
+   *
+   * `lvh`, not `svh` or `vh` — the largest the viewport gets, so the frame
+   * still covers when a mobile address bar retracts. Every full-screen
+   * frame in this theme is on `lvh`.
+   *
+   * The section is the frame and its own padding counts inside it
+   * (`border-box`); a grid of 100lvh sitting below the padding overhangs
+   * the fold by exactly that padding. The padding has to stay — the header
+   * is fixed and transparent, so it takes no layout height but is still
+   * painted over the top of the page.
+   *
+   * `min-height: 0` on the grid as well as the columns: the section is a
+   * grid too, and a grid item's automatic minimum size is its content, so
+   * without it the row grows to the tallest column and the frame settles
+   * taller than the screen.
+   */
+  @media screen and (min-width: 750px) {
+    .coffee-product__grid {
+      grid-template-columns: 1fr var(--coffee-media-width, 1.4fr) 1fr;
+      align-items: stretch;
+    }
+
+    .coffee-product--one-screen {
+      height: 100lvh;
+      box-sizing: border-box;
+    }
+
+    .coffee-product--one-screen .coffee-product__grid {
+      height: 100%;
+      min-height: 0;
+    }
+
+    .coffee-product--one-screen .coffee-product__col {
+      height: 100%;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+
+    /* The bag is centred in its column and does not scroll away from it. */
+    .coffee-product--one-screen .coffee-product__col--media {
+      overflow: hidden;
+    }
+  }
+
+  /*
+   * The order column. The stock variant picker, quantity and buy button
+   * are used as they are for cart correctness, and restyled here into the
+   * label-left / value-right rows the rest of the column uses.
+   *
+   * Scoped through `.coffee-product__col--buy` so these win on
+   * specificity rather than on sitting later in the generated bundle than
+   * the stock rules — within one file a rule near the top loses to a
+   * stock rule further down at equal specificity.
+   */
+  .coffee-product__col--buy .variant-option,
+  .coffee-product__col--buy .coffee-grind .variant-option {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .coffee-product__col--buy .variant-option > label {
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .coffee-product__col--buy .variant-option__select-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .coffee-product__col--buy .variant-option__select {
+    border: 0;
+    padding: 0;
+    background: none;
+    text-align: end;
+    text-transform: uppercase;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    color: var(--color-foreground);
+  }
+
+  .coffee-product__col--buy .coffee-grind__help {
+    display: none;
+  }
+
+  /* The add-to-cart is the one solid block of brand colour on the page. */
+  .coffee-product__col--buy .button,
+  .coffee-product__col--buy button[type="submit"] {
+    width: 100%;
+    border-radius: 0;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+{% endstylesheet %}

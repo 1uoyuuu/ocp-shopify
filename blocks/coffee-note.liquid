@@ -32,20 +32,11 @@
     "
     {{ block.shopify_attributes }}
   >
-    <details class="coffee-note__details" {% if block_settings.open_by_default %}open{% endif %}>
-      <summary class="coffee-note__summary">
-        <span>{{ block_settings.label | default: 'Why we stock it' | escape }}</span>
-        <svg
-          aria-hidden="true"
-          focusable="false"
-          class="icon icon-caret coffee-note__caret"
-          viewBox="0 0 10 6"
-        >
-          {%- render 'icon', icon: 'caret' -%}
-        </svg>
-      </summary>
-      <div class="coffee-note__body rte">{{ note }}</div>
-    </details>
+    {% render 'coffee-disclosure',
+      heading: block_settings.label | default: 'Why OCP bought this',
+      open: block_settings.open_by_default,
+      body: note
+    %}
   </div>
 {%- endif -%}
 
@@ -62,7 +53,7 @@
       "type": "text",
       "id": "label",
       "label": "Heading",
-      "default": "Why we stock it"
+      "default": "Why OCP bought this"
     },
     {
       "type": "checkbox",
@@ -119,45 +110,12 @@
     color: var(--coffee-note-color, var(--color-foreground));
   }
 
-  .coffee-note__summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-
-    padding-block: 0.75rem;
-    cursor: pointer;
-    list-style: none;
-
-    font-family: var(--font-subheading--family);
-    text-transform: uppercase;
-  }
-
-  .coffee-note__summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .coffee-note__caret {
-    flex: 0 0 auto;
-    width: 0.625rem;
-    transition: transform 0.2s ease;
-  }
-
-  .coffee-note__details[open] .coffee-note__caret {
-    transform: rotate(180deg);
-  }
-
   .coffee-note .coffee-note__body {
     padding-block-end: 1rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .coffee-note__caret {
-      transition: none;
-    }
-  }
-
-  .coffee-note .coffee-note__body > :first-child {
+    .coffee-note .coffee-note__body > :first-child {
     margin-block-start: 0;
   }
 

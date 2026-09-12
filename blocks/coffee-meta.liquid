@@ -1,0 +1,114 @@
+{%- doc -%}
+  The line above the title: what the coffee was roasted for on the left,
+  when it was roasted on the right.
+
+  Both are freshness. Roast profile says which brew it was built for and
+  roast date says how long it has left, and on a shop where most of the
+  catalogue is a small lot that sells out and does not come back, that
+  pair is what a returning reader checks first.
+
+  Renders whichever half it has, or nothing.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign mf = closest.product.metafields.coffee
+
+  assign profile = mf.roast_profile.value
+
+  assign roasted = ''
+  if mf.roast_date.value != blank
+    assign date_format = block_settings.date_format | default: '%d/%m/%y'
+    assign roasted = mf.roast_date.value | date: date_format
+    if block_settings.date_prefix != blank
+      assign roasted = block_settings.date_prefix | append: roasted
+    endif
+  endif
+%}
+
+{%- if profile != blank or roasted != blank -%}
+  <div
+    class="coffee-meta spacing-style"
+    style="{% render 'spacing-style', settings: block_settings %}"
+    {{ block.shopify_attributes }}
+  >
+    <span class="coffee-meta__profile">{{ profile }}</span>
+    {%- if roasted != blank -%}
+      <time class="coffee-meta__date" datetime="{{ mf.roast_date.value | date: '%Y-%m-%d' }}">
+        {{- roasted -}}
+      </time>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Roast profile and date",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "date_prefix",
+      "label": "Before the date",
+      "info": "Leave empty to show only the date.",
+      "default": "RD:"
+    },
+    {
+      "type": "select",
+      "id": "date_format",
+      "label": "Date format",
+      "options": [
+        { "value": "%d/%m/%y", "label": "10/08/26" },
+        { "value": "%d %b %Y", "label": "10 Aug 2026" },
+        { "value": "%d/%m/%Y", "label": "10/08/2026" }
+      ],
+      "default": "%d/%m/%y"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Roast profile and date",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+{% endstylesheet %}

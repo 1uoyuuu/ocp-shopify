@@ -23,7 +23,7 @@
     assign notes = notes | slice: 0, 4
   endif
 
-  assign separator = block_settings.separator | default: ' · '
+  assign separator = block_settings.separator | default: ' / '
 %}
 
 {%- if notes != blank and notes.size > 0 -%}
@@ -55,13 +55,13 @@
       "type": "text",
       "id": "separator",
       "label": "Separator",
-      "default": " · "
+      "default": " / "
     },
     {
       "type": "text_alignment",
       "id": "alignment",
       "label": "Alignment",
-      "default": "left"
+      "default": "center"
     },
     {
       "type": "select",

@@ -1,0 +1,79 @@
+{%- doc -%}
+  One collapsible row on the coffee page: a heading with a rule under it,
+  the OCP arrow as the toggle, and the body beneath.
+
+  All three of the left column's panels go through here — the spec table,
+  the roaster's notes and OCP's own — so they share a heading, a rule and
+  a caret rather than each growing their own. The arrow rotates rather
+  than swapping glyphs, which keeps the mark itself constant.
+
+  @param {string} heading - The summary text
+  @param {string} body - Rendered markup for the panel
+  @param {boolean} [open] - Whether it starts open
+{%- enddoc -%}
+
+<details class="coffee-disclosure"{% if open %} open{% endif %}>
+  <summary class="coffee-disclosure__summary">
+    <span class="coffee-disclosure__heading">{{ heading }}</span>
+    <span class="coffee-disclosure__mark">{% render 'logo-arrow' %}</span>
+  </summary>
+  <div class="coffee-disclosure__body">{{ body }}</div>
+</details>
+
+{% stylesheet %}
+  .coffee-disclosure {
+    border-block-end: 1px solid var(--color-foreground);
+  }
+
+  .coffee-disclosure__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    padding-block: 0.5rem;
+    cursor: pointer;
+    list-style: none;
+
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .coffee-disclosure__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .coffee-disclosure__mark {
+    flex: 0 0 auto;
+    width: 0.7em;
+    transition: transform 0.2s ease;
+  }
+
+  .coffee-disclosure__mark svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /*
+   * The mark points down-right at rest, which reads as "there is more
+   * here". Open, it turns to point up-right — the same gesture reversed,
+   * rather than a different glyph.
+   */
+  .coffee-disclosure[open] .coffee-disclosure__mark {
+    transform: rotate(-90deg);
+  }
+
+  .coffee-disclosure__body {
+    padding-block: 0.5rem 1.25rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .coffee-disclosure__mark {
+      transition: none;
+    }
+  }
+{% endstylesheet %}

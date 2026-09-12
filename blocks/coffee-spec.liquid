@@ -4,13 +4,27 @@
   reordered and configured in the theme editor like any other block.
 {%- enddoc -%}
 
-<div
-  class="coffee-spec-block spacing-style"
-  style="{% render 'spacing-style', settings: block.settings %}"
-  {{ block.shopify_attributes }}
->
+{%- capture spec -%}
   {% render 'coffee-spec', product: closest.product, block: block %}
-</div>
+{%- endcapture -%}
+
+{%- if spec != blank -%}
+  <div
+    class="coffee-spec-block spacing-style"
+    style="{% render 'spacing-style', settings: block.settings %}"
+    {{ block.shopify_attributes }}
+  >
+    {%- if block.settings.heading != blank -%}
+      {% render 'coffee-disclosure',
+        heading: block.settings.heading,
+        open: block.settings.open_by_default,
+        body: spec
+      %}
+    {%- else -%}
+      {{ spec }}
+    {%- endif -%}
+  </div>
+{%- endif -%}
 
 {% schema %}
 {
@@ -20,6 +34,19 @@
     {
       "type": "paragraph",
       "content": "Reads the product's coffee metafields. Rows with nothing in them are left out, so this block is safe on any product."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave empty to show the table with no heading and always open.",
+      "default": "Coffee information"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_by_default",
+      "label": "Open by default",
+      "default": true
     },
     {
       "type": "header",
@@ -37,8 +64,20 @@
       "content": "Layout"
     },
     {
+      "type": "select",
+      "id": "spec_layout",
+      "label": "Layout",
+      "info": "Stacked puts the label above its value with the OCP arrow in front. Use it in narrow columns.",
+      "options": [
+        { "value": "rows", "label": "Label and value side by side" },
+        { "value": "stacked", "label": "Label above value" }
+      ],
+      "default": "rows"
+    },
+    {
       "type": "range",
       "id": "spec_label_width",
+      "visible_if": "{{ block.settings.spec_layout == 'rows' }}",
       "label": "Label column width",
       "min": 8,
       "max": 20,

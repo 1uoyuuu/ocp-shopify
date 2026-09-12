@@ -1,0 +1,31 @@
+{%- doc -%}
+  One column of the coffee product page. Holds whatever blocks are nested
+  under it in the template and does nothing else.
+
+  Private and rendered by id, three times, because a section gets one
+  `{% content_for 'blocks' %}` and this page needs three places to put
+  things. Same arrangement `_product-details` uses inside the stock
+  product section.
+{%- enddoc -%}
+
+<div class="coffee-column" {{ block.shopify_attributes }}>
+  {% content_for 'blocks' %}
+</div>
+
+{% schema %}
+{
+  "name": "Column",
+  "tag": null,
+  "blocks": [{ "type": "@theme" }, { "type": "@app" }],
+  "settings": []
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--coffee-column-gap, 0);
+    min-height: 0;
+  }
+{% endstylesheet %}

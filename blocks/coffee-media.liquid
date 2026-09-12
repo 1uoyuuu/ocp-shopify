@@ -1,0 +1,113 @@
+{%- doc -%}
+  The bag, centred on its own ground.
+
+  A single image, contained rather than cropped: the photographs are
+  cut-outs on transparency, so the ground behind them is what gives a
+  white or frosted bag an edge. Three of the roasters here ship white
+  packaging and it disappears on white.
+
+  Not the stock media gallery — no thumbnails, no carousel, no zoom. One
+  bag, one picture.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign product = closest.product
+  assign image = product.selected_or_first_available_variant.image | default: product.featured_image
+%}
+
+<div
+  class="coffee-media spacing-style"
+  style="
+    --coffee-media-ratio: {{ block_settings.aspect_ratio }};
+    {% render 'spacing-style', settings: block_settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {%- if image -%}
+    {{
+      image
+      | image_url: width: 1400
+      | image_tag:
+        loading: 'eager',
+        fetchpriority: 'high',
+        class: 'coffee-media__image',
+        widths: '400, 600, 800, 1000, 1400',
+        sizes: '(min-width: 750px) 40vw, 92vw',
+        alt: image.alt | default: product.title
+    }}
+  {%- else -%}
+    <div class="coffee-media__placeholder">
+      {{ 'product-apparel-1' | placeholder_svg_tag: 'coffee-media__image' }}
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Coffee image",
+  "tag": null,
+  "settings": [
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Shape",
+      "options": [
+        { "value": "1", "label": "Square" },
+        { "value": "4 / 5", "label": "Portrait" },
+        { "value": "3 / 4", "label": "Tall portrait" },
+        { "value": "auto", "label": "The image's own" }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Coffee image",
+      "category": "t:categories.product"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+  .coffee-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    aspect-ratio: var(--coffee-media-ratio, 1);
+    background-color: var(--coffee-media-background, #f6f6f6);
+    overflow: hidden;
+  }
+
+  .coffee-media .coffee-media__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+{% endstylesheet %}

@@ -27,7 +27,7 @@
   # as Liquid, so a literal placeholder is the only thing that survives.
   assign roaster_name = mf.roaster.value.name.value
   if roaster_name != blank
-    assign heading_template = block_settings.heading_template | default: '[roaster] on this coffee'
+    assign heading_template = block_settings.heading_template | default: 'Notes from [roaster]'
     assign heading = heading_template | replace: '[roaster]', roaster_name
   else
     assign heading = block_settings.fallback_heading | default: 'About this coffee'
@@ -35,46 +35,38 @@
 %}
 
 {%- if notes != blank or transparency != blank or lot_name != blank -%}
+  {%- capture panel -%}
+    {%- if lot_name != blank and block_settings.show_lot_name -%}
+      <p class="coffee-roaster-notes__lot">
+        {{ block_settings.lot_name_label | default: "Roaster's name for this lot" }}:
+        <span>{{ lot_name }}</span>
+      </p>
+    {%- endif -%}
+
+    {%- if notes != blank -%}
+      <div class="coffee-roaster-notes__rte rte">{{ notes }}</div>
+    {%- endif -%}
+
+    {%- if transparency != blank -%}
+      <div class="coffee-roaster-notes__transparency">
+        <p class="coffee-roaster-notes__transparency-heading">
+          {{ block_settings.transparency_heading | default: 'Price transparency' }}
+        </p>
+        <div class="rte">{{ transparency | newline_to_br }}</div>
+      </div>
+    {%- endif -%}
+  {%- endcapture -%}
+
   <div
     class="coffee-roaster-notes spacing-style"
     style="{% render 'spacing-style', settings: block_settings %}"
     {{ block.shopify_attributes }}
   >
-    <details class="coffee-roaster-notes__details" {% if block_settings.open_by_default %}open{% endif %}>
-      <summary class="coffee-roaster-notes__summary">
-        <span>{{ heading }}</span>
-        <svg
-          aria-hidden="true"
-          focusable="false"
-          class="icon icon-caret coffee-roaster-notes__caret"
-          viewBox="0 0 10 6"
-        >
-          {%- render 'icon', icon: 'caret' -%}
-        </svg>
-      </summary>
-
-      <div class="coffee-roaster-notes__body">
-        {%- if lot_name != blank and block_settings.show_lot_name -%}
-          <p class="coffee-roaster-notes__lot">
-            {{ block_settings.lot_name_label | default: "Roaster's name for this lot" }}:
-            <span>{{ lot_name }}</span>
-          </p>
-        {%- endif -%}
-
-        {%- if notes != blank -%}
-          <div class="coffee-roaster-notes__rte rte">{{ notes }}</div>
-        {%- endif -%}
-
-        {%- if transparency != blank -%}
-          <div class="coffee-roaster-notes__transparency">
-            <p class="coffee-roaster-notes__transparency-heading">
-              {{ block_settings.transparency_heading | default: 'Price transparency' }}
-            </p>
-            <div class="rte">{{ transparency | newline_to_br }}</div>
-          </div>
-        {%- endif -%}
-      </div>
-    </details>
+    {% render 'coffee-disclosure',
+      heading: heading,
+      open: block_settings.open_by_default,
+      body: panel
+    %}
   </div>
 {%- endif -%}
 
@@ -104,7 +96,7 @@
       "id": "heading_template",
       "label": "Heading",
       "info": "[roaster] is replaced with the roaster's name.",
-      "default": "[roaster] on this coffee"
+      "default": "Notes from [roaster]"
     },
     {
       "type": "text",
@@ -159,37 +151,6 @@
 {% endschema %}
 
 {% stylesheet %}
-  .coffee-roaster-notes__summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-
-    padding-block: 0.75rem;
-    cursor: pointer;
-    list-style: none;
-
-    font-family: var(--font-subheading--family);
-    font-size: var(--ocp-text-size);
-    line-height: var(--ocp-leading-snug);
-    letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
-  }
-
-  .coffee-roaster-notes__summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .coffee-roaster-notes__caret {
-    flex: 0 0 auto;
-    width: 0.625rem;
-    transition: transform 0.2s ease;
-  }
-
-  .coffee-roaster-notes__details[open] .coffee-roaster-notes__caret {
-    transform: rotate(180deg);
-  }
-
   /*
    * Scoped through the block rather than left as a bare `.rte` rule: the
    * stock rich text styles are declared further down the generated
@@ -222,9 +183,4 @@
     opacity: 0.55;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .coffee-roaster-notes__caret {
-      transition: none;
-    }
-  }
 {% endstylesheet %}
