@@ -1,0 +1,149 @@
+{%- doc -%}
+  The product's name as the page says it: where the coffee is from, then what
+  the roaster calls the lot.
+
+  The catalogue's titles carry the roaster first — "Rose - Ecuador / La
+  Florida / Sidra (Honey)" — because that is what makes them sortable and
+  searchable in the admin. On the page the roaster is already named twice
+  over, so the line here drops everything up to the separator and leads with
+  the origin instead.
+
+  This exists as a block rather than as a stock text block holding Liquid
+  because a template's setting value may be a dynamic source but not an
+  expression: `{{ closest.product.title }}` is accepted and
+  `{{ closest.product.title | split: ' - ' | last }}` makes the whole
+  template invalid, silently. Composition belongs in a file like this one.
+{%- enddoc -%}
+
+{% liquid
+  assign block_settings = block.settings
+  assign separator = block_settings.separator | default: ' / '
+
+  assign origin = closest.product.metafields.coffee.origin.value
+  assign origin_text = ''
+  if origin != blank
+    # A list metafield joins; a single value is already the string, and
+    # `join` leaves it alone.
+    assign origin_text = origin | join: block_settings.origin_separator
+  endif
+
+  # Everything after the last " - " is the lot, which is what the roaster
+  # named. A title without the separator is left whole rather than emptied.
+  assign lot = closest.product.title | split: ' - ' | last
+
+  assign line = lot
+  if origin_text != blank
+    assign line = origin_text | append: separator | append: lot
+  endif
+
+  assign font = block_settings.font | default: 'subheading'
+  assign text_case = block_settings.case | default: 'uppercase'
+  if text_case == 'none'
+    assign text_case = 'none'
+  endif
+%}
+
+{%- if line != blank -%}
+  <h1
+    class="coffee-title spacing-style"
+    style="
+      --coffee-title-font: var(--font-{{ font }}--family);
+      --coffee-title-weight: var(--font-{{ font }}--weight);
+      --coffee-title-case: {{ text_case }};
+      --coffee-title-alignment: {{ block_settings.alignment | default: 'left' }};
+      {% render 'spacing-style', settings: block_settings %}
+    "
+    {{ block.shopify_attributes }}
+  >
+    {{- line -}}
+  </h1>
+{%- endif -%}
+
+{% stylesheet %}
+  /*
+   * An h1 for the one line on the page that names the product, and none of
+   * the h1 preset that comes with it: the type here is the column's, which is
+   * the house text size. The element is the semantics, not the scale.
+   */
+  .coffee-title {
+    margin: 0;
+    font-family: var(--coffee-title-font, var(--font-subheading--family));
+    font-size: var(--ocp-text-size);
+    font-weight: var(--coffee-title-weight, var(--font-subheading--weight));
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: var(--coffee-title-case, uppercase);
+    text-align: var(--coffee-title-alignment, left);
+    text-wrap: pretty;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Coffee title",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "separator",
+      "label": "Between the origin and the lot",
+      "default": " / "
+    },
+    {
+      "type": "text",
+      "id": "origin_separator",
+      "label": "Between two origins",
+      "info": "Used when a blend names more than one country.",
+      "default": " & "
+    },
+    {
+      "type": "select",
+      "id": "font",
+      "label": "Font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "subheading"
+    },
+    {
+      "type": "select",
+      "id": "case",
+      "label": "Case",
+      "options": [
+        { "value": "none", "label": "As typed" },
+        { "value": "uppercase", "label": "Uppercase" }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "Alignment",
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ]
+}
+{% endschema %}
