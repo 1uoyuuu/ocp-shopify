@@ -660,6 +660,21 @@ until a menu is created in Shopify admin and selected.
   suspect, then pull and see which arrived. A control that is a byte-copy
   of `product.json` tells you first whether the problem is the content at
   all or the file being new.
+- **A setting value may be a dynamic source but not an expression.**
+  `{{ closest.product.title }}` is fine; `{{ closest.product.title | split:
+  ' - ' | last }}` invalidates the whole template. **Any filter is fatal.**
+  The tell across the theme: the thirteen live templates hold eighty-four
+  Liquid values between them and not one carries a `|`. Compose in a block
+  instead — that is why `blocks/coffee-title.liquid` exists rather than a
+  stock `text` block holding the expression.
+- The two-cycle bisect that found it, as a template for the next one: ten
+  probes in one commit narrowed it from "somewhere in the template" to one
+  block of six (each block alone in its column, plus one probe per column,
+  plus a byte-copy control that reproduced the refusal and so proved it was
+  the content). Seven more in the next commit narrowed it inside that block
+  by replacing one thing at a time — plain text instead of Liquid was the
+  only one that arrived. Do not bisect one suspect per cycle; a cycle is a
+  minute and a commit holds as many probes as you like.
 - **A section whose schema declares no `blocks` refuses any template that
   gives it blocks.** Rendering a private block statically by id needs no
   declaration — `sections/product-list.liquid` renders `_product-card`
