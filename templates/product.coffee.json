@@ -6,7 +6,8 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
- */{
+ */
+{
   "sections": {
     "main": {
       "type": "coffee-product",
@@ -21,13 +22,18 @@
               "settings": {
                 "heading": "Coffee information",
                 "open_by_default": true,
-                "spec_layout": "stacked",
                 "spec_rows": "origin: Origin\nregion: Region\nproducer: Producer\nvariety: Variety\nprocess: Process\naltitude: Altitude\nharvest: Harvest",
+                "spec_layout": "stacked",
+                "spec_label_width": 11,
                 "spec_dividers": false,
                 "spec_date_format": "%d %b %Y",
+                "spec_label_color": "",
                 "padding-block-start": 0,
-                "padding-block-end": 0
-              }
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
             },
             "coffee_roaster_notes": {
               "type": "coffee-roaster-notes",
@@ -40,16 +46,19 @@
                 "transparency_heading": "Price transparency",
                 "padding-block-start": 0,
                 "padding-block-end": 0
-              }
+              },
+              "blocks": {}
             },
             "ocp_note": {
               "type": "coffee-note",
               "settings": {
                 "label": "Why OCP bought this",
                 "open_by_default": false,
+                "text_color": "",
                 "padding-block-start": 0,
                 "padding-block-end": 0
-              }
+              },
+              "blocks": {}
             }
           },
           "block_order": [
@@ -69,18 +78,21 @@
                 "aspect_ratio": "1",
                 "padding-block-start": 0,
                 "padding-block-end": 16
-              }
+              },
+              "blocks": {}
             },
             "coffee_notes": {
               "type": "coffee-tasting-notes",
               "settings": {
-                "separator": " / ",
+                "separator": "/",
                 "alignment": "center",
                 "font": "subheading",
                 "case": "uppercase",
+                "text_color": "",
                 "padding-block-start": 0,
                 "padding-block-end": 0
-              }
+              },
+              "blocks": {}
             }
           },
           "block_order": [
@@ -100,19 +112,21 @@
                 "date_format": "%d/%m/%y",
                 "padding-block-start": 0,
                 "padding-block-end": 4
-              }
+              },
+              "blocks": {}
             },
             "product_title": {
               "type": "coffee-title",
               "settings": {
-                "separator": " / ",
-                "origin_separator": " & ",
+                "separator": "/",
+                "origin_separator": "&",
                 "font": "subheading",
                 "case": "uppercase",
                 "alignment": "left",
                 "padding-block-start": 50,
                 "padding-block-end": 0
-              }
+              },
+              "blocks": {}
             },
             "price": {
               "type": "price",
@@ -122,7 +136,7 @@
                 "show_tax_info": true,
                 "type_preset": "h5",
                 "width": "100%",
-                "alignment": "center",
+                "alignment": "left",
                 "font": "var(--font-body--family)",
                 "font_size": "1rem",
                 "line_height": "normal",
@@ -130,7 +144,7 @@
                 "case": "none",
                 "text_color": "",
                 "padding-block-start": 0,
-                "padding-block-end": 50,
+                "padding-block-end": 0,
                 "padding-inline-start": 0,
                 "padding-inline-end": 0
               },
@@ -167,7 +181,8 @@
                 "property_key": "Grind",
                 "padding-block-start": 0,
                 "padding-block-end": 0
-              }
+              },
+              "blocks": {}
             },
             "buy_buttons": {
               "type": "buy-buttons",
@@ -303,6 +318,12 @@
               "name": "t:names.product_card_media",
               "settings": {
                 "image_ratio": "portrait",
+                "card_media_background": "#f6f6f6",
+                "card_media_hover_lift": 15,
+                "show_card_meta": true,
+                "card_meta_date_prefix": "Roasted",
+                "card_meta_date_format": "%d %b %Y",
+                "card_meta_color": "#ffffff",
                 "border": "none",
                 "border_width": 1,
                 "border_opacity": 100,
@@ -345,6 +366,7 @@
                 "border_opacity": 100,
                 "border_color": "",
                 "border_radius": 0,
+                "link": "",
                 "open_in_new_tab": false,
                 "padding-block-start": 2,
                 "padding-block-end": 0,
@@ -383,6 +405,7 @@
                     "border_opacity": 100,
                     "border_color": "",
                     "border_radius": 0,
+                    "link": "",
                     "open_in_new_tab": false,
                     "padding-block-start": 0,
                     "padding-block-end": 0,
@@ -474,6 +497,7 @@
                     "border_opacity": 100,
                     "border_color": "",
                     "border_radius": 0,
+                    "link": "",
                     "open_in_new_tab": false,
                     "padding-block-start": 0,
                     "padding-block-end": 0,
@@ -532,8 +556,7 @@
         "gap": 28,
         "background_color": "{{ settings.color_palette.background }}",
         "padding-block-start": 48,
-        "padding-block-end": 48,
-        "heading": "You may like"
+        "padding-block-end": 48
       }
     }
   },
