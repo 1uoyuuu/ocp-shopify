@@ -660,6 +660,25 @@ until a menu is created in Shopify admin and selected.
   suspect, then pull and see which arrived. A control that is a byte-copy
   of `product.json` tells you first whether the problem is the content at
   all or the file being new.
+- **A section whose schema declares no `blocks` refuses any template that
+  gives it blocks.** Rendering a private block statically by id needs no
+  declaration — `sections/product-list.liquid` renders `_product-card`
+  that way — but the moment the *template* carries a `blocks` key, the
+  section has to declare `[{"type": "@theme"}, {"type": "@app"}]` or the
+  whole template is refused. `product-information` declares both even
+  though its two structural children are static.
+- Two explanations that looked right here and were not, both worth ruling
+  out by evidence rather than plausibility:
+  - *"the types were introduced in the same commit, so they were not
+    registered yet."* Re-pushing the template after the section and block
+    were provably live on the store changed nothing.
+  - *"the richtext value has no block-level wrapper."* Live templates on
+    this store do exactly that.
+
+  Both were arrived at by changing two things and reading the wrong one.
+  Change one thing per sync cycle, and confirm the premise — pull the
+  dependency and check it is actually there — before believing an
+  ordering story.
 
 **Scroll restoration**
 - **A refresh always goes to the top.** `scroll-container.js` reads the
