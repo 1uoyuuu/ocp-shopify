@@ -103,30 +103,16 @@
               }
             },
             "product_title": {
-              "type": "text",
-              "name": "t:names.title",
+              "type": "coffee-title",
               "settings": {
-                "text": "<p>{{ closest.product.metafields.coffee.origin.value | join: ' & ' }} / {{ closest.product.title | split: ' - ' | last }}</p>",
-                "width": "100%",
-                "max_width": "normal",
-                "alignment": "left",
-                "type_preset": "custom",
-                "font": "var(--font-subheading--family)",
-                "font_size": "",
-                "line_height": "normal",
-                "letter_spacing": "normal",
+                "separator": " / ",
+                "origin_separator": " & ",
+                "font": "subheading",
                 "case": "uppercase",
-                "wrap": "pretty",
-                "text_color": "",
-                "background": false,
-                "background_color": "#00000026",
-                "corner_radius": 0,
+                "alignment": "left",
                 "padding-block-start": 50,
-                "padding-block-end": 0,
-                "padding-inline-start": 0,
-                "padding-inline-end": 0
-              },
-              "blocks": {}
+                "padding-block-end": 0
+              }
             },
             "price": {
               "type": "price",
