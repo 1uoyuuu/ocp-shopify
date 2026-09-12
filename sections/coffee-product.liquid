@@ -152,7 +152,6 @@
   .coffee-product__col--media {
     display: flex;
     flex-direction: column;
-    justify-content: center;
   }
 
   /*
@@ -177,27 +176,51 @@
   @media screen and (min-width: 750px) {
     .coffee-product__grid {
       grid-template-columns: 1fr var(--coffee-media-width, 1.4fr) 1fr;
-      align-items: stretch;
+
+      /*
+       * The three columns start on one line. They are three readings of the
+       * same coffee, not three panels, and a shared top edge is what says so
+       * — the bag's top, the first disclosure's rule and the roast line all
+       * land together.
+       */
+      align-items: start;
     }
 
+    /*
+     * The frame is a screen and the block sits in the middle of it.
+     *
+     * `align-content`, not `align-items`: it centres the row within the
+     * frame while leaving the columns free to align to each other's tops. A
+     * grid that stretched to the full height would put the block back where
+     * it was — against the top, with the empty space all below it.
+     */
     .coffee-product--one-screen {
+      display: grid;
+      align-content: center;
       height: 100lvh;
       box-sizing: border-box;
     }
 
+    /*
+     * A cap rather than a height. At rest the row is as tall as its tallest
+     * column and no taller, which is what lets it be centred; a column with
+     * every disclosure open takes the rest of the screen and then scrolls
+     * inside itself rather than pushing the frame past a screen.
+     */
     .coffee-product--one-screen .coffee-product__grid {
-      height: 100%;
+      max-height: 100%;
       min-height: 0;
     }
 
     .coffee-product--one-screen .coffee-product__col {
-      height: 100%;
+      max-height: 100%;
+      min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
       scrollbar-width: thin;
     }
 
-    /* The bag is centred in its column and does not scroll away from it. */
+    /* The bag has no more to show than itself; nothing to scroll to. */
     .coffee-product--one-screen .coffee-product__col--media {
       overflow: hidden;
     }
