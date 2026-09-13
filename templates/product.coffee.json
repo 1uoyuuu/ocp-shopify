@@ -108,7 +108,7 @@
             "coffee_meta": {
               "type": "coffee-meta",
               "settings": {
-                "date_prefix": "Roast Date: ",
+                "date_prefix": "Roast Date:",
                 "date_format": "%d/%m/%y",
                 "padding-block-start": 0,
                 "padding-block-end": 4
@@ -174,7 +174,7 @@
               "type": "coffee-grind",
               "settings": {
                 "grind_label": "Grind",
-                "grind_options": "Whole bean, Filter, Espresso, AeroPress, Moka",
+                "grind_options": "Whole bean, Espresso, Aero Press, French Press, Batch Brewer, Pour Over",
                 "grind_help": "",
                 "property_key": "Grind",
                 "padding-block-start": 0,
