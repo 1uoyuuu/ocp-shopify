@@ -20,8 +20,9 @@
 
 {% liquid
   assign block_settings = block.settings
-  # rich_text_field: render the metafield through `metafield_tag`, test the
-  # value. Printing the value prints the document tree.
+  # rich_text_field: render the metafield through `metafield_tag`, and test
+  # `.value` for presence. Printing the value prints the document tree —
+  # `{"type"=>"root", "children"=>[...]}` — rather than the prose.
   assign note_field = closest.product.metafields.coffee.ocp_note
   assign has_note = note_field.value
 %}
