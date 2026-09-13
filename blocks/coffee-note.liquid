@@ -20,10 +20,19 @@
 
 {% liquid
   assign block_settings = block.settings
-  assign note = closest.product.metafields.coffee.ocp_note.value
+  # rich_text_field: render the metafield through `metafield_tag`, test the
+  # value. Printing the value prints the document tree.
+  assign note_field = closest.product.metafields.coffee.ocp_note
+  assign has_note = note_field.value
 %}
 
-{%- if note != blank -%}
+{%- comment -%}
+  Captured rather than passed straight down, because a `render` parameter
+  cannot carry a filter.
+{%- endcomment -%}
+{%- capture note_html -%}{{ note_field | metafield_tag }}{%- endcapture -%}
+
+{%- if has_note != blank -%}
   <div
     class="coffee-note spacing-style"
     style="
@@ -35,7 +44,7 @@
     {% render 'coffee-disclosure',
       heading: block_settings.label | default: 'Why OCP bought this',
       open: block_settings.open_by_default,
-      body: note
+      body: note_html
     %}
   </div>
 {%- endif -%}

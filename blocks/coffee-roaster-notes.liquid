@@ -19,7 +19,15 @@
   assign block_settings = block.settings
   assign mf = closest.product.metafields.coffee
 
-  assign notes = mf.roaster_notes.value
+  # The metafield itself, not its `.value`. `roaster_notes` is a
+  # rich_text_field, whose value is the document as a tree of nodes — print
+  # that and you get the tree, `{"type"=>"root", "children"=>[...]}` and all.
+  # `metafield_tag` is what turns the tree into markup, and it takes the
+  # metafield. `.value` is still the right thing to test for presence.
+  assign notes = mf.roaster_notes
+  assign has_notes = mf.roaster_notes.value
+
+  # multi_line_text_field, so this one really is a string.
   assign transparency = mf.transparency.value
   assign lot_name = mf.roaster_lot_name.value
 
@@ -34,7 +42,7 @@
   endif
 %}
 
-{%- if notes != blank or transparency != blank or lot_name != blank -%}
+{%- if has_notes != blank or transparency != blank or lot_name != blank -%}
   {%- capture panel -%}
     {%- if lot_name != blank and block_settings.show_lot_name -%}
       <p class="coffee-roaster-notes__lot">
@@ -43,8 +51,8 @@
       </p>
     {%- endif -%}
 
-    {%- if notes != blank -%}
-      <div class="coffee-roaster-notes__rte rte">{{ notes }}</div>
+    {%- if has_notes != blank -%}
+      <div class="coffee-roaster-notes__rte rte">{{ notes | metafield_tag }}</div>
     {%- endif -%}
 
     {%- if transparency != blank -%}
