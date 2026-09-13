@@ -1,0 +1,18 @@
+{% liquid
+  assign block_settings = block.settings
+%}
+<div class="p6a" {{ block.shopify_attributes }}>
+  {% render 'coffee-disclosure',
+    heading: block_settings.label | upcase,
+    open: block_settings.open_by_default,
+    body: 'x'
+  %}
+</div>
+{% schema %}
+{ "name": "P6a", "tag": null,
+  "settings": [
+    { "type": "text", "id": "label", "label": "L", "default": "hi" },
+    { "type": "checkbox", "id": "open_by_default", "label": "O", "default": false }
+  ]
+}
+{% endschema %}
