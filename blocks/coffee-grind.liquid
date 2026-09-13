@@ -47,9 +47,14 @@
             <option value="{{ option_label | escape }}">{{ option_label }}</option>
           {%- endfor -%}
         </select>
-        <span aria-hidden="true" class="icon coffee-grind__mark">
-          {%- render 'logo-arrow' -%}
-        </span>
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          class="icon icon-caret"
+          viewBox="0 0 10 6"
+        >
+          {%- render 'icon', icon: 'caret' -%}
+        </svg>
       </div>
     </div>
 
@@ -129,17 +134,6 @@
 {% endschema %}
 
 {% stylesheet %}
-  /*
-   * The stock dropdown caret, swapped for the OCP arrow mark. `.icon`
-   * still carries the position/size from the stock dropdown styles this
-   * markup otherwise reuses; the mark just needs to fill that box.
-   */
-  .coffee-grind__mark svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-
   .coffee-grind__help {
     margin-block: 0.4rem 0;
 
