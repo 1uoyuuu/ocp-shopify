@@ -108,7 +108,7 @@
             "coffee_meta": {
               "type": "coffee-meta",
               "settings": {
-                "date_prefix": "RD:",
+                "date_prefix": "Roast Date: ",
                 "date_format": "%d/%m/%y",
                 "padding-block-start": 0,
                 "padding-block-end": 4
@@ -118,8 +118,6 @@
             "product_title": {
               "type": "coffee-title",
               "settings": {
-                "separator": "/",
-                "origin_separator": "&",
                 "font": "subheading",
                 "case": "uppercase",
                 "alignment": "left",

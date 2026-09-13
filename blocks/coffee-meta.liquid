@@ -14,7 +14,18 @@
   assign block_settings = block.settings
   assign mf = closest.product.metafields.coffee
 
+  # The controlled brew word in parens, same shape whether it's an
+  # off-the-shelf profile ("Filter", "Omni") or one that also spans more
+  # than one lot ("Filter Blend").
   assign profile = mf.roast_profile.value
+  assign profile_text = ''
+  if profile != blank
+    assign profile_text = profile
+    if mf.is_blend.value
+      assign profile_text = profile_text | append: ' Blend'
+    endif
+    assign profile_text = profile_text | prepend: '(' | append: ')'
+  endif
 
   assign roasted = ''
   if mf.roast_date.value != blank
@@ -26,13 +37,13 @@
   endif
 %}
 
-{%- if profile != blank or roasted != blank -%}
+{%- if profile_text != blank or roasted != blank -%}
   <div
     class="coffee-meta spacing-style"
     style="{% render 'spacing-style', settings: block_settings %}"
     {{ block.shopify_attributes }}
   >
-    <span class="coffee-meta__profile">{{ profile }}</span>
+    <span class="coffee-meta__profile">{{ profile_text }}</span>
     {%- if roasted != blank -%}
       <time class="coffee-meta__date" datetime="{{ mf.roast_date.value | date: '%Y-%m-%d' }}">
         {{- roasted -}}
@@ -51,7 +62,7 @@
       "id": "date_prefix",
       "label": "Before the date",
       "info": "Leave empty to show only the date.",
-      "default": "RD:"
+      "default": "Roast Date: "
     },
     {
       "type": "select",
