@@ -2,13 +2,15 @@
   OCP's own line about a coffee — the curator's voice, as opposed to the
   roaster's words in `coffee-roaster-notes`.
 
-  This exists as a block rather than as a stock `text` block holding
-  `{{ ... }}` because the text block's `text` setting is of type
-  `richtext`, and a richtext value has to be wrapped in a block-level tag.
-  A bare Liquid output tag is an invalid value, which silently invalidates
-  the whole template JSON — Shopify refuses the file and says nothing.
-  Wrapping it in `<p>` would satisfy the validator and then nest `<p>`
-  inside the `<p>` that a rich_text_field renders for itself.
+  This exists as a block rather than as a stock `text` block pointed at the
+  metafield, because a template's setting value may be a dynamic source but
+  not an expression: a filter in one invalidates the whole template JSON, and
+  Shopify refuses it without saying so. Rendering a rich text field needs
+  `metafield_tag`, which is a filter, so it has to happen in a file like this.
+
+  Note the absence of a Liquid output tag in this paragraph. What was written
+  here to illustrate that point was not itself valid Liquid, and a doc comment
+  is still parsed — it kept this whole block off the store until it was found.
 
   Optional by design: an empty metafield renders nothing, because a
   curator with nothing to add should not be made to write filler.
