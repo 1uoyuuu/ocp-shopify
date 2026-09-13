@@ -262,8 +262,8 @@
         "media_width": 1.4,
         "grid_gap": 48,
         "column_gap": 12,
-        "padding-block-start": 60,
-        "padding-block-end": 40
+        "padding-block-start": 96,
+        "padding-block-end": 96
       }
     },
     "product_recommendations_qnzPkn": {

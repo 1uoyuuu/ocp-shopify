@@ -28,7 +28,7 @@
 %}
 
 <div
-  class="coffee-product{% if section.settings.one_screen %} coffee-product--one-screen{% endif %}"
+  class="coffee-product spacing-style{% if section.settings.one_screen %} coffee-product--one-screen{% endif %}"
   style="
     --coffee-media-background: {{ section.settings.media_background }};
     --coffee-column-gap: {{ section.settings.column_gap }}px;
@@ -116,7 +116,7 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 60
+      "default": 96
     },
     {
       "type": "range",
@@ -126,7 +126,7 @@
       "max": 100,
       "step": 1,
       "unit": "px",
-      "default": 40
+      "default": 96
     }
   ]
 }
@@ -179,41 +179,32 @@
     }
 
     /*
-     * The frame is a screen, full stop — not a cap the block grows into.
-     *
-     * `align-content: center` used to do the sitting-in-the-middle part,
-     * which meant the row's own height came from whichever column was
-     * tallest at that moment, capped but still variable. Opening a second
-     * disclosure grew that row from a short rest height toward the cap, and
-     * `align-content: center` re-centred it every time — the whole block
-     * visibly jumped upward on every open, by however much the row had just
-     * grown. A row that is always exactly the frame's height has nothing
-     * left to recentre: it never grows, so it never moves.
+     * One screen is a ceiling, not a size to grow into. Short content
+     * leaves the block shorter than the frame, with the padding above and
+     * below reading as margin instead of the block being stretched to
+     * meet the fold.
      */
     .coffee-product--one-screen {
       display: grid;
-      height: 100lvh;
+      max-height: 100lvh;
       box-sizing: border-box;
     }
 
     /*
-     * The grid fills the frame outright rather than sizing to content, and
-     * each column fills the grid the same way — both a height now, not a
-     * cap on an otherwise-auto one. Every column's box starts at the same
-     * y, which is what makes them read as three lines on one page rather
-     * than three panels — no align-items needed to arrange it, since a
-     * column that is exactly the row's own height has nowhere else to sit.
-     * One whose content doesn't reach the bottom just leaves it blank; one
-     * that overflows scrolls inside its own unchanging box instead of
-     * asking the row to grow for it.
+     * The cap lives on each column directly, in the same absolute unit as
+     * the frame, rather than as a percentage of the row. A row that only
+     * ever grows to fit its content has no definite height of its own for
+     * a percentage to resolve against — it would be treated as auto and
+     * cap nothing. Subtracting the padding keeps column-plus-padding at
+     * or under one screen either way; content past that scrolls inside
+     * the column instead of growing the page.
+     *
+     * `min-height: 0` overrides a grid item's automatic minimum size,
+     * which defaults to its content — without it, opening a disclosure
+     * would grow the column past its own max-height instead of scrolling.
      */
-    .coffee-product--one-screen .coffee-product__grid {
-      height: 100%;
-      min-height: 0;
-    }
-
     .coffee-product--one-screen .coffee-product__col {
-      height: 100%;
+      max-height: calc(100lvh - var(--padding-block-start, 0px) - var(--padding-block-end, 0px));
       min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
