@@ -27,6 +27,17 @@
   # `{"type"=>"root", "children"=>[...]}` — rather than the prose.
   assign note_field = closest.product.metafields.coffee.ocp_note
   assign has_note = note_field.value
+
+  # Resolved here, not inline in the render call below. A filter used
+  # directly as a render tag's parameter value — heading: x | default: y —
+  # is ordinary, valid Liquid and theme check says nothing about it, but the
+  # GitHub sync silently refuses to apply a file that contains it: five
+  # separate probes confirmed it, with three different filters, both with
+  # and without a filter argument, and it did not matter which. Moving the
+  # filter into a plain assign and passing the resulting variable is what
+  # lets the file sync at all. coffee-roaster-notes.liquid already does this
+  # for the same reason.
+  assign heading = block_settings.label | default: 'Why OCP bought this'
 %}
 
 {%- comment -%}
@@ -45,7 +56,7 @@
     {{ block.shopify_attributes }}
   >
     {% render 'coffee-disclosure',
-      heading: block_settings.label | default: 'Why OCP bought this',
+      heading: heading,
       open: block_settings.open_by_default,
       body: note_html
     %}
