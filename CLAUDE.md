@@ -623,6 +623,46 @@ until a menu is created in Shopify admin and selected.
   a section offers. `sections/product-list.liquid` renders `_product-card`
   without declaring it.
 
+**Sync — a `.liquid` file refused for a filter inside a `render` parameter**
+- A filter used directly as a `{% render %}` tag's named-parameter value —
+  `heading: block_settings.label | default: 'x'`, `price: value |
+  money_with_currency` — is ordinary, valid Liquid. It runs fine, and
+  **`shopify theme check` says nothing about it.** But a `.liquid` file
+  containing one does not sync through the GitHub connection: the push
+  succeeds, the file is simply never updated on the store, silently, exactly
+  like the schema and template failures above.
+- It does not matter which filter, and it does not matter whether the filter
+  takes an argument. `| upcase` (no argument) and `| append: '!'` (a
+  different filter, with one) both failed identically to the `| default:
+  'Why OCP bought this'` that was actually in the file. Six probes, isolating
+  one variable at a time, all landed on the same line shape.
+- **The fix is to resolve the filter with a plain `assign` before the
+  `render` tag, then pass the resulting variable in.** `heading: heading`
+  instead of `heading: block_settings.label | default: '...'`. Once moved
+  out, the file syncs immediately — nothing else about it changes.
+- Two stock Horizon files carry this exact pattern today and are *currently*
+  fine: `snippets/theme-drawer-header.liquid` (`title: 'content.cart_title' |
+  t`) and `snippets/unit-price.liquid` (`price: line_item.unit_price |
+  money_with_currency`). They are fine only because they have never been
+  re-pushed through this git connection since the theme was created — the
+  ingestion path that rejects this shape is specifically the GitHub-diff
+  sync, not whatever validated them originally. **The moment either file is
+  edited and pushed again, expect this exact failure.** Left alone rather
+  than "fixed pre-emptively," since touching stock files nobody asked about
+  is its own risk — but this is the reason if one of them ever silently stops
+  updating.
+- Found by bisecting `blocks/coffee-note.liquid`, which had already survived
+  three separate real fixes (a genuine rich-text rendering bug, an unbalanced
+  brace in its stylesheet, invalid Liquid inside its own doc comment) and
+  still would not sync. Each of those was a real defect and none of them was
+  the blocker. The method that actually found it: a byte-identical copy of
+  the file under a new path also failed (rules out anything path-specific);
+  swapping the body for a hardcoded literal landed (narrows it to one
+  render call); stripping that call down to a trivial body with no
+  `metafield_tag` still failed (narrows it to the call's own parameters);
+  three more probes on that one line finished it. Six commits, six sync
+  waits, one line.
+
 **Sync — a JSON template refused for one bad setting value**
 - Shopify validates each setting value in `templates/*.json` against its
   type in the section or block schema. A value that is invalid for its
