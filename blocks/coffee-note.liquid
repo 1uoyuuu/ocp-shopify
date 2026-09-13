@@ -12,8 +12,11 @@
   here to illustrate that point was not itself valid Liquid, and a doc comment
   is still parsed — it kept this whole block off the store until it was found.
 
-  Optional by design: an empty metafield renders nothing, because a
-  curator with nothing to add should not be made to write filler.
+  Always in the list, even before OCP has written a word about a coffee —
+  an empty metafield falls back to a plain placeholder line instead of the
+  panel disappearing, so the reader sees the same three rows on every
+  coffee rather than wondering why this one is missing a section the last
+  one had.
 
   Collapsed, like the roaster's notes beside it. The product page is
   meant to hold everything that decides a purchase inside one screen, and
@@ -38,30 +41,35 @@
   # lets the file sync at all. coffee-roaster-notes.liquid already does this
   # for the same reason.
   assign heading = block_settings.label | default: 'Why OCP bought this'
+  assign default_message = block_settings.default_message | default: "We haven't written a note for this one yet."
 %}
 
 {%- comment -%}
   Captured rather than passed straight down, because a `render` parameter
   cannot carry a filter.
 {%- endcomment -%}
-{%- capture note_html -%}{{ note_field | metafield_tag }}{%- endcapture -%}
+{%- capture note_html -%}
+  {%- if has_note != blank -%}
+    {{ note_field | metafield_tag }}
+  {%- else -%}
+    <p>{{ default_message }}</p>
+  {%- endif -%}
+{%- endcapture -%}
 
-{%- if has_note != blank -%}
-  <div
-    class="coffee-note spacing-style"
-    style="
-      {% if block_settings.text_color != blank %}--coffee-note-color: {{ block_settings.text_color }};{% endif %}
-      {% render 'spacing-style', settings: block_settings %}
-    "
-    {{ block.shopify_attributes }}
-  >
-    {% render 'coffee-disclosure',
-      heading: heading,
-      open: block_settings.open_by_default,
-      body: note_html
-    %}
-  </div>
-{%- endif -%}
+<div
+  class="coffee-note spacing-style"
+  style="
+    {% if block_settings.text_color != blank %}--coffee-note-color: {{ block_settings.text_color }};{% endif %}
+    {% render 'spacing-style', settings: block_settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {% render 'coffee-disclosure',
+    heading: heading,
+    open: block_settings.open_by_default,
+    body: note_html
+  %}
+</div>
 
 {% schema %}
 {
@@ -70,13 +78,19 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "A sentence or two in OCP's voice about why we stock this coffee. Renders nothing when the metafield is empty."
+      "content": "A sentence or two in OCP's voice about why we stock this coffee. Always shows in the list — falls back to the message below when the metafield is empty."
     },
     {
       "type": "text",
       "id": "label",
       "label": "Heading",
       "default": "Why OCP bought this"
+    },
+    {
+      "type": "textarea",
+      "id": "default_message",
+      "label": "Message when there's no note",
+      "default": "We haven't written a note for this one yet."
     },
     {
       "type": "checkbox",
@@ -133,19 +147,18 @@
     color: var(--coffee-note-color, var(--color-foreground));
   }
 
-  .coffee-note .coffee-note__body {
-    padding-block-end: 1rem;
-  }
-
   /*
-   * The note's prose comes from a rich text field, so its first and last
-   * elements bring their own margins; the disclosure already spaces itself.
+   * The body comes from a rich text field (or the fallback paragraph),
+   * so its first and last elements bring their own margins; the
+   * disclosure already spaces itself. Scoped to `.coffee-disclosure__body`
+   * — the class the shared snippet actually renders, not one of this
+   * block's own.
    */
-  .coffee-note .coffee-note__body > :first-child {
+  .coffee-note .coffee-disclosure__body > :first-child {
     margin-block-start: 0;
   }
 
-  .coffee-note .coffee-note__body > :last-child {
+  .coffee-note .coffee-disclosure__body > :last-child {
     margin-block-end: 0;
   }
 {% endstylesheet %}

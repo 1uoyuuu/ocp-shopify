@@ -7,12 +7,18 @@
   a caret rather than each growing their own. The arrow rotates rather
   than swapping glyphs, which keeps the mark itself constant.
 
+  Shared `name` on the `<details>` makes the three of them one native
+  accordion group — opening one closes whichever of the others was open,
+  with no JS. That only holds as long as every caller is a left-column
+  panel meant to belong to the same group; a future caller wanting an
+  independent panel would need its own name, not this shared one.
+
   @param {string} heading - The summary text
   @param {string} body - Rendered markup for the panel
   @param {boolean} [open] - Whether it starts open
 {%- enddoc -%}
 
-<details class="coffee-disclosure"{% if open %} open{% endif %}>
+<details class="coffee-disclosure" name="coffee-disclosure-group"{% if open %} open{% endif %}>
   <summary class="coffee-disclosure__summary">
     <span class="coffee-disclosure__heading">{{ heading }}</span>
     <span class="coffee-disclosure__mark">{% render 'logo-arrow' %}</span>

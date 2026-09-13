@@ -53,6 +53,7 @@
               "type": "coffee-note",
               "settings": {
                 "label": "Why OCP bought this",
+                "default_message": "We haven't written a note for this one yet.",
                 "open_by_default": false,
                 "text_color": "",
                 "padding-block-start": 0,
