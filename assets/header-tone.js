@@ -34,6 +34,20 @@ const SAMPLES = [0.08, 0.5, 0.92];
 const BACKDROP_MIN_WIDTH = 0.8;
 
 /**
+ * How many frames to keep re-measuring after connect, before settling into
+ * the normal scroll/resize/intro-driven triggers.
+ *
+ * The very first read has nothing to fall back on if it is wrong — every
+ * later one is a response to a scroll or resize, so a bad read there just
+ * means the next gesture corrects it. On connect there is no such gesture
+ * to wait for, and the page can still be settling (a scrollbar reserving its
+ * width, a style recalc not yet flushed) even a frame or two after the
+ * element upgrades. Twenty frames is a third of a second — enough margin for
+ * that, spent once per page load.
+ */
+const SETTLE_FRAMES = 20;
+
+/**
  * The class hero-scroll.js puts on <html> while the intro holds the page.
  *
  * Everything else that changes what sits behind the header does it by
@@ -80,6 +94,10 @@ function parse(colour) {
 
 class HeaderTone extends HTMLElement {
   #frame = 0;
+  /** The connect-time settle loop's own frame handle and remaining count —
+   * see SETTLE_FRAMES. */
+  #settleFrame = 0;
+  #settleFramesLeft = 0;
   /** While the intro is playing, the reading is retaken every frame. */
   #introFrame = 0;
   #watchingIntro = false;
@@ -111,7 +129,8 @@ class HeaderTone extends HTMLElement {
     });
     this.#syncIntroWatch();
 
-    this.#schedule();
+    this.#settleFramesLeft = SETTLE_FRAMES;
+    this.#settle();
   }
 
   disconnectedCallback() {
@@ -127,7 +146,21 @@ class HeaderTone extends HTMLElement {
     this.#introFrame = 0;
     cancelAnimationFrame(this.#frame);
     this.#frame = 0;
+    cancelAnimationFrame(this.#settleFrame);
+    this.#settleFrame = 0;
   }
+
+  /**
+   * Re-measures once a frame for SETTLE_FRAMES frames, then stops and leaves
+   * scroll/resize/intro to keep it current from there. See SETTLE_FRAMES for
+   * why the connect-time read gets this and later ones do not.
+   */
+  #settle = () => {
+    this.#settleFrame = 0;
+    this.#measure();
+    this.#settleFramesLeft -= 1;
+    if (this.#settleFramesLeft > 0) this.#settleFrame = requestAnimationFrame(this.#settle);
+  };
 
   /**
    * Starts and stops the per-frame reading as the intro takes and gives back
@@ -221,7 +254,26 @@ class HeaderTone extends HTMLElement {
     const { top, height } = this.#host.getBoundingClientRect();
     if (!height) return;
 
-    const y = top + height / 2;
+    /*
+     * Just past the header's own box, not its centre.
+     *
+     * The header sits in a `position: sticky` section. Once stuck, that box
+     * overlaps whatever has scrolled up underneath it, and either y worked
+     * equally well. Before it has ever stuck — which is the state every page
+     * loads in — the header is still in normal flow at the very top, and its
+     * own box is all there is at its vertical centre: nothing has scrolled
+     * under it yet to read. Sampling there fell through every wrapper
+     * straight to <body>, which is a colour, just not the first section's.
+     * On an all-white page the two happened to agree; on any page whose
+     * first section is not <body>'s own colour, the header read <body>
+     * and got it wrong — reliably, not as a fluke — until the first scroll
+     * gave it a stuck box to read instead.
+     *
+     * One pixel past the bottom edge is inside the section that starts
+     * there, at rest or stuck alike, so the answer no longer depends on
+     * having scrolled even once.
+     */
+    const y = top + height + 1;
     const width = window.innerWidth;
 
     // Every sample has to agree. An unreadable one — media, or nothing but
