@@ -284,6 +284,24 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    border: 0;
+  }
+
+  /* No hover state on the grind dropdown — a plain control, not a button. */
+  .coffee-product__col--buy .variant-option__select-wrapper:hover {
+    border-color: transparent;
+    color: inherit;
+  }
+
+  .coffee-product__col--buy .variant-option__select-wrapper:hover .variant-option__select {
+    background-color: transparent;
+  }
+
+  /* The weight buttons read the same case as everything else in this
+     column, rather than whatever case the variant's own value happens
+     to be typed in. */
+  .coffee-product__col--buy .variant-option__button-label {
+    text-transform: uppercase;
   }
 
   .coffee-product__col--buy .variant-option__select {
@@ -311,5 +329,10 @@
     font-size: var(--ocp-text-size);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
+  }
+
+  /* Text only — the cart icon the stock button renders next to it. */
+  .coffee-product__col--buy .add-to-cart-icon {
+    display: none;
   }
 {% endstylesheet %}

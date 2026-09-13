@@ -54,7 +54,10 @@
   .coffee-title {
     margin: 0;
     font-family: var(--coffee-title-font, var(--font-subheading--family));
-    font-size: var(--ocp-text-size);
+    /* One deliberate exception to the house 3-size scale, at the owner's
+       request — the product name is the one line on this page that reads
+       a step above body text. */
+    font-size: 1.125rem;
     font-weight: var(--coffee-title-weight, var(--font-subheading--weight));
     line-height: var(--ocp-leading-snug);
     letter-spacing: var(--ocp-letter-spacing);
