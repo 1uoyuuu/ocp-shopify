@@ -227,6 +227,43 @@
    * the stock rules — within one file a rule near the top loses to a
    * stock rule further down at equal specificity.
    */
+
+  /*
+   * Two groups, not six blocks in a row: what the coffee is (roast line,
+   * title, price) at the top, what orders it (variant, grind, buy button)
+   * pinned to the bottom. `.coffee-column` is already a column flexbox, so
+   * an auto top margin on the first block of the second group is enough —
+   * it eats all the leftover height in one gap rather than spreading it
+   * across all six, which is what plain `space-between` on the column
+   * would do.
+   *
+   * That only has space to eat once `.coffee-column` itself is as tall as
+   * the column around it rather than shrunk to its own content — the grid
+   * already stretches `.coffee-product__col--buy` to the row's height by
+   * default, so 100% here is resolving against a real, definite size.
+   */
+  .coffee-product__col--buy .coffee-column {
+    height: 100%;
+  }
+
+  .coffee-product__col--buy .variant-picker {
+    margin-block-start: auto;
+  }
+
+  /* Price on one side, whether tax is included on the other. Installments
+     get their own row below rather than a third slot in the space-between. */
+  .coffee-product__col--buy product-price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+  }
+
+  .coffee-product__col--buy product-price .installments {
+    flex-basis: 100%;
+  }
+
   .coffee-product__col--buy .variant-option,
   .coffee-product__col--buy .coffee-grind .variant-option {
     display: flex;
