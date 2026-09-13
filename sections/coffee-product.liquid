@@ -301,6 +301,13 @@
     border: 0;
   }
 
+  /* Flush to the edge — the stock offset (var(--padding-md)) exists to
+     clear an input's own border/padding, which this borderless control
+     no longer has. */
+  .coffee-product__col--buy .variant-option__select-wrapper .icon {
+    right: 0;
+  }
+
   /* No hover state on the grind dropdown — a plain control, not a button. */
   .coffee-product__col--buy .variant-option__select-wrapper:hover {
     border-color: transparent;
@@ -322,9 +329,10 @@
     border: 0;
     padding-block: 0;
     /* Right-aligned text still needs room on that side for the absolutely
-       positioned arrow (.icon, in .variant-option__select-wrapper) — a
-       flat `padding: 0` let "WHOLE BEAN" run underneath it. */
-    padding-inline: 0 calc(var(--padding-md) + var(--icon-size-2xs) + 0.3rem);
+       positioned arrow (.icon, in .variant-option__select-wrapper, now
+       flush against the same edge) — a flat `padding: 0` let "WHOLE BEAN"
+       run underneath it. */
+    padding-inline: 0 calc(var(--icon-size-2xs) + 0.3rem);
     background: none;
     text-align: end;
     text-transform: uppercase;
