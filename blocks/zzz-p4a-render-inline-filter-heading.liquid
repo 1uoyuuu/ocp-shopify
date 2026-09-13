@@ -1,0 +1,19 @@
+{% liquid
+  assign block_settings = block.settings
+%}
+{%- capture body_text -%}plain captured text{%- endcapture -%}
+<div class="p4a spacing-style" {{ block.shopify_attributes }}>
+  {% render 'coffee-disclosure',
+    heading: block_settings.label | default: 'Why OCP bought this',
+    open: block_settings.open_by_default,
+    body: body_text
+  %}
+</div>
+{% schema %}
+{ "name": "P4a", "tag": null,
+  "settings": [
+    { "type": "text", "id": "label", "label": "Heading", "default": "Why OCP bought this" },
+    { "type": "checkbox", "id": "open_by_default", "label": "Open by default", "default": false }
+  ]
+}
+{% endschema %}
