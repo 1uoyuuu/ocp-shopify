@@ -124,8 +124,11 @@
     padding-block-end: 1rem;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .coffee-note .coffee-note__body > :first-child {
+  /*
+   * The note's prose comes from a rich text field, so its first and last
+   * elements bring their own margins; the disclosure already spaces itself.
+   */
+  .coffee-note .coffee-note__body > :first-child {
     margin-block-start: 0;
   }
 
