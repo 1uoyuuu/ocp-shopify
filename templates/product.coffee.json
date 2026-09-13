@@ -108,7 +108,7 @@
             "coffee_meta": {
               "type": "coffee-meta",
               "settings": {
-                "date_prefix": "Roast Date:",
+                "date_prefix": "RD:",
                 "date_format": "%d/%m/%y",
                 "padding-block-start": 0,
                 "padding-block-end": 4
