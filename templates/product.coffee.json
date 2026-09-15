@@ -90,7 +90,7 @@
                 "font": "subheading",
                 "case": "uppercase",
                 "text_color": "",
-                "padding-block-start": 0,
+                "padding-block-start": 16,
                 "padding-block-end": 0
               },
               "blocks": {}
