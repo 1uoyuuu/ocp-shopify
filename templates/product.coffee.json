@@ -85,7 +85,7 @@
             "coffee_notes": {
               "type": "coffee-tasting-notes",
               "settings": {
-                "separator": "/",
+                "separator": "+",
                 "alignment": "center",
                 "font": "subheading",
                 "case": "uppercase",
