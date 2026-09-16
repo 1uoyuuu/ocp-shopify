@@ -179,32 +179,35 @@
     }
 
     /*
-     * One screen is a ceiling, not a size to grow into. Short content
-     * leaves the block shorter than the frame, with the padding above and
-     * below reading as margin instead of the block being stretched to
-     * meet the fold.
+     * A fixed frame, not a cap. This one had been a `max-height` — short
+     * content left the block shorter than the frame — but a short *info*
+     * column shrank the whole row, and since the buy column stretches to
+     * match, its bottom-pinned button group (`margin-block-start: auto`
+     * on the variant picker) moved with it: open a short disclosure and
+     * the buttons rode up, open a long one and they rode down. Fixing the
+     * row at one screen always is what gives that group a fixed floor to
+     * sit on regardless of which of the left column's panels is open.
      */
     .coffee-product--one-screen {
       display: grid;
-      max-height: 100lvh;
+      height: 100lvh;
       box-sizing: border-box;
     }
 
     /*
-     * The cap lives on each column directly, in the same absolute unit as
-     * the frame, rather than as a percentage of the row. A row that only
-     * ever grows to fit its content has no definite height of its own for
-     * a percentage to resolve against — it would be treated as auto and
-     * cap nothing. Subtracting the padding keeps column-plus-padding at
-     * or under one screen either way; content past that scrolls inside
-     * the column instead of growing the page.
+     * Set directly on each column, in the same absolute unit as the
+     * frame, rather than as a percentage of the row — sizing every
+     * column off the row's own height would still let the row itself
+     * come from whichever column is tallest at a given moment, which is
+     * exactly the moving target above. Fixed and absolute instead: always
+     * one screen minus this column's own padding, full stop.
      *
      * `min-height: 0` overrides a grid item's automatic minimum size,
      * which defaults to its content — without it, opening a disclosure
-     * would grow the column past its own max-height instead of scrolling.
+     * would grow the column past its own height instead of scrolling.
      */
     .coffee-product--one-screen .coffee-product__col {
-      max-height: calc(100lvh - var(--padding-block-start, 0px) - var(--padding-block-end, 0px));
+      height: calc(100lvh - var(--padding-block-start, 0px) - var(--padding-block-end, 0px));
       min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
