@@ -29,6 +29,13 @@
   control: the owner can reorder the spine or drop a row without touching
   code.
 
+  One row's label is an exception to that: `producer`'s metafield holds
+  whichever of farm, producer or washing station a roaster actually named
+  (one slot, not three, since a lot only ever gets one of these), and the
+  `producer_label` metafield swaps the row's own label per product —
+  "Farm", "Washing station" — so the word shown matches what was actually
+  typed in rather than always reading "Producer".
+
   @param {object} product - The product to read
   @param {object} [block] - The block whose settings configure the table
 {%- enddoc -%}
@@ -95,6 +102,17 @@ roast_profile: Roast
           assign value = mf.process.value
           if value != blank and mf.process_detail.value != blank
             assign value = value | append: ' · ' | append: mf.process_detail.value
+          endif
+        when 'producer'
+          # One slot for whichever of farm, producer or washing station the
+          # roaster actually names — a coffee only ever has one of these to
+          # report, and three separate rows would leave two empty on every
+          # lot. `producer_label` swaps the row's own label to match
+          # ("Farm", "Washing station"), defaulting to the `spec_rows`
+          # setting's own label ("Producer") when a roaster didn't say.
+          assign value = mf.producer.value
+          if mf.producer_label.value != blank
+            assign label = mf.producer_label.value
           endif
         when 'roast_date'
           if mf.roast_date.value != blank

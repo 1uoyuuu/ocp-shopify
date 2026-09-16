@@ -43,7 +43,6 @@
                 "heading_template": "Notes from [roaster]",
                 "fallback_heading": "About this coffee",
                 "lot_name_label": "Roaster's name for this lot",
-                "transparency_heading": "Price transparency",
                 "padding-block-start": 0,
                 "padding-block-end": 0
               },

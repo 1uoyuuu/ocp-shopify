@@ -193,17 +193,39 @@ search terms — nobody searches "coffee", they search "sidra honey" or
 
 ### Metafields
 
-`coffee.*` (17 definitions) and `gear.*` are separate namespaces because
-they describe different things; do not try to share one. The Shopify
-category metafields (`Coffee roast`, `Coffee product form`, `Country`,
-`Grind size`) are deliberately **left empty** — `coffee.*` owns those
-concepts and two sources of truth is how the values drift apart.
+`coffee.*` (17 definitions) and `gear.*` (7) are separate namespaces
+because they describe different things; do not try to share one. The
+Shopify category metafields (`Coffee roast`, `Coffee product form`,
+`Country`, `Grind size`) are deliberately **left empty** — `coffee.*`
+owns those concepts and two sources of truth is how the values drift
+apart.
+
+Every definition's Shopify admin **name carries its namespace as a
+suffix** — "Origin (Coffee)", "Brand (Gear)" — so the two namespaces
+stay visually distinguishable in the admin's flat definition list,
+which does not group by namespace. Purely a display-name convention;
+does not touch the `key`, so keep it up whenever a definition is added.
 
 Required on a coffee, or it does not go up: `roaster`, `origin`,
 `process`, `roast_profile`, `tasting_notes`. Everything else renders only
 when present, which is the entire point — roasters supply anywhere from
 five fields to ten plus two pages of prose, and the page has to look the
 same either way. See `snippets/coffee-spec.liquid`.
+
+`producer` is one slot for whichever of farm, producer or washing
+station a roaster actually names — a lot only ever gets one of the
+three, and splitting it into separate fields left two blank on every
+coffee. `producer_label` is the companion field that swaps the row's
+displayed label to match ("Farm", "Washing station") when a roaster's
+answer isn't literally a producer; left blank, the row reads "Producer"
+same as before.
+
+There is no separate price-transparency field. It was the least-filled
+metafield on the whole sheet (4 of 57 coffees, checked directly against
+live product data on 2026-09-16) and already rendered in the same panel
+as the roaster's own notes — when a roaster does publish FOB/DDP, it
+goes in `roaster_notes` as its own paragraph instead of a dedicated
+field nobody else uses.
 
 The product Category is `fb-1-3-1` (Coffee Beans & Ground Coffee). It is
 not cosmetic: the **Coffee collection is automated on exactly that rule**,

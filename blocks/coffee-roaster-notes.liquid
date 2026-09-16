@@ -27,8 +27,6 @@
   assign notes = mf.roaster_notes
   assign has_notes = mf.roaster_notes.value
 
-  # multi_line_text_field, so this one really is a string.
-  assign transparency = mf.transparency.value
   assign lot_name = mf.roaster_lot_name.value
 
   # [roaster] rather than a Liquid tag: setting values are not re-parsed
@@ -42,7 +40,7 @@
   endif
 %}
 
-{%- if has_notes != blank or transparency != blank or lot_name != blank -%}
+{%- if has_notes != blank or lot_name != blank -%}
   {%- capture panel -%}
     {%- if lot_name != blank and block_settings.show_lot_name -%}
       <p class="coffee-roaster-notes__lot">
@@ -53,15 +51,6 @@
 
     {%- if has_notes != blank -%}
       <div class="coffee-roaster-notes__rte rte">{{ notes | metafield_tag }}</div>
-    {%- endif -%}
-
-    {%- if transparency != blank -%}
-      <div class="coffee-roaster-notes__transparency">
-        <p class="coffee-roaster-notes__transparency-heading">
-          {{ block_settings.transparency_heading | default: 'Price transparency' }}
-        </p>
-        <div class="rte">{{ transparency | newline_to_br }}</div>
-      </div>
     {%- endif -%}
   {%- endcapture -%}
 
@@ -119,12 +108,6 @@
       "default": "Roaster's name for this lot"
     },
     {
-      "type": "text",
-      "id": "transparency_heading",
-      "label": "Price transparency heading",
-      "default": "Price transparency"
-    },
-    {
       "type": "header",
       "content": "Padding"
     },
@@ -164,7 +147,9 @@
    * stock rich text styles are declared further down the generated
    * bundle, and a tie on specificity would go to whichever came last.
    */
-  .coffee-roaster-notes .coffee-roaster-notes__body {
+  /* `.coffee-disclosure__body` — the class the shared snippet actually
+     renders, not `.coffee-roaster-notes__body`, which nothing outputs. */
+  .coffee-roaster-notes .coffee-disclosure__body {
     padding-block-end: 1rem;
 
     font-family: var(--font-body--family);
@@ -177,18 +162,4 @@
     margin-block: 0 1rem;
     opacity: 0.55;
   }
-
-  .coffee-roaster-notes .coffee-roaster-notes__transparency {
-    margin-block-start: 1.5rem;
-    padding-block-start: 1rem;
-    border-block-start: 1px solid var(--color-border);
-  }
-
-  .coffee-roaster-notes .coffee-roaster-notes__transparency-heading {
-    margin-block: 0 0.5rem;
-    font-family: var(--font-subheading--family);
-    text-transform: uppercase;
-    opacity: 0.55;
-  }
-
 {% endstylesheet %}
