@@ -1,10 +1,9 @@
 {%- doc -%}
-  The hover strip that rides over a product card's image: roaster on the
-  left, roast date on the right, both read from product metafields.
+  The hover strip that rides over a product card's image: roast profile on
+  the left, roast date on the right, both read from product metafields.
 
-  The roaster arrives through the `coffee.roaster` metaobject rather than
-  a text field, so the name here is the same string the product page and
-  the roaster's own page use — it cannot drift into a second spelling.
+  The profile reads the same as the product page's roast line — "(Filter)",
+  or "(Filter Blend)" when `coffee.is_blend` is set.
 
   Rendered inside `.card-gallery`, which is already `position: relative`
   with `overflow: hidden` — so the strip can be absolutely positioned
@@ -20,9 +19,12 @@
 {% liquid
   assign block_settings = block.settings
 
-  assign roaster = product.metafields.coffee.roaster.value.name.value
-  if roaster != blank
-    assign roaster = '(' | append: roaster | append: ')'
+  assign profile = product.metafields.coffee.roast_profile.value
+  if profile != blank
+    if product.metafields.coffee.is_blend.value
+      assign profile = profile | append: ' Blend'
+    endif
+    assign profile = '(' | append: profile | append: ')'
   endif
 
   assign roast_date_value = product.metafields.coffee.roast_date.value
@@ -40,7 +42,7 @@
   # "enabled AND (either value present)" test is built up rather than
   # written as one mixed and/or expression.
   assign has_meta = false
-  if roaster != blank or roast_date != blank
+  if profile != blank or roast_date != blank
     assign has_meta = true
   endif
   if block_settings.show_card_meta == false
@@ -56,7 +58,7 @@
     "
     aria-hidden="true"
   >
-    <span class="card-meta__item">{{ roaster }}</span>
+    <span class="card-meta__item">{{ profile }}</span>
     <span class="card-meta__item">{{ roast_date }}</span>
   </product-card-meta>
 {%- endif -%}
@@ -107,7 +109,7 @@
   }
 
   .card-meta__item {
-    /* Long roaster names shouldn't wrap the band into two lines. */
+    /* A long profile shouldn't wrap the band into two lines. */
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -134,7 +136,7 @@
 
   /*
    * Without hover there is no way to reveal the band, so show it outright
-   * rather than hiding the roaster and roast date from touch users.
+   * rather than hiding the roast profile and roast date from touch users.
    *
    * It also moves to the top of the image and stays there. Riding the cursor
    * is the whole reason it sits low on a mouse — there is no cursor here, and
