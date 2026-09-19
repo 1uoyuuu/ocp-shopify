@@ -122,7 +122,7 @@
                 "card_media_hover_lift": 15,
                 "show_card_meta": true,
                 "card_meta_date_prefix": "",
-                "card_meta_date_format": "(%d/%b/%Y)",
+                "card_meta_date_format": "(%d/%m/%Y)",
                 "card_meta_color": "{{ settings.color_palette.color1 }}",
                 "border": "none",
                 "border_width": 1,
