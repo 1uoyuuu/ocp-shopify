@@ -138,12 +138,12 @@
             },
             "product_card_group_Pd7Uq8": {
               "type": "_product-card-group",
-              "name": "t:names.group",
+              "name": "title+price",
               "settings": {
                 "content_direction": "row",
                 "vertical_on_mobile": true,
                 "horizontal_alignment": "space-between",
-                "vertical_alignment": "center",
+                "vertical_alignment": "flex-start",
                 "align_baseline": false,
                 "horizontal_alignment_flex_direction_column": "flex-start",
                 "vertical_alignment_flex_direction_column": "center",
@@ -260,6 +260,7 @@
         "intro": "<p>Tell us how you drink it. We'll handle the rest. Every subscription pulls from the same shelf we sell in-store — nothing set aside, nothing lesser, just picked to match how you brew.</p>",
         "cta_label": "Subscribe now",
         "cta_link": "/pages/subscriptions",
+        "collection": "frontpage",
         "text_alignment": "center",
         "background_color": "#ffffff",
         "text_color": "#0f80be",
@@ -267,8 +268,7 @@
         "heading_font": "heading",
         "label_font": "subheading",
         "padding-block-start": 100,
-        "padding-block-end": 96,
-        "collection": "frontpage"
+        "padding-block-end": 96
       }
     }
   },
