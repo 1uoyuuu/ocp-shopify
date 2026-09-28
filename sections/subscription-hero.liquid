@@ -317,6 +317,25 @@
     line-height: var(--ocp-leading-snug);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
+    transition:
+      background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Blue with white type turns white with black type. Focus does the same,
+     for anyone on a keyboard; touch has no hover, so it is left out rather
+     than sticking after a tap. */
+  @media (hover: hover) and (pointer: fine) {
+    .subscription-bar:hover {
+      background: #fff;
+      color: #000;
+    }
+  }
+
+  .subscription-bar:focus-visible {
+    background: #fff;
+    color: #000;
+    outline: none;
   }
 
   /* Editor only — see the markup. */
@@ -517,6 +536,10 @@
   @media (prefers-reduced-motion: reduce) {
     .subscription-drawer[open] {
       animation: none;
+    }
+
+    .subscription-bar {
+      transition: none;
     }
   }
 {% endstylesheet %}
