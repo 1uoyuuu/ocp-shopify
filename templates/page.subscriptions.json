@@ -20,32 +20,39 @@
         "add_label": "Add to cart"
       }
     },
-    "details": {
-      "type": "subscription-info",
+    "panels": {
+      "type": "subscription-panels",
       "blocks": {
         "benefits": {
-          "type": "list",
+          "type": "panel",
           "settings": {
+            "image_side": "right",
             "heading": "Subscription benefits",
             "lines": "Coffees picked by us from the roasters we stock\nAustralian roasters or international ones — your call\nYour brew method, grind and size, set once\nPause, skip or cancel any time"
           }
         },
         "journey": {
-          "type": "feature",
+          "type": "panel",
           "settings": {
+            "image_side": "left",
             "heading": "A coffee journey",
             "text": "<p>Every week we taste through what other roasters have made, here and half a world away. Your subscription pulls from that same shelf — nothing set aside, nothing lesser.</p><p>You choose how you brew and who you want to hear from. We choose the coffee, and it is revealed when it arrives.</p>"
           }
         },
         "steps": {
-          "type": "list",
+          "type": "panel",
           "settings": {
+            "image_side": "right",
             "heading": "How it works",
             "lines": "Choose your brew method and the roasters you want to hear from\nPick a size, how many bags and how often\nWe choose the coffee — revealed when it arrives"
           }
         }
       },
-      "block_order": ["benefits", "journey", "steps"]
+      "block_order": [
+        "benefits",
+        "journey",
+        "steps"
+      ]
     },
     "faq": {
       "type": "subscription-faq",
@@ -65,12 +72,20 @@
           }
         }
       },
-      "block_order": ["choose", "manage"],
+      "block_order": [
+        "choose",
+        "manage"
+      ],
       "settings": {
         "heading": "Still have questions?",
-        "intro": "<p>Anything not covered here, get in touch and we will help.</p>"
+        "intro": "<p>Anything not covered here, get in touch and we will help.</p>",
+        "image_side": "left"
       }
     }
   },
-  "order": ["hero", "details", "faq"]
+  "order": [
+    "hero",
+    "panels",
+    "faq"
+  ]
 }
