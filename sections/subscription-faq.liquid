@@ -1,0 +1,131 @@
+{% comment %}
+  The questions under the subscription page. Each is a block, so a new
+  question is one click in the editor. Goes through the coffee page's own
+  disclosure, so it has the same rule, arrow and open-one-close-the-rest
+  behaviour rather than a second accordion to keep in step with it.
+
+  Not a `{% doc %}`: those are not valid in sections.
+{% endcomment %}
+
+<div class="subscription-faq" {{ section.shopify_attributes }}>
+  <div class="subscription-faq__intro">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="subscription-faq__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    {%- if section.settings.intro != blank -%}
+      <div class="subscription-faq__text rte">{{ section.settings.intro }}</div>
+    {%- endif -%}
+  </div>
+
+  <div class="subscription-faq__items">
+    {%- for block in section.blocks -%}
+      {%- capture answer_html -%}
+        <div class="rte">{{ block.settings.answer }}</div>
+      {%- endcapture -%}
+      {%- assign question = block.settings.question -%}
+      <div {{ block.shopify_attributes }}>
+        {% render 'coffee-disclosure', heading: question, body: answer_html %}
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .subscription-faq {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 3rem var(--ocp-page-margin) 6rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .subscription-faq__heading {
+    margin: 0 0 1rem;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: var(--ocp-display-size-sm);
+    line-height: var(--ocp-leading-display);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-faq__text {
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-text);
+    letter-spacing: var(--ocp-letter-spacing);
+  }
+
+  .subscription-faq__text > :first-child {
+    margin-block-start: 0;
+  }
+
+  .subscription-faq .coffee-disclosure__body {
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-text);
+    letter-spacing: var(--ocp-letter-spacing);
+  }
+
+  .subscription-faq .coffee-disclosure__body .rte > :first-child {
+    margin-block-start: 0;
+  }
+
+  .subscription-faq .coffee-disclosure__body .rte > :last-child {
+    margin-block-end: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .subscription-faq {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--ocp-page-margin);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Subscription FAQ",
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Question",
+          "default": "Can I choose the coffee I receive?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer",
+          "default": "<p>You choose how you brew and which roasters you want to hear from. Which coffee arrives is our call.</p>"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Still have questions?"
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Intro",
+      "default": "<p>Anything not covered here, get in touch and we will help.</p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Subscription FAQ",
+      "blocks": [{ "type": "question" }, { "type": "question" }]
+    }
+  ]
+}
+{% endschema %}

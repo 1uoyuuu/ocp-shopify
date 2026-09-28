@@ -1,0 +1,671 @@
+{% comment %}
+  The subscription page's first screen and the way in.
+
+  A split screen — a solid panel with the name of the thing on one side, a
+  photograph on the other — and one button. The button opens a drawer from
+  the right where the whole subscription is chosen: the product's own
+  options, the grind, how many bags, how often. A bar along the bottom of
+  the screen opens the same drawer once the button has scrolled away.
+
+  The choices are the product's, not this section's. Every option the
+  subscription product has is drawn, in the order it has them, so adding
+  Decaf to Roasters or 2kg to Size in the admin changes this page without
+  touching the theme. What is fixed here is only what a product cannot
+  carry: grind (a line item property, for the reason coffee-grind gives),
+  bag count (the cart's own quantity) and frequency (a selling plan).
+
+  The section wrapper's background is the panel colour, all the way across.
+  The header reads what is behind it by sampling wide elements, and a half-
+  width panel is not wide enough to count — without a full-width colour
+  behind it the header would read the page's white and print blue on blue.
+
+  Not a `{% doc %}`: those are not valid in sections.
+{% endcomment %}
+
+{% liquid
+  assign product = section.settings.product
+  assign selected_variant = product.selected_or_first_available_variant
+  assign heading_font = section.settings.heading_font | default: 'heading'
+  assign plan_group = product.selling_plan_groups.first
+  assign ignore_form = 'subscription-options-' | append: section.id
+
+  assign grind_options = section.settings.grind_options | split: ','
+  assign grind_key = section.settings.grind_key | default: 'Grind'
+  assign max_quantity = section.settings.max_quantity | default: 4
+  assign price_note = section.settings.price_note | default: 'per shipment'
+%}
+
+<subscription-picker
+  class="subscription-hero-wrapper"
+  style="
+    --sub-panel: {{ section.settings.panel_color | default: '#0f80be' }};
+    --sub-panel-text: {{ section.settings.panel_text_color | default: '#ffffff' }};
+    --sub-heading-font: var(--font-{{ heading_font }}--family);
+    --sub-heading-weight: var(--font-{{ heading_font }}--weight);
+  "
+  {{ section.shopify_attributes }}
+>
+  <div class="subscription-hero">
+    <div class="subscription-hero__panel">
+      <h1 class="subscription-hero__title">{{ section.settings.title }}</h1>
+      {%- if section.settings.tagline != blank -%}
+        <p class="subscription-hero__tagline">{{ section.settings.tagline }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="subscription-hero__media">
+      {%- if section.settings.image != blank -%}
+        {{ section.settings.image | image_url: width: 1600 | image_tag: sizes: '(min-width: 750px) 50vw, 100vw', class: 'subscription-hero__image', loading: 'eager', fetchpriority: 'high' }}
+      {%- endif -%}
+
+      {%- if product != blank -%}
+        <button type="button" class="subscription-hero__cta" data-sub-open data-sub-cta>
+          {{- section.settings.cta_label | default: 'Subscribe' -}}
+        </button>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if product != blank -%}
+    <div class="subscription-bar" data-sub-bar>
+      <button type="button" class="subscription-bar__button" data-sub-open>
+        <span>{{ product.title }}</span>
+        <span>{{ section.settings.cta_label | default: 'Subscribe' }}</span>
+      </button>
+    </div>
+
+    <dialog class="subscription-drawer" aria-labelledby="subscription-drawer-title-{{ section.id }}">
+      <div class="subscription-drawer__inner">
+        <div class="subscription-drawer__top">
+          <button type="button" class="subscription-drawer__close" data-sub-close>Close</button>
+        </div>
+
+        <h2 class="subscription-drawer__title" id="subscription-drawer-title-{{ section.id }}">
+          {{- section.settings.drawer_title | default: product.title -}}
+        </h2>
+
+        <form
+          class="subscription-form"
+          action="{{ routes.cart_add_url }}"
+          method="post"
+          data-sub-form
+        >
+          <div class="subscription-form__groups">
+            {%- for option in product.options_with_values -%}
+              {%- assign option_index = forloop.index0 -%}
+              <fieldset class="subscription-group">
+                <legend class="subscription-group__label">{{ option.name }}</legend>
+                <div class="subscription-group__choices">
+                  {%- for value in option.values -%}
+                    <label class="subscription-choice">
+                      <input
+                        type="radio"
+                        name="option-{{ option_index }}"
+                        value="{{ value | escape }}"
+                        form="{{ ignore_form }}"
+                        data-option-index="{{ option_index }}"
+                        {% if value == selected_variant.options[option_index] %}checked{% endif %}
+                      >
+                      <span class="subscription-choice__label">{{ value }}</span>
+                      <span class="subscription-choice__dot" aria-hidden="true"></span>
+                    </label>
+                  {%- endfor -%}
+                </div>
+              </fieldset>
+            {%- endfor -%}
+
+            {%- if grind_options.size > 0 -%}
+              <fieldset class="subscription-group">
+                <legend class="subscription-group__label">{{ section.settings.grind_label | default: 'Grind' }}</legend>
+                <div class="subscription-group__choices">
+                  {%- for grind in grind_options -%}
+                    {%- assign grind_name = grind | strip -%}
+                    <label class="subscription-choice">
+                      <input
+                        type="radio"
+                        name="properties[{{ grind_key | escape }}]"
+                        value="{{ grind_name | escape }}"
+                        {% if forloop.first %}checked{% endif %}
+                      >
+                      <span class="subscription-choice__label">{{ grind_name }}</span>
+                      <span class="subscription-choice__dot" aria-hidden="true"></span>
+                    </label>
+                  {%- endfor -%}
+                </div>
+              </fieldset>
+            {%- endif -%}
+
+            <fieldset class="subscription-group">
+              <legend class="subscription-group__label">{{ section.settings.quantity_label | default: 'Bag amount' }}</legend>
+              <div class="subscription-group__choices subscription-group__choices--compact">
+                {%- for count in (1..max_quantity) -%}
+                  <label class="subscription-choice">
+                    <input
+                      type="radio"
+                      name="quantity"
+                      value="{{ count }}"
+                      {% if forloop.first %}checked{% endif %}
+                    >
+                    <span class="subscription-choice__label">{{ count }}</span>
+                    <span class="subscription-choice__dot" aria-hidden="true"></span>
+                  </label>
+                {%- endfor -%}
+              </div>
+            </fieldset>
+
+            {%- if plan_group != blank -%}
+              <fieldset class="subscription-group">
+                <legend class="subscription-group__label">{{ section.settings.frequency_label | default: 'Frequency' }}</legend>
+                <div class="subscription-group__choices">
+                  {%- for plan in plan_group.selling_plans -%}
+                    <label class="subscription-choice">
+                      <input
+                        type="radio"
+                        name="selling_plan"
+                        value="{{ plan.id }}"
+                        {% if forloop.first %}checked{% endif %}
+                      >
+                      <span class="subscription-choice__label">{{ plan.options.first }}</span>
+                      <span class="subscription-choice__dot" aria-hidden="true"></span>
+                    </label>
+                  {%- endfor -%}
+                </div>
+              </fieldset>
+            {%- endif -%}
+          </div>
+
+          <div class="subscription-form__footer">
+            <p class="subscription-form__price">
+              <span data-sub-price></span>
+              <span class="subscription-form__note">{{ price_note }}</span>
+            </p>
+
+            <input type="hidden" name="id" value="{{ selected_variant.id }}" data-sub-variant-id>
+            <input type="hidden" name="return_to" value="{{ routes.cart_url }}">
+
+            <button
+              type="submit"
+              class="subscription-form__submit"
+              data-sub-submit
+              data-label-add="{{ section.settings.add_label | default: 'Add to cart' }}"
+              data-label-sold-out="Sold out"
+              data-label-unavailable="Unavailable"
+            >
+              {{- section.settings.add_label | default: 'Add to cart' -}}
+            </button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+
+    <script type="application/json" data-sub-data>
+      {
+        "currency": {{ cart.currency.iso_code | json }},
+        "locale": {{ request.locale.iso_code | json }},
+        "variants": [
+          {%- for variant in product.variants -%}
+            {
+              "id": {{ variant.id }},
+              "options": {{ variant.options | json }},
+              "available": {{ variant.available | json }},
+              "price": {{ variant.price }},
+              "plans": {
+                {%- for allocation in variant.selling_plan_allocations -%}
+                  "{{ allocation.selling_plan.id }}": {{ allocation.price }}{% unless forloop.last %},{% endunless %}
+                {%- endfor -%}
+              }
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }
+    </script>
+  {%- endif -%}
+</subscription-picker>
+
+<script src="{{ 'subscription-picker.js' | asset_url }}" type="module" defer></script>
+
+{% stylesheet %}
+  /* Full-width, panel-coloured ground: see the note at the top of the file. */
+  .subscription-hero-wrapper {
+    display: block;
+    background: var(--sub-panel);
+    color: var(--sub-panel-text);
+  }
+
+  .subscription-hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 100lvh;
+  }
+
+  .subscription-hero__panel {
+    display: grid;
+    grid-template-rows: 1fr auto 1fr;
+    padding: 7rem var(--ocp-page-margin) 2rem;
+    min-height: 60lvh;
+  }
+
+  .subscription-hero__title {
+    grid-row: 2;
+    margin: 0;
+    font-family: var(--sub-heading-font);
+    font-weight: var(--sub-heading-weight);
+    font-size: var(--ocp-display-size-sm);
+    line-height: var(--ocp-leading-display);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-hero__tagline {
+    grid-row: 3;
+    align-self: end;
+    max-width: 22ch;
+    margin: 0;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-hero__media {
+    position: relative;
+    min-height: 60lvh;
+    overflow: hidden;
+  }
+
+  .subscription-hero__media .subscription-hero__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .subscription-hero__cta {
+    position: absolute;
+    inset-block-end: 2rem;
+    inset-inline: var(--ocp-page-margin);
+    min-height: 3rem;
+    border: 0;
+    border-radius: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    cursor: pointer;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  @media screen and (min-width: 750px) {
+    .subscription-hero {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .subscription-hero__panel,
+    .subscription-hero__media {
+      min-height: 100lvh;
+    }
+
+    .subscription-hero__cta {
+      inset-inline: auto var(--ocp-page-margin);
+      inline-size: 14rem;
+    }
+  }
+
+  /* The bar along the bottom, once the button has scrolled out of sight. */
+  .subscription-bar {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 5;
+    background: var(--color-background);
+    border-block-start: 1px solid var(--color-foreground);
+    transform: translateY(100%);
+    visibility: hidden;
+    transition: transform 0.3s ease, visibility 0s linear 0.3s;
+  }
+
+  .subscription-bar[data-visible] {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.3s ease;
+  }
+
+  .subscription-bar__button {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem var(--ocp-page-margin);
+    border: 0;
+    background: none;
+    color: var(--color-foreground);
+    cursor: pointer;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  /* The drawer. A modal <dialog>, so focus, Escape and the backdrop are the
+     browser's job. */
+  .subscription-drawer {
+    inset: 0 0 0 auto;
+    width: min(32rem, 100vw);
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .subscription-drawer::backdrop {
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  .subscription-drawer[open] {
+    animation: subscription-drawer-in 0.3s ease;
+  }
+
+  @keyframes subscription-drawer-in {
+    from {
+      transform: translateX(100%);
+    }
+  }
+
+  .subscription-drawer__inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.5rem var(--ocp-page-margin) 0;
+  }
+
+  .subscription-drawer__close {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-drawer__title {
+    margin: 1.5rem 0 2rem;
+    font-family: var(--font-heading--family);
+    font-weight: var(--font-heading--weight);
+    font-size: var(--ocp-display-size-sm);
+    line-height: var(--ocp-leading-display);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .subscription-form__groups {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow-y: auto;
+    padding-block-end: 1.5rem;
+  }
+
+  .subscription-group {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .subscription-group__label {
+    padding: 0;
+    margin-block-end: 0.5rem;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-group__choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .subscription-group__choices--compact {
+    grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
+  }
+
+  .subscription-choice {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    cursor: pointer;
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+  }
+
+  .subscription-choice input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .subscription-choice:has(input:focus-visible) {
+    outline: 2px solid currentcolor;
+    outline-offset: 2px;
+  }
+
+  .subscription-choice__dot {
+    flex: 0 0 auto;
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 1px solid currentcolor;
+    border-radius: 50%;
+  }
+
+  .subscription-choice:has(input:checked) .subscription-choice__dot {
+    background: currentcolor;
+  }
+
+  .subscription-form__footer {
+    display: grid;
+    gap: 1rem;
+    padding-block: 1.25rem;
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  .subscription-form__price {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-form__note {
+    opacity: 0.55;
+  }
+
+  .subscription-form__submit {
+    min-height: 3rem;
+    border: 0;
+    border-radius: 0;
+    background: var(--color-foreground);
+    color: var(--color-background);
+    cursor: pointer;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .subscription-form__submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .subscription-drawer[open] {
+      animation: none;
+    }
+
+    .subscription-bar,
+    .subscription-bar[data-visible] {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Subscription hero",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Subscription product",
+      "info": "Its options, selling plans and prices fill the drawer. Nothing shows until one is picked."
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "OCP Subscription"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "Picked by us. Freshly roasted. Delivered on repeat."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "Subscribe"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Title font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "heading"
+    },
+    {
+      "type": "color",
+      "id": "panel_color",
+      "label": "Panel",
+      "default": "#0f80be"
+    },
+    {
+      "type": "color",
+      "id": "panel_text_color",
+      "label": "Panel text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Drawer"
+    },
+    {
+      "type": "text",
+      "id": "drawer_title",
+      "label": "Drawer title",
+      "info": "Leave empty to use the product's title."
+    },
+    {
+      "type": "text",
+      "id": "grind_label",
+      "label": "Grind label",
+      "default": "Grind"
+    },
+    {
+      "type": "textarea",
+      "id": "grind_options",
+      "label": "Grind options",
+      "info": "Comma separated. The first one is selected by default. Empty hides the grind choice.",
+      "default": "Whole bean, Espresso, Aero Press, French Press, Batch Brewer, Pour Over"
+    },
+    {
+      "type": "text",
+      "id": "grind_key",
+      "label": "Order property name for grind",
+      "info": "Keep this the same as the coffee page's, so orders read alike.",
+      "default": "Grind"
+    },
+    {
+      "type": "text",
+      "id": "quantity_label",
+      "label": "Bag amount label",
+      "default": "Bag amount"
+    },
+    {
+      "type": "range",
+      "id": "max_quantity",
+      "label": "Most bags per delivery",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "frequency_label",
+      "label": "Frequency label",
+      "default": "Frequency"
+    },
+    {
+      "type": "text",
+      "id": "price_note",
+      "label": "Under the price",
+      "default": "per shipment"
+    },
+    {
+      "type": "text",
+      "id": "add_label",
+      "label": "Add to cart label",
+      "default": "Add to cart"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Subscription hero"
+    }
+  ]
+}
+{% endschema %}
