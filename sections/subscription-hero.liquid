@@ -62,6 +62,11 @@
         <button type="button" class="subscription-hero__cta" data-sub-open data-sub-cta>
           {{- section.settings.cta_label | default: 'Subscribe' -}}
         </button>
+      {%- elsif request.design_mode -%}
+        <p class="subscription-hero__hint">
+          No button yet: pick a subscription product in this section's settings. A product that is
+          still a draft, or not on the Online Store channel, reads as empty to the storefront.
+        </p>
       {%- endif -%}
     </div>
   </div>
@@ -296,6 +301,20 @@
     font-size: var(--ocp-text-size);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
+  }
+
+  /* Editor only — see the markup. */
+  .subscription-hero__hint {
+    position: absolute;
+    inset-block-end: 2rem;
+    inset-inline: var(--ocp-page-margin);
+    margin: 0;
+    padding: 0.85rem 1rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
   }
 
   @media screen and (min-width: 750px) {
