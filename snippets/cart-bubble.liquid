@@ -10,6 +10,15 @@
 {% liquid
   assign bubble_bg_fallback = settings.page_text_color
   assign bubble_text_fallback = settings.page_background_color
+
+  comment
+    The number as shown, and again as data-count for the header's text
+    style, which needs a second copy of it to roll over on hover.
+  endcomment
+  assign bubble_count = ''
+  if limit == blank or cart.item_count < limit
+    assign bubble_count = cart.item_count
+  endif
 %}
 
 <div
@@ -26,6 +35,7 @@
     ref="cartBubbleText"
     id="cart-bubble-text"
     class="cart-bubble__text"
+    data-count="{{ bubble_count }}"
   >
     <span
       class="cart-bubble__text-count{% if cart == empty %} hidden{% endif %}"
@@ -33,9 +43,7 @@
       aria-hidden="true"
       data-testid="cart-bubble"
     >
-      {%- if limit == blank or cart.item_count < limit %}
-        {{- cart.item_count -}}
-      {%- endif -%}
+      {{- bubble_count -}}
     </span>
   </span>
 </div>

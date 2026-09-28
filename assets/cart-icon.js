@@ -22,7 +22,11 @@ class CartIcon extends Component {
   }
 
   set currentCartCount(value) {
-    this.refs.cartBubbleCount.textContent = value < 100 ? String(value) : '';
+    const text = value < 100 ? String(value) : '';
+    this.refs.cartBubbleCount.textContent = text;
+    // The header's text style rolls a second copy of the count in on hover,
+    // and reads it from here.
+    this.refs.cartBubbleText.dataset.count = text;
   }
 
   connectedCallback() {

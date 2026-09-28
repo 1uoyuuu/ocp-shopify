@@ -306,6 +306,62 @@
     content: ')';
   }
 
+  /*
+   * The count rolls over with the word. letter-swap.js can't split it —
+   * cart-icon.js writes the number into that element's own text, and
+   * rebuilding it would break the ref — so the same mechanism is built here
+   * in CSS instead: the bubble is the clip box, `.cart-bubble__text` is the
+   * sliding pair, and its ::after is the copy arriving from below, read from
+   * `data-count`, which cart-icon.js keeps in step with the number. The
+   * brackets are part of both copies. Measurements are letter-swap.liquid's,
+   * so the two halves travel together.
+   */
+  .header-actions__cart-icon--text.header-actions__cart-icon .cart-bubble {
+    --swap-bleed: 0.18em;
+
+    display: block;
+    overflow: hidden;
+    height: 1lh;
+    box-sizing: content-box;
+    padding-block: var(--swap-bleed);
+    margin-block: calc(var(--swap-bleed) * -1);
+    line-height: inherit;
+    vertical-align: top;
+    white-space: nowrap;
+  }
+
+  .header-actions__cart-icon--text .cart-bubble__text {
+    display: block;
+    line-height: inherit;
+    transition: transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .header-actions__cart-icon--text .cart-bubble__text-count {
+    display: block;
+  }
+
+  .header-actions__cart-icon--text .cart-bubble__text::after {
+    content: '(' attr(data-count) ')';
+    content: '(' attr(data-count) ')' / '';
+    display: block;
+    margin-block-start: calc(var(--swap-bleed) * 2);
+  }
+
+  .header-actions__cart-icon--text .cart-bubble__text[data-count='']::after {
+    content: none;
+  }
+
+  [data-swap-host]:hover .header-actions__cart-icon--text .cart-bubble__text,
+  [data-swap-host]:focus-visible .header-actions__cart-icon--text .cart-bubble__text {
+    transform: translateY(calc(-50% - var(--swap-bleed)));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .header-actions__cart-icon--text .cart-bubble__text {
+      transition: none;
+    }
+  }
+
   .header-actions__cart-icon.header-actions__cart-icon--has-cart svg {
     /* Create donut mask where the cart bubble sits */
     mask: radial-gradient(
@@ -348,7 +404,6 @@
   .header-actions__cart-icon--text {
     display: flex;
     align-items: center;
-    gap: 0.3em;
   }
 
   .header__column--right .header-actions--text {
