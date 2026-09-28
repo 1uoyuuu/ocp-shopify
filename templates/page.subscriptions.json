@@ -78,8 +78,7 @@
       ],
       "settings": {
         "heading": "Still have questions?",
-        "intro": "<p>Anything not covered here, get in touch and we will help.</p>",
-        "image_side": "left"
+        "intro": "<p>Anything not covered here, get in touch and we will help.</p>"
       }
     }
   },
