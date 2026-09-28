@@ -322,19 +322,20 @@
       color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Blue with white type turns white with black type. Focus does the same,
+  /* Blue with white type turns white with blue type — the bar's own colour,
+     so a change to it in the editor carries through. Focus does the same,
      for anyone on a keyboard; touch has no hover, so it is left out rather
      than sticking after a tap. */
   @media (hover: hover) and (pointer: fine) {
     .subscription-bar:hover {
       background: #fff;
-      color: #000;
+      color: var(--sub-panel);
     }
   }
 
   .subscription-bar:focus-visible {
     background: #fff;
-    color: #000;
+    color: var(--sub-panel);
     outline: none;
   }
 
