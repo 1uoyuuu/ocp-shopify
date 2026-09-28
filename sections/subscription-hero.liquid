@@ -66,7 +66,7 @@
 
   {%- if product != blank -%}
     <button type="button" class="subscription-bar" data-sub-open>
-      {{- section.settings.cta_label | default: 'Subscribe' -}}
+      {{- section.settings.cta_label | default: 'Subscribe now' -}}
     </button>
 
     <dialog class="subscription-drawer" aria-labelledby="subscription-drawer-title-{{ section.id }}">
@@ -276,7 +276,7 @@
     margin: 0;
     font-family: var(--sub-heading-font);
     font-weight: 700;
-    font-size: var(--ocp-display-size);
+    font-size: var(--ocp-display-size-sm);
     line-height: var(--ocp-leading-display);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
@@ -304,15 +304,17 @@
     inset-block-end: 0;
     z-index: 5;
     width: 100%;
-    min-height: 3.5rem;
+    min-height: 1.75rem;
     padding: 0 var(--ocp-page-margin);
     border: 0;
+    border-block-start: 1px solid #000;
     border-radius: 0;
     background: var(--sub-panel);
     color: var(--sub-panel-text);
     cursor: pointer;
     font-family: var(--font-subheading--family);
     font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
   }
@@ -321,7 +323,7 @@
   .subscription-hint {
     position: fixed;
     inset-inline: var(--ocp-page-margin);
-    inset-block-end: 4.5rem;
+    inset-block-end: 2.75rem;
     z-index: 5;
     margin: 0;
     padding: 0.85rem 1rem;
@@ -561,7 +563,7 @@
       "type": "text",
       "id": "cta_label",
       "label": "Bar label",
-      "default": "Subscribe"
+      "default": "Subscribe now"
     },
     {
       "type": "select",
