@@ -1,0 +1,8 @@
+{%- doc -%}
+  Loads parallax.js, which defines `<parallax-frame>`: wrap an image in one
+  (with `display: block`, `position: relative` and `overflow: hidden` from
+  the caller's own class) and it drifts against the page as it scrolls.
+  Module scripts load once however many sections render this.
+{%- enddoc -%}
+
+<script src="{{ 'parallax.js' | asset_url }}" type="module" defer></script>

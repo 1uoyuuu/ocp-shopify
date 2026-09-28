@@ -1,0 +1,137 @@
+{% comment %}
+  The top of every ordinary page: the title in the middle with the OCP arrow
+  set at its upper right, and a paragraph of introduction under it. One
+  section so every page opens the same way — locations, about, contact and
+  whatever comes next.
+
+  The title falls back to the page's own, so a fresh page needs nothing
+  typed. The introduction does not fall back to the page's body: that is
+  long on some pages (policies), and would land the whole thing up here.
+
+  Not a `{% doc %}`: those are not valid in sections.
+{% endcomment %}
+
+{% liquid
+  assign title = section.settings.title
+  if title == blank
+    assign title = page.title
+  endif
+  assign heading_font = section.settings.heading_font | default: 'heading'
+%}
+
+<header
+  class="page-hero"
+  style="
+    --page-hero-font: var(--font-{{ heading_font }}--family);
+    --page-hero-weight: var(--font-{{ heading_font }}--weight);
+  "
+  {{ section.shopify_attributes }}
+>
+  <h1 class="page-hero__title">
+    <span class="page-hero__title-text">{{ title }}</span>
+    {%- if section.settings.show_arrow -%}
+      <span class="page-hero__mark" aria-hidden="true">{% render 'logo-arrow' %}</span>
+    {%- endif -%}
+  </h1>
+
+  {%- if section.settings.description != blank -%}
+    <div class="page-hero__description rte">{{ section.settings.description }}</div>
+  {%- endif -%}
+</header>
+
+{% stylesheet %}
+  .page-hero {
+    display: grid;
+    justify-items: center;
+    gap: 4rem;
+    padding: 5rem var(--ocp-page-margin) 4rem;
+    text-align: center;
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .page-hero__title {
+    position: relative;
+    margin: 0;
+    font-family: var(--page-hero-font);
+    font-weight: var(--page-hero-weight);
+    font-size: var(--ocp-display-size-sm);
+    line-height: var(--ocp-leading-display);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  /* Hung off the title's upper right rather than sitting in the line, so the
+     word stays centred on the page. */
+  .page-hero__mark {
+    position: absolute;
+    inset-block-start: -0.1em;
+    inset-inline-start: 100%;
+    width: 0.32em;
+    margin-inline-start: 0.12em;
+  }
+
+  .page-hero__mark svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .page-hero__description {
+    max-width: 40rem;
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-text);
+    letter-spacing: var(--ocp-letter-spacing);
+  }
+
+  .page-hero__description > :first-child {
+    margin-block-start: 0;
+  }
+
+  .page-hero__description > :last-child {
+    margin-block-end: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Page hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "info": "Leave empty to use the page's own title."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrow",
+      "label": "Arrow beside the title",
+      "default": true
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Introduction"
+    },
+    {
+      "type": "select",
+      "id": "heading_font",
+      "label": "Title font",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "subheading", "label": "Subheading" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "accent", "label": "Accent" }
+      ],
+      "default": "heading"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Page hero"
+    }
+  ]
+}
+{% endschema %}

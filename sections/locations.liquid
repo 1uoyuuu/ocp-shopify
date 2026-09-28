@@ -1,0 +1,248 @@
+{% comment %}
+  The shops, laid out as a spread rather than a list. Each is a photograph
+  with its name under it on the left and an arrow on the right; the arrow
+  opens the details — address, hours, whatever the owner puts there — by
+  sliding them down under the name.
+
+  Two columns, and the shops take them in turn: the first sits left, the
+  second right and dropped a little, the third left again. Each column keeps
+  its own rhythm because a shop with a longer photograph pushes only its own
+  side down. Below 750px it is one column and nothing is offset.
+
+  Every photograph is inside a <parallax-frame>, so it drifts against the
+  page as it scrolls by.
+
+  Not a `{% doc %}`: those are not valid in sections.
+{% endcomment %}
+
+{% liquid
+  assign placeholders = 'hero-apparel-1,detailed-apparel-1,hero-apparel-3,product-apparel-1' | split: ','
+  assign drop = section.settings.drop | default: 10
+%}
+
+<div class="locations" style="--locations-drop: {{ drop }}vw;" {{ section.shopify_attributes }}>
+  {%- for block in section.blocks -%}
+    {%- liquid
+      assign slot = forloop.index0 | modulo: placeholders.size
+      assign placeholder = placeholders[slot]
+      assign ratio = block.settings.aspect_ratio | default: '1 / 1'
+    -%}
+    <article class="location" {{ block.shopify_attributes }}>
+      <parallax-frame class="location__media" style="aspect-ratio: {{ ratio }};">
+        {%- if block.settings.image != blank -%}
+          {{ block.settings.image | image_url: width: 1400 | image_tag: sizes: '(min-width: 750px) 30vw, 100vw', class: 'location__image', loading: 'lazy' }}
+        {%- else -%}
+          {{ placeholder | placeholder_svg_tag: 'location__image' }}
+        {%- endif -%}
+      </parallax-frame>
+
+      {%- if block.settings.details != blank -%}
+        <details class="location__details">
+          <summary class="location__summary">
+            <span class="location__name">{{ block.settings.name }}</span>
+            <span class="location__mark" aria-hidden="true">{% render 'logo-arrow' %}</span>
+          </summary>
+          <div class="location__info rte">{{ block.settings.details }}</div>
+        </details>
+      {%- else -%}
+        <p class="location__summary location__summary--plain">
+          <span class="location__name">{{ block.settings.name }}</span>
+        </p>
+      {%- endif -%}
+    </article>
+  {%- endfor -%}
+</div>
+
+{% render 'parallax' %}
+
+{% stylesheet %}
+  .locations {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4rem;
+    padding: 0 var(--ocp-page-margin) 8rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .location {
+    min-width: 0;
+  }
+
+  .location__media {
+    position: relative;
+    display: block;
+    overflow: hidden;
+  }
+
+  .location__media .location__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .location__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0;
+    padding-block: 0.6rem;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .location__summary--plain {
+    cursor: default;
+  }
+
+  .location__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .location__mark {
+    flex: 0 0 auto;
+    width: 0.7em;
+    transition: transform 0.3s ease;
+  }
+
+  .location__mark svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Points down-right at rest — there is more here. Open, it turns to point
+     up-right: the same gesture reversed. */
+  .location__details[open] .location__mark {
+    transform: rotate(-90deg);
+  }
+
+  /* The details slide down. Only where the browser can animate to an
+     intrinsic height; elsewhere they simply appear, which is a fair fallback. */
+  .location__details {
+    interpolate-size: allow-keywords;
+  }
+
+  .location__details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+      content-visibility 0.45s allow-discrete;
+  }
+
+  .location__details[open]::details-content {
+    block-size: auto;
+  }
+
+  .location__info {
+    padding-block: 0.25rem 1.5rem;
+    font-family: var(--font-body--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-text);
+    letter-spacing: var(--ocp-letter-spacing);
+  }
+
+  .location__info > :first-child {
+    margin-block-start: 0;
+  }
+
+  .location__info > :last-child {
+    margin-block-end: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .locations {
+      grid-template-columns: 1fr 1fr;
+      gap: 8rem 0;
+    }
+
+    /* Left shops sit in from the margin, right ones in from the far edge, and
+       every second shop is dropped by the section's own setting. */
+    .location:nth-child(odd) {
+      width: 52%;
+      margin-inline-start: 15%;
+    }
+
+    .location:nth-child(even) {
+      width: 56%;
+      margin-inline: auto 8%;
+      margin-block-start: var(--locations-drop);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .location__mark,
+    .location__details::details-content {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Locations",
+  "blocks": [
+    {
+      "type": "location",
+      "name": "Location",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Photograph"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "OCP Crow Nest"
+        },
+        {
+          "type": "richtext",
+          "id": "details",
+          "label": "Details",
+          "info": "Address, opening hours, phone. Shown when the arrow is opened; with none, the name has no arrow."
+        },
+        {
+          "type": "select",
+          "id": "aspect_ratio",
+          "label": "Photograph shape",
+          "options": [
+            { "value": "1 / 1", "label": "Square" },
+            { "value": "4 / 5", "label": "Portrait" },
+            { "value": "3 / 2", "label": "Landscape" }
+          ],
+          "default": "1 / 1"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "range",
+      "id": "drop",
+      "label": "How far the right-hand shops sit lower",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "vw",
+      "default": 10
+    }
+  ],
+  "presets": [
+    {
+      "name": "Locations",
+      "blocks": [{ "type": "location" }, { "type": "location" }]
+    }
+  ]
+}
+{% endschema %}

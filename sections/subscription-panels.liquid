@@ -36,13 +36,13 @@
       "
       {{ block.shopify_attributes }}
     >
-      <div class="subscription-panel__media">
+      <parallax-frame class="subscription-panel__media">
         {%- if block.settings.image != blank -%}
           {{ block.settings.image | image_url: width: 1600 | image_tag: sizes: '(min-width: 750px) 50vw, 100vw', class: 'subscription-panel__image', loading: 'lazy' }}
         {%- else -%}
           {{ placeholder | placeholder_svg_tag: 'subscription-panel__image' }}
         {%- endif -%}
-      </div>
+      </parallax-frame>
 
       <div class="subscription-panel__text">
         <div class="subscription-panel__inner">
@@ -73,6 +73,8 @@
   {%- endfor -%}
 </div>
 
+{% render 'parallax' %}
+
 {% stylesheet %}
   .subscription-panel {
     display: grid;
@@ -83,6 +85,7 @@
 
   .subscription-panel__media {
     position: relative;
+    display: block;
     min-height: 60lvh;
     overflow: hidden;
   }

@@ -47,14 +47,14 @@
   {{ section.shopify_attributes }}
 >
   <div class="subscription-hero">
-    <div class="subscription-hero__media">
+    <parallax-frame class="subscription-hero__media">
       {%- if section.settings.image != blank -%}
         {{ section.settings.image | image_url: width: 2400 | image_tag: sizes: '100vw', class: 'subscription-hero__image', loading: 'eager', fetchpriority: 'high' }}
       {%- else -%}
         {{ 'hero-apparel-1' | placeholder_svg_tag: 'subscription-hero__image' }}
       {%- endif -%}
       <div class="subscription-hero__scrim"></div>
-    </div>
+    </parallax-frame>
 
     <div class="subscription-hero__content">
       <h1 class="subscription-hero__title">{{ section.settings.title }}</h1>
@@ -223,6 +223,7 @@
 </subscription-picker>
 
 <script src="{{ 'subscription-picker.js' | asset_url }}" type="module" defer></script>
+{% render 'parallax' %}
 
 {% stylesheet %}
   /* Full-width colour ground: see the note at the top of the file. */
