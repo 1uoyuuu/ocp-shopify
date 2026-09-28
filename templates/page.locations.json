@@ -24,26 +24,58 @@
         "drop": 10
       },
       "blocks": {
-        "crow_nest": {
+        "crows_nest": {
           "type": "location",
           "settings": {
-            "name": "OCP Crow Nest",
+            "image": "shopify://shop_images/ocp-crow.jpg",
+            "name": "OCP Crows Nest",
             "aspect_ratio": "1 / 1",
-            "details": "<p>Address and opening hours to come.</p>"
+            "details": "<p>Opening hours<br>6:30–15:00</p>"
           }
         },
-        "second": {
+        "artarmon": {
           "type": "location",
           "settings": {
-            "name": "OCP",
+            "image": "shopify://shop_images/ocp-artarmon.jpg",
+            "name": "OCP Artarmon",
             "aspect_ratio": "1 / 1",
-            "details": "<p>Address and opening hours to come.</p>"
+            "details": "<p>Opening hours<br>6:00–14:30<br>Sat–Sun 7:00–15:30</p>"
+          }
+        },
+        "victoria_cross": {
+          "type": "location",
+          "settings": {
+            "image": "shopify://shop_images/ocp-vc.jpg",
+            "name": "OCP Victoria Cross",
+            "aspect_ratio": "1 / 1",
+            "details": "<p>Opening hours<br>6:30–15:00<br>Sat–Sun 8:00–14:00</p>"
+          }
+        },
+        "george_st": {
+          "type": "location",
+          "settings": {
+            "image": "shopify://shop_images/ocp-george.jpg",
+            "name": "OCP George St",
+            "aspect_ratio": "1 / 1",
+            "details": "<p>Opening hours<br>7:30–16:00<br>Closed weekends</p>"
+          }
+        },
+        "docklands": {
+          "type": "location",
+          "settings": {
+            "image": "shopify://shop_images/ocp-mel.jpg",
+            "name": "OCP Docklands",
+            "aspect_ratio": "1 / 1",
+            "details": "<p>Opening hours<br>7:00–16:00<br>Sat 8:00–14:00</p>"
           }
         }
       },
       "block_order": [
-        "crow_nest",
-        "second"
+        "crows_nest",
+        "artarmon",
+        "victoria_cross",
+        "george_st",
+        "docklands"
       ]
     }
   },
