@@ -27,6 +27,9 @@
   elsif section.settings.enable_transparent_header_collection and template.name == 'collection'
     assign transparent = 'always'
     assign transparent_text_color_setting = section.settings.text_color_transparent_collection
+  elsif section.settings.enable_transparent_header_subscription and template.suffix == 'subscriptions'
+    assign transparent = 'always'
+    assign transparent_text_color_setting = section.settings.text_color_transparent_subscription
   endif
 
   if section.settings.enable_sticky_header == 'always'
@@ -1885,6 +1888,24 @@
       "label": "t:settings.text_color_transparent",
       "placeholder": "t:settings.default",
       "visible_if": "{{ section.settings.enable_transparent_header_collection }}"
+    },
+    {
+      "type": "header",
+      "content": "Subscription page"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent_header_subscription",
+      "label": "t:settings.transparent_background",
+      "info": "Needed for the split-screen hero: without it the header is a bar above the panel instead of over it.",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "text_color_transparent_subscription",
+      "label": "t:settings.text_color_transparent",
+      "placeholder": "t:settings.default",
+      "visible_if": "{{ section.settings.enable_transparent_header_subscription }}"
     }
   ],
   "presets": []
