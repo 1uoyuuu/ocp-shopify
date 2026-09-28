@@ -1,0 +1,76 @@
+{
+  "sections": {
+    "hero": {
+      "type": "subscription-hero",
+      "settings": {
+        "product": "ocp-coffee-subscription",
+        "title": "OCP Subscription",
+        "tagline": "Picked by us. Freshly roasted. Delivered on repeat.",
+        "cta_label": "Subscribe",
+        "heading_font": "heading",
+        "panel_color": "#0f80be",
+        "panel_text_color": "#ffffff",
+        "grind_label": "Grind",
+        "grind_options": "Whole bean, Espresso, Aero Press, French Press, Batch Brewer, Pour Over",
+        "grind_key": "Grind",
+        "quantity_label": "Bag amount",
+        "max_quantity": 4,
+        "frequency_label": "Frequency",
+        "price_note": "per shipment",
+        "add_label": "Add to cart"
+      }
+    },
+    "details": {
+      "type": "subscription-info",
+      "blocks": {
+        "benefits": {
+          "type": "list",
+          "settings": {
+            "heading": "Subscription benefits",
+            "lines": "Coffees picked by us from the roasters we stock\nAustralian roasters or international ones — your call\nYour brew method, grind and size, set once\nPause, skip or cancel any time"
+          }
+        },
+        "journey": {
+          "type": "feature",
+          "settings": {
+            "heading": "A coffee journey",
+            "text": "<p>Every week we taste through what other roasters have made, here and half a world away. Your subscription pulls from that same shelf — nothing set aside, nothing lesser.</p><p>You choose how you brew and who you want to hear from. We choose the coffee, and it is revealed when it arrives.</p>"
+          }
+        },
+        "steps": {
+          "type": "list",
+          "settings": {
+            "heading": "How it works",
+            "lines": "Choose your brew method and the roasters you want to hear from\nPick a size, how many bags and how often\nWe choose the coffee — revealed when it arrives"
+          }
+        }
+      },
+      "block_order": ["benefits", "journey", "steps"]
+    },
+    "faq": {
+      "type": "subscription-faq",
+      "blocks": {
+        "choose": {
+          "type": "question",
+          "settings": {
+            "question": "Can I choose the coffee I receive?",
+            "answer": "<p>You choose how you brew and whether it comes from Australian or international roasters. Which coffee arrives is our call — that is the point.</p>"
+          }
+        },
+        "manage": {
+          "type": "question",
+          "settings": {
+            "question": "How do I manage, pause or cancel my subscription?",
+            "answer": "<p>Log in to your account to skip a delivery, pause, change how often it comes, or cancel.</p>"
+          }
+        }
+      },
+      "block_order": ["choose", "manage"],
+      "settings": {
+        "heading": "Still have questions?",
+        "intro": "<p>Anything not covered here, get in touch and we will help.</p>"
+      }
+    }
+  },
+  "order": ["hero", "details", "faq"]
+}
