@@ -6,34 +6,19 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
- */{
+ */
+{
   "sections": {
+    "hero": {
+      "type": "page-hero",
+      "settings": {
+        "show_arrow": true,
+        "heading_font": "heading"
+      }
+    },
     "main": {
       "type": "main-page",
       "blocks": {
-        "title": {
-          "type": "text",
-          "name": "t:names.title",
-          "settings": {
-            "text": "<h1>{{ closest.page.title }}</h1>",
-            "width": "100%",
-            "max_width": "normal",
-            "alignment": "center",
-            "type_preset": "h2",
-            "font": "var(--font-body--family)",
-            "line_height": "normal",
-            "letter_spacing": "normal",
-            "case": "none",
-            "wrap": "pretty",
-            "background": false,
-            "background_color": "#00000026",
-            "padding-block-start": 0,
-            "padding-block-end": 0,
-            "padding-inline-start": 0,
-            "padding-inline-end": 0
-          },
-          "blocks": {}
-        },
         "content": {
           "type": "text",
           "name": "t:names.content",
@@ -59,7 +44,6 @@
         }
       },
       "block_order": [
-        "title",
         "content"
       ],
       "settings": {
@@ -135,6 +119,7 @@
     }
   },
   "order": [
+    "hero",
     "main",
     "form"
   ]

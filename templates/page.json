@@ -6,27 +6,25 @@
  * or related systems. Please exercise caution as any changes
  * made to this file may be overwritten.
  * ------------------------------------------------------------
- */{
+ */
+{
   "sections": {
+    "hero": {
+      "type": "page-hero",
+      "settings": {
+        "show_arrow": true,
+        "heading_font": "heading"
+      }
+    },
     "main": {
       "type": "main-page",
       "blocks": {
-        "heading": {
-          "type": "text",
-          "name": "t:names.title",
-          "settings": {
-            "text": "<h1>{{ closest.page.title }}</h1>",
-            "width": "100%",
-            "type_preset": "h2"
-          }
-        },
         "page-content": {
           "type": "page-content",
           "settings": {}
         }
       },
       "block_order": [
-        "heading",
         "page-content"
       ],
       "settings": {
@@ -38,6 +36,7 @@
     }
   },
   "order": [
+    "hero",
     "main"
   ]
 }

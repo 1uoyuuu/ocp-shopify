@@ -1,0 +1,54 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "page-hero",
+      "settings": {
+        "title": "Locations",
+        "show_arrow": true,
+        "heading_font": "heading",
+        "description": "<p>Find us in store. Tap the arrow under a shop for its address and opening hours.</p>"
+      }
+    },
+    "shops": {
+      "type": "locations",
+      "settings": {
+        "drop": 10
+      },
+      "blocks": {
+        "crow_nest": {
+          "type": "location",
+          "settings": {
+            "name": "OCP Crow Nest",
+            "aspect_ratio": "1 / 1",
+            "details": "<p>Address and opening hours to come.</p>"
+          }
+        },
+        "second": {
+          "type": "location",
+          "settings": {
+            "name": "OCP",
+            "aspect_ratio": "1 / 1",
+            "details": "<p>Address and opening hours to come.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "crow_nest",
+        "second"
+      ]
+    }
+  },
+  "order": [
+    "hero",
+    "shops"
+  ]
+}
