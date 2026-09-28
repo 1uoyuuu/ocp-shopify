@@ -14,8 +14,6 @@ class SubscriptionPicker extends HTMLElement {
   #variants = [];
   #currency = 'USD';
   #locale = 'en';
-  /** @type {IntersectionObserver | null} */
-  #observer = null;
 
   connectedCallback() {
     const data = this.querySelector('[data-sub-data]');
@@ -29,14 +27,11 @@ class SubscriptionPicker extends HTMLElement {
     this.addEventListener('click', this.#onClick);
     this.addEventListener('change', this.#update);
     this.#update();
-    this.#watchButton();
   }
 
   disconnectedCallback() {
     this.removeEventListener('click', this.#onClick);
     this.removeEventListener('change', this.#update);
-    this.#observer?.disconnect();
-    this.#observer = null;
   }
 
   get #dialog() {
@@ -102,19 +97,6 @@ class SubscriptionPicker extends HTMLElement {
           : submit.dataset.labelSoldOut || '';
     }
   };
-
-  /** The bottom bar takes over once the hero's button has scrolled away. */
-  #watchButton() {
-    const button = this.querySelector('[data-sub-cta]');
-    const bar = this.querySelector('[data-sub-bar]');
-    if (!button || !bar) return;
-
-    this.#observer = new IntersectionObserver(([entry]) => {
-      // Gone off the top, not merely not yet on screen.
-      bar.toggleAttribute('data-visible', !entry.isIntersecting && entry.boundingClientRect.top < 0);
-    });
-    this.#observer.observe(button);
-  }
 }
 
 if (!customElements.get('subscription-picker')) {

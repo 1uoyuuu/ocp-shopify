@@ -1,11 +1,11 @@
 {% comment %}
   The subscription page's first screen and the way in.
 
-  A split screen — a solid panel with the name of the thing on one side, a
-  photograph on the other — and one button. The button opens a drawer from
-  the right where the whole subscription is chosen: the product's own
-  options, the grind, how many bags, how often. A bar along the bottom of
-  the screen opens the same drawer once the button has scrolled away.
+  A photograph across the whole screen, the name of the thing in the middle
+  and one line under it. The way in is a bar along the bottom of the screen,
+  the full width, that stays there however far the page is scrolled; it
+  opens a drawer from the right where the whole subscription is chosen: the
+  product's own options, the grind, how many bags, how often.
 
   The choices are the product's, not this section's. Every option the
   subscription product has is drawn, in the order it has them, so adding
@@ -14,10 +14,10 @@
   carry: grind (a line item property, for the reason coffee-grind gives),
   bag count (the cart's own quantity) and frequency (a selling plan).
 
-  The section wrapper's background is the panel colour, all the way across.
-  The header reads what is behind it by sampling wide elements, and a half-
-  width panel is not wide enough to count — without a full-width colour
-  behind it the header would read the page's white and print blue on blue.
+  The wrapper's background is the colour all the way across. The header
+  reads what is behind it by sampling wide elements; the photograph is one,
+  but with no photograph chosen the colour has to be, or the header would
+  read the page's white and print blue on blue.
 
   Not a `{% doc %}`: those are not valid in sections.
 {% endcomment %}
@@ -33,6 +33,7 @@
   assign grind_key = section.settings.grind_key | default: 'Grind'
   assign max_quantity = section.settings.max_quantity | default: 4
   assign price_note = section.settings.price_note | default: 'per shipment'
+  assign scrim = section.settings.darken | default: 30 | divided_by: 100.0
 %}
 
 <subscription-picker
@@ -40,45 +41,33 @@
   style="
     --sub-panel: {{ section.settings.panel_color | default: '#0f80be' }};
     --sub-panel-text: {{ section.settings.panel_text_color | default: '#ffffff' }};
+    --sub-scrim: {{ scrim }};
     --sub-heading-font: var(--font-{{ heading_font }}--family);
   "
   {{ section.shopify_attributes }}
 >
   <div class="subscription-hero">
-    <div class="subscription-hero__panel">
+    <div class="subscription-hero__media">
+      {%- if section.settings.image != blank -%}
+        {{ section.settings.image | image_url: width: 2400 | image_tag: sizes: '100vw', class: 'subscription-hero__image', loading: 'eager', fetchpriority: 'high' }}
+      {%- else -%}
+        {{ 'hero-apparel-1' | placeholder_svg_tag: 'subscription-hero__image' }}
+      {%- endif -%}
+      <div class="subscription-hero__scrim"></div>
+    </div>
+
+    <div class="subscription-hero__content">
       <h1 class="subscription-hero__title">{{ section.settings.title }}</h1>
       {%- if section.settings.tagline != blank -%}
         <p class="subscription-hero__tagline">{{ section.settings.tagline }}</p>
       {%- endif -%}
     </div>
-
-    <div class="subscription-hero__media">
-      {%- if section.settings.image != blank -%}
-        {{ section.settings.image | image_url: width: 1600 | image_tag: sizes: '(min-width: 750px) 50vw, 100vw', class: 'subscription-hero__image', loading: 'eager', fetchpriority: 'high' }}
-      {%- else -%}
-        {{ 'hero-apparel-1' | placeholder_svg_tag: 'subscription-hero__image' }}
-      {%- endif -%}
-
-      {%- if product != blank -%}
-        <button type="button" class="subscription-hero__cta" data-sub-open data-sub-cta>
-          {{- section.settings.cta_label | default: 'Subscribe' -}}
-        </button>
-      {%- elsif request.design_mode -%}
-        <p class="subscription-hero__hint">
-          No button yet: pick a subscription product in this section's settings. A product that is
-          still a draft, or not on the Online Store channel, reads as empty to the storefront.
-        </p>
-      {%- endif -%}
-    </div>
   </div>
 
   {%- if product != blank -%}
-    <div class="subscription-bar" data-sub-bar>
-      <button type="button" class="subscription-bar__button" data-sub-open>
-        <span>{{ product.title }}</span>
-        <span>{{ section.settings.cta_label | default: 'Subscribe' }}</span>
-      </button>
-    </div>
+    <button type="button" class="subscription-bar" data-sub-open>
+      {{- section.settings.cta_label | default: 'Subscribe' -}}
+    </button>
 
     <dialog class="subscription-drawer" aria-labelledby="subscription-drawer-title-{{ section.id }}">
       <div class="subscription-drawer__inner">
@@ -225,13 +214,18 @@
         ]
       }
     </script>
+  {%- elsif request.design_mode -%}
+    <p class="subscription-hint">
+      No button yet: pick a subscription product in this section's settings. A product that is
+      still a draft, or not on the Online Store channel, reads as empty to the storefront.
+    </p>
   {%- endif -%}
 </subscription-picker>
 
 <script src="{{ 'subscription-picker.js' | asset_url }}" type="module" defer></script>
 
 {% stylesheet %}
-  /* Full-width, panel-coloured ground: see the note at the top of the file. */
+  /* Full-width colour ground: see the note at the top of the file. */
   .subscription-hero-wrapper {
     display: block;
     background: var(--sub-panel);
@@ -239,46 +233,19 @@
   }
 
   .subscription-hero {
+    position: relative;
     display: grid;
-    grid-template-columns: 1fr;
+    place-items: center;
     min-height: 100lvh;
-  }
-
-  .subscription-hero__panel {
-    display: grid;
-    grid-template-rows: 1fr auto 1fr;
-    /* The same on all four sides, so the title sits on the panel's true
-       centre and the tagline keeps the gutter the header's MENU does. */
     padding: var(--ocp-page-margin);
-    min-height: 60lvh;
-  }
-
-  .subscription-hero__title {
-    grid-row: 2;
-    margin: 0;
-    font-family: var(--sub-heading-font);
-    font-weight: 700;
-    font-size: var(--ocp-display-size-sm);
-    line-height: var(--ocp-leading-display);
-    letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
-  }
-
-  .subscription-hero__tagline {
-    grid-row: 3;
-    align-self: end;
-    max-width: 22ch;
-    margin: 0;
-    font-family: var(--font-subheading--family);
-    font-size: var(--ocp-text-size);
-    line-height: var(--ocp-leading-snug);
-    letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
+    isolation: isolate;
+    text-align: center;
   }
 
   .subscription-hero__media {
-    position: relative;
-    min-height: 60lvh;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     overflow: hidden;
   }
 
@@ -290,15 +257,59 @@
     object-fit: cover;
   }
 
-  .subscription-hero__cta {
+  /* Type sits straight on a photograph, so it is darkened a little; how much
+     is a setting. */
+  .subscription-hero__scrim {
     position: absolute;
-    inset-block-end: 2rem;
-    inset-inline: var(--ocp-page-margin);
-    min-height: 3rem;
+    inset: 0;
+    background: rgb(0 0 0 / var(--sub-scrim, 0.3));
+  }
+
+  .subscription-hero__content {
+    display: grid;
+    justify-items: center;
+    gap: 2rem;
+    max-width: 100%;
+  }
+
+  .subscription-hero__title {
+    margin: 0;
+    font-family: var(--sub-heading-font);
+    font-weight: 700;
+    font-size: var(--ocp-display-size);
+    line-height: var(--ocp-leading-display);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+
+  .subscription-hero__tagline {
+    max-width: 34ch;
+    margin: 0;
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    line-height: var(--ocp-leading-snug);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  /* The way in: the full width of the screen, along the bottom, and it
+     stays. Fixed rather than sticky — the page scrolls inside a container
+     on desktop, and sticky only holds within its own parent. */
+  .subscription-bar {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 5;
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 0 var(--ocp-page-margin);
     border: 0;
     border-radius: 0;
-    background: var(--color-background);
-    color: var(--color-foreground);
+    background: var(--sub-panel);
+    color: var(--sub-panel-text);
     cursor: pointer;
     font-family: var(--font-subheading--family);
     font-size: var(--ocp-text-size);
@@ -307,10 +318,11 @@
   }
 
   /* Editor only — see the markup. */
-  .subscription-hero__hint {
-    position: absolute;
-    inset-block-end: 2rem;
+  .subscription-hint {
+    position: fixed;
     inset-inline: var(--ocp-page-margin);
+    inset-block-end: 4.5rem;
+    z-index: 5;
     margin: 0;
     padding: 0.85rem 1rem;
     background: var(--color-background);
@@ -318,57 +330,6 @@
     font-size: var(--ocp-text-size);
     line-height: var(--ocp-leading-snug);
     letter-spacing: var(--ocp-letter-spacing);
-  }
-
-  @media screen and (min-width: 750px) {
-    .subscription-hero {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .subscription-hero__panel,
-    .subscription-hero__media {
-      min-height: 100lvh;
-    }
-
-    .subscription-hero__cta {
-      inset-inline: auto var(--ocp-page-margin);
-      inline-size: 14rem;
-    }
-  }
-
-  /* The bar along the bottom, once the button has scrolled out of sight. */
-  .subscription-bar {
-    position: fixed;
-    inset-inline: 0;
-    inset-block-end: 0;
-    z-index: 5;
-    background: var(--color-background);
-    border-block-start: 1px solid var(--color-foreground);
-    transform: translateY(100%);
-    visibility: hidden;
-    transition: transform 0.3s ease, visibility 0s linear 0.3s;
-  }
-
-  .subscription-bar[data-visible] {
-    transform: none;
-    visibility: visible;
-    transition: transform 0.3s ease;
-  }
-
-  .subscription-bar__button {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
-    padding: 1rem var(--ocp-page-margin);
-    border: 0;
-    background: none;
-    color: var(--color-foreground);
-    cursor: pointer;
-    font-family: var(--font-subheading--family);
-    font-size: var(--ocp-text-size);
-    letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
   }
 
   /* The drawer. A modal <dialog>, so focus, Escape and the backdrop are the
@@ -555,11 +516,6 @@
     .subscription-drawer[open] {
       animation: none;
     }
-
-    .subscription-bar,
-    .subscription-bar[data-visible] {
-      transition: none;
-    }
   }
 {% endstylesheet %}
 
@@ -591,9 +547,20 @@
       "label": "Image"
     },
     {
+      "type": "range",
+      "id": "darken",
+      "label": "Darken the image",
+      "info": "So the title reads over a busy photograph.",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
       "type": "text",
       "id": "cta_label",
-      "label": "Button label",
+      "label": "Bar label",
       "default": "Subscribe"
     },
     {
@@ -611,13 +578,14 @@
     {
       "type": "color",
       "id": "panel_color",
-      "label": "Panel",
+      "label": "Colour",
+      "info": "The bar along the bottom, and what shows behind the photo.",
       "default": "#0f80be"
     },
     {
       "type": "color",
       "id": "panel_text_color",
-      "label": "Panel text",
+      "label": "Colour text",
       "default": "#ffffff"
     },
     {
