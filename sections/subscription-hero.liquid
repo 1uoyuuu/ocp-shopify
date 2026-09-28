@@ -41,7 +41,6 @@
     --sub-panel: {{ section.settings.panel_color | default: '#0f80be' }};
     --sub-panel-text: {{ section.settings.panel_text_color | default: '#ffffff' }};
     --sub-heading-font: var(--font-{{ heading_font }}--family);
-    --sub-heading-weight: var(--font-{{ heading_font }}--weight);
   "
   {{ section.shopify_attributes }}
 >
@@ -56,6 +55,8 @@
     <div class="subscription-hero__media">
       {%- if section.settings.image != blank -%}
         {{ section.settings.image | image_url: width: 1600 | image_tag: sizes: '(min-width: 750px) 50vw, 100vw', class: 'subscription-hero__image', loading: 'eager', fetchpriority: 'high' }}
+      {%- else -%}
+        {{ 'hero-apparel-1' | placeholder_svg_tag: 'subscription-hero__image' }}
       {%- endif -%}
 
       {%- if product != blank -%}
@@ -246,7 +247,9 @@
   .subscription-hero__panel {
     display: grid;
     grid-template-rows: 1fr auto 1fr;
-    padding: 7rem var(--ocp-page-margin) 2rem;
+    /* The same on all four sides, so the title sits on the panel's true
+       centre and the tagline keeps the gutter the header's MENU does. */
+    padding: var(--ocp-page-margin);
     min-height: 60lvh;
   }
 
@@ -254,7 +257,7 @@
     grid-row: 2;
     margin: 0;
     font-family: var(--sub-heading-font);
-    font-weight: var(--sub-heading-weight);
+    font-weight: 700;
     font-size: var(--ocp-display-size-sm);
     line-height: var(--ocp-leading-display);
     letter-spacing: var(--ocp-letter-spacing);
