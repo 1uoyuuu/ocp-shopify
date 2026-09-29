@@ -96,16 +96,20 @@
    * faux-bold. Width is in the path's own 215-unit viewBox, not CSS px, so
    * it scales with the mark's size rather than needing its own unit.
    *
-   * Explicit miter join and a raised limit: the arrow's point is an acute
-   * angle, past the 4:1 ratio SVG's default miter-limit allows before it
-   * falls back to a bevel — which is the "rounded off" look at the tip.
-   * Forcing the join and lifting the limit keeps the corner sharp.
+   * Its corners were never the problem — every angle in this path is 45°
+   * or wider, well inside what even the default miter limit (4) renders as
+   * a sharp point. The earlier attempt at this raised the limit anyway,
+   * which did nothing, because the actual cause was the stroke-width
+   * itself: the diagonal arm this path traces is only ~19.6 units wide at
+   * its narrowest, and a stroke of 12 (added to both sides of the line)
+   * fattened it past that — the two edges' strokes met and overlapped
+   * inside the point, and the overlap is what rendered as a soft, rounded
+   * blob rather than a crisp tip. Kept well under half that width instead.
    */
   .page-hero__mark svg path {
     stroke: currentColor;
-    stroke-width: 12;
+    stroke-width: 5;
     stroke-linejoin: miter;
-    stroke-miterlimit: 12;
   }
 
   .page-hero__description {
