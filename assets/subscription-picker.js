@@ -2,12 +2,16 @@
  * The subscription drawer: opens and closes it, works out which variant the
  * chosen options point at, and keeps the price and the button in step.
  *
- * Only the product's own options go through here. Grind, bag count and
- * frequency are plain named radios inside the form — `properties[Grind]`,
- * `quantity`, `selling_plan` — so they submit themselves and this file only
- * has to read them for the price. The option radios are deliberately not
- * submitted (their `form` attribute names a form that does not exist); the
- * cart takes a variant id, and the id is what this file writes.
+ * Only the product's own options go through here. Grind and frequency are
+ * plain named radios inside the form — `properties[Grind]`, `selling_plan`
+ * — so they submit themselves and this file only has to read them for the
+ * price. The option radios are deliberately not submitted (their `form`
+ * attribute names a form that does not exist); the cart takes a variant id,
+ * and the id is what this file writes.
+ *
+ * Bag count is the one field this file writes to as well as reads: a
+ * readonly number input the stepper buttons step, rather than a run of
+ * radios — there being no fixed list of choices to render.
  */
 class SubscriptionPicker extends HTMLElement {
   /** @type {{id: number, options: string[], available: boolean, price: number, plans: Record<string, number>}[]} */
@@ -46,11 +50,32 @@ class SubscriptionPicker extends HTMLElement {
 
     if (target.closest('[data-sub-open]')) {
       if (!dialog.open) dialog.showModal();
-    } else if (target.closest('[data-sub-close]') || target === dialog) {
+      return;
+    }
+
+    if (target.closest('[data-sub-close]') || target === dialog) {
       // A click on the dialog itself, rather than anything inside it, can
       // only be the backdrop.
       dialog.close();
+      return;
     }
+
+    const step = target.closest('[data-sub-stepper-increment], [data-sub-stepper-decrement]');
+    if (step) this.#step(step);
+  };
+
+  /** @param {Element} button */
+  #step = (button) => {
+    const input = /** @type {HTMLInputElement | null} */ (
+      button.closest('[data-sub-stepper]')?.querySelector('[data-sub-stepper-value]')
+    );
+    if (!input) return;
+
+    const min = Number(input.min) || 1;
+    const max = Number(input.max) || Infinity;
+    const delta = button.hasAttribute('data-sub-stepper-increment') ? 1 : -1;
+    input.value = String(Math.min(max, Math.max(min, Number(input.value) + delta)));
+    this.#update();
   };
 
   #update = () => {
@@ -70,8 +95,14 @@ class SubscriptionPicker extends HTMLElement {
     if (idInput && variant) idInput.value = String(variant.id);
 
     const plan = /** @type {HTMLInputElement | null} */ (form.querySelector('input[name="selling_plan"]:checked'));
-    const quantity = /** @type {HTMLInputElement | null} */ (form.querySelector('input[name="quantity"]:checked'));
+    const quantity = /** @type {HTMLInputElement | null} */ (form.querySelector('[data-sub-stepper-value]'));
     const count = Number(quantity?.value || 1);
+
+    const stepper = quantity?.closest('[data-sub-stepper]');
+    const decrement = stepper?.querySelector('[data-sub-stepper-decrement]');
+    const increment = stepper?.querySelector('[data-sub-stepper-increment]');
+    if (decrement instanceof HTMLButtonElement) decrement.disabled = count <= (Number(quantity?.min) || 1);
+    if (increment instanceof HTMLButtonElement) increment.disabled = count >= (Number(quantity?.max) || Infinity);
 
     const price = this.querySelector('[data-sub-price]');
     if (price) {
