@@ -28,10 +28,10 @@
   {{ section.shopify_attributes }}
 >
   <h1 class="page-hero__title">
-    <span class="page-hero__title-text">{{ title }}</span>
     {%- if section.settings.show_arrow -%}
       <span class="page-hero__mark" aria-hidden="true">{% render 'logo-arrow' %}</span>
     {%- endif -%}
+    <span class="page-hero__title-text">{{ title }}</span>
   </h1>
 
   {%- if section.settings.description != blank -%}
@@ -50,8 +50,26 @@
     color: var(--color-foreground);
   }
 
+  /*
+   * A row, not centred text with something hung off it: the arrow and the
+   * word are laid out side by side and the pair is centred on the page as
+   * one unit, matching the Figma frame (a 217×47 auto-layout row, itself
+   * centred, holding a 21×21 arrow then the word with a 4px gap). Sizes
+   * below are that frame's own ratios against its 36px type — 21/36 for the
+   * arrow, 4/36 for the gap — kept in em so both scale with the title
+   * wherever its actual size ends up (this page's is not fixed at 36px).
+   *
+   * `align-items: flex-start` is the row-level equivalent of the Figma
+   * frame's nested layout, where the arrow sits inside its own column
+   * top-aligned against the row's full height: the word's own box is taller
+   * than the arrow (line-height above 1), so top-aligning both is what
+   * lets the arrow read as sitting slightly above the word instead of
+   * centred through its middle.
+   */
   .page-hero__title {
-    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.11em;
     margin: 0;
     font-family: var(--page-hero-font);
     font-weight: var(--page-hero-weight);
@@ -61,17 +79,9 @@
     text-transform: uppercase;
   }
 
-  /* Hung off the title's upper left rather than sitting in the line, so the
-     word stays centred on the page — up and in from the corner, its point
-     dropping toward the first letter, rather than flush against it. Sized
-     and spaced relative to the title's own font-size (em), so both scale
-     with it together. */
   .page-hero__mark {
-    position: absolute;
-    inset-block-end: 65%;
-    inset-inline-end: 100%;
-    width: 0.5em;
-    margin-inline-end: 0.15em;
+    flex: none;
+    width: 0.58em;
   }
 
   .page-hero__mark svg {
