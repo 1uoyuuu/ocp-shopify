@@ -58,79 +58,83 @@
     {%- endif -%}
 
     <div class="contact-form__form-row">
+      <div class="contact-form__field">
+        <label
+          class="contact-form__label"
+          for="ContactForm-name"
+        >
+          {{- 'blocks.contact_form.name' | t -}}
+        </label>
+        <input
+          type="text"
+          id="ContactForm-name"
+          class="contact-form__input"
+          autocomplete="name"
+          name="contact[name]"
+          value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+        >
+      </div>
+
+      <div class="contact-form__field">
+        <label
+          class="contact-form__label"
+          for="ContactForm-email"
+        >
+          {{- 'blocks.contact_form.email' | t -}}
+          <span aria-hidden="true">*</span>
+        </label>
+        <input
+          type="email"
+          id="ContactForm-email"
+          class="contact-form__input"
+          autocomplete="email"
+          name="contact[email]"
+          spellcheck="false"
+          autocapitalize="off"
+          value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+          aria-required="true"
+          {% if form.errors contains 'email' and form_matches %}
+            aria-invalid="true"
+            aria-describedby="ContactForm-email-error"
+          {% endif %}
+        >
+      </div>
+    </div>
+
+    <div class="contact-form__field">
       <label
-        class="visually-hidden"
-        for="ContactForm-name"
+        class="contact-form__label"
+        for="ContactForm-phone"
       >
-        {{- 'blocks.contact_form.name' | t -}}
+        {{- 'blocks.contact_form.phone' | t -}}
       </label>
       <input
-        type="text"
-        id="ContactForm-name"
+        type="tel"
+        id="ContactForm-phone"
         class="contact-form__input"
-        autocomplete="name"
-        name="contact[name]"
-        value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
-        placeholder="{{ 'blocks.contact_form.name' | t }}"
-      >
-
-      <label
-        class="visually-hidden"
-        for="ContactForm-email"
-      >
-        {{- 'blocks.contact_form.email' | t -}}
-        <span aria-hidden="true">*</span></label
-      >
-      <input
-        type="email"
-        id="ContactForm-email"
-        class="contact-form__input"
-        autocomplete="email"
-        name="contact[email]"
-        spellcheck="false"
-        autocapitalize="off"
-        value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
-        aria-required="true"
-        {% if form.errors contains 'email' and form_matches %}
-          aria-invalid="true"
-          aria-describedby="ContactForm-email-error"
-        {% endif %}
-        placeholder="{{ 'blocks.contact_form.email' | t }}"
+        autocomplete="tel"
+        name="contact[phone]"
+        pattern="[0-9\-]*"
+        value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
       >
     </div>
 
-    <label
-      class="visually-hidden"
-      for="ContactForm-phone"
-    >
-      {{- 'blocks.contact_form.phone' | t -}}
-    </label>
-    <input
-      type="tel"
-      id="ContactForm-phone"
-      class="contact-form__input"
-      autocomplete="tel"
-      name="contact[phone]"
-      pattern="[0-9\-]*"
-      value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
-      placeholder="{{ 'blocks.contact_form.phone' | t }}"
-    >
-
-    <label
-      class="visually-hidden"
-      for="ContactForm-body"
-    >
-      {{- 'blocks.contact_form.comment' | t -}}
-    </label>
-    <textarea
-      rows="10"
-      id="ContactForm-body"
-      class="contact-form__input contact-form__input--textarea"
-      name="contact[body]"
-      placeholder="{{ 'blocks.contact_form.comment' | t }}"
-    >
-      {{- form.body -}}
-    </textarea>
+    <div class="contact-form__field">
+      <label
+        class="contact-form__label"
+        for="ContactForm-body"
+      >
+        {{- 'blocks.contact_form.comment' | t -}}
+      </label>
+      <textarea
+        rows="10"
+        id="ContactForm-body"
+        class="contact-form__input contact-form__input--textarea"
+        name="contact[body]"
+      >
+        {{- form.body -}}
+      </textarea>
+    </div>
 
     {{ submit_button }}
   {%- endform -%}
@@ -150,25 +154,61 @@
 
     @media screen and (min-width: 750px) {
       flex-direction: row;
-      align-items: center;
+      align-items: flex-end;
     }
   }
 
+  .contact-form__form-row .contact-form__field {
+    flex: 1;
+  }
+
+  .contact-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .contact-form__label {
+    font-family: var(--font-subheading--family);
+    font-size: var(--ocp-text-size);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  /*
+   * A line under the field rather than a box around it, at a fraction of
+   * the input colour's own opacity — full strength only once the field is
+   * actually focused, which is the one state worth calling out. The full
+   * border/background/radius this stock input normally carries is dropped
+   * entirely for this look.
+   */
   .contact-form__input {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--color-input-text);
-    background-color: var(--color-input-background);
-    padding: var(--padding-lg) var(--padding-xl);
-    border-radius: var(--style-border-radius-inputs);
-    border: var(--style-border-width-inputs) solid var(--color-input-border);
+    background-color: transparent;
+    padding: 0.75rem 0;
+    border: 0;
+    border-block-end: 1px solid color-mix(in srgb, var(--color-input-border) 40%, transparent);
+    transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     -webkit-font-smoothing: antialiased;
+  }
+
+  .contact-form__input:focus {
+    outline: none;
+    border-block-end-color: var(--color-input-border);
   }
 
   .contact-form__input--textarea {
     resize: vertical;
     min-height: var(--input-textarea-min-height);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact-form__input {
+      transition: none;
+    }
   }
 
   .contact-form__error,
