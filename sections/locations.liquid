@@ -4,6 +4,12 @@
   opens the details — address, hours, whatever the owner puts there — by
   sliding them down under the name.
 
+  Each block points at a `location` metaobject rather than carrying its own
+  photo and copy: the shop's own data (address, hours, description, photo)
+  lives in one place and is reused wherever a shop needs to be shown, rather
+  than being retyped per block the way the coffee page's roaster credit
+  points at a `roaster` metaobject for the same reason.
+
   Two columns, and the shops take them in turn: the first sits left, the
   second right and dropped a little, the third left again. Each column keeps
   its own rhythm because a shop with a longer photograph pushes only its own
@@ -26,27 +32,60 @@
       assign slot = forloop.index0 | modulo: placeholders.size
       assign placeholder = placeholders[slot]
       assign ratio = block.settings.aspect_ratio | default: '1 / 1'
+
+      assign shop = block.settings.location
+      assign name = shop.name.value
+      assign photo = shop.photo.value
+      assign address = shop.address.value
+      assign hours = shop.hours.value
+      assign has_description = shop.description.value
+
+      assign has_info = false
+      if address != blank or hours != blank or has_description != blank
+        assign has_info = true
+      endif
     -%}
     <article class="location" {{ block.shopify_attributes }}>
       <parallax-frame class="location__media" style="aspect-ratio: {{ ratio }};">
-        {%- if block.settings.image != blank -%}
-          {{ block.settings.image | image_url: width: 1400 | image_tag: sizes: '(min-width: 750px) 30vw, 100vw', class: 'location__image', loading: 'lazy' }}
+        {%- if photo != blank -%}
+          {{ photo | image_url: width: 1400 | image_tag: sizes: '(min-width: 750px) 30vw, 100vw', class: 'location__image', loading: 'lazy' }}
         {%- else -%}
           {{ placeholder | placeholder_svg_tag: 'location__image' }}
         {%- endif -%}
       </parallax-frame>
 
-      {%- if block.settings.details != blank -%}
+      {%- if has_info -%}
         <details class="location__details">
           <summary class="location__summary">
-            <span class="location__name">{{ block.settings.name }}</span>
+            <span class="location__name">{{ name }}</span>
             <span class="location__mark" aria-hidden="true">{% render 'logo-arrow' %}</span>
           </summary>
-          <div class="location__info rte">{{ block.settings.details }}</div>
+          <div class="location__info">
+            {%- if has_description != blank -%}
+              <div class="location__description rte">{{ shop.description | metafield_tag }}</div>
+            {%- endif -%}
+
+            {%- if address != blank -%}
+              <p class="location__address">{{ address }}</p>
+            {%- endif -%}
+
+            {%- if hours != blank -%}
+              <div class="location__hours">
+                <p class="location__hours-heading">{{ section.settings.hours_label | default: 'Opening hours' }}</p>
+                {%- assign hour_lines = hours | newline_to_br | split: '<br />' -%}
+                {%- for line in hour_lines -%}
+                  {%- assign line_text = line | strip -%}
+                  {%- if line_text != blank -%}
+                    <p>{{ line_text }}</p>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </div>
         </details>
       {%- else -%}
         <p class="location__summary location__summary--plain">
-          <span class="location__name">{{ block.settings.name }}</span>
+          <span class="location__name">{{ name }}</span>
         </p>
       {%- endif -%}
     </article>
@@ -144,6 +183,8 @@
   }
 
   .location__info {
+    display: grid;
+    gap: 1rem;
     padding-block: 0.25rem 1.5rem;
     font-family: var(--font-body--family);
     font-size: var(--ocp-text-size);
@@ -151,12 +192,32 @@
     letter-spacing: var(--ocp-letter-spacing);
   }
 
-  .location__info > :first-child {
+  .location__description > :first-child {
     margin-block-start: 0;
   }
 
-  .location__info > :last-child {
+  .location__description > :last-child {
     margin-block-end: 0;
+  }
+
+  .location__address {
+    margin: 0;
+  }
+
+  .location__hours {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .location__hours p {
+    margin: 0;
+  }
+
+  .location__hours-heading {
+    font-family: var(--font-subheading--family);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    opacity: 0.55;
   }
 
   @media screen and (min-width: 750px) {
@@ -196,21 +257,11 @@
       "name": "Location",
       "settings": [
         {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Photograph"
-        },
-        {
-          "type": "text",
-          "id": "name",
-          "label": "Name",
-          "default": "OCP Crow Nest"
-        },
-        {
-          "type": "richtext",
-          "id": "details",
-          "label": "Details",
-          "info": "Address, opening hours, phone. Shown when the arrow is opened; with none, the name has no arrow."
+          "type": "metaobject",
+          "id": "location",
+          "metaobject_type": "location",
+          "label": "Shop",
+          "info": "Name, photo, address, hours and description all live on the shop itself — add or edit one under Content > Metaobjects."
         },
         {
           "type": "select",
@@ -227,6 +278,12 @@
     }
   ],
   "settings": [
+    {
+      "type": "text",
+      "id": "hours_label",
+      "label": "Hours heading",
+      "default": "Opening hours"
+    },
     {
       "type": "range",
       "id": "drop",
