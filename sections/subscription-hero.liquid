@@ -150,7 +150,7 @@
             {%- if plan_group != blank -%}
               <fieldset class="subscription-group">
                 <legend class="subscription-group__label">{{ section.settings.frequency_label | default: 'Frequency' }}</legend>
-                <div class="subscription-group__choices">
+                <div class="subscription-group__choices subscription-group__choices--fill">
                   {%- for plan in plan_group.selling_plans -%}
                     <label class="subscription-choice">
                       <input
@@ -159,7 +159,14 @@
                         value="{{ plan.id }}"
                         {% if forloop.first %}checked{% endif %}
                       >
-                      <span class="subscription-choice__label">{{ plan.options.first.value }}</span>
+                      {%- comment -%}
+                        The selling plan app names its own options "Deliver every 2 weeks" —
+                        stripped down to "Every 2 weeks" for the shorter, title-cased label
+                        here. Only the display changes; the plan itself is untouched.
+                      {%- endcomment -%}
+                      <span class="subscription-choice__label">
+                        {{- plan.options.first.value | remove_first: 'Deliver ' | capitalize -}}
+                      </span>
                       <span class="subscription-choice__dot" aria-hidden="true"></span>
                     </label>
                   {%- endfor -%}
