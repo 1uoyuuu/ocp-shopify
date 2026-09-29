@@ -175,40 +175,27 @@
     text-transform: uppercase;
   }
 
-  /*
-   * A line under the field rather than a box around it, at a fraction of
-   * the input colour's own opacity — full strength only once the field is
-   * actually focused, which is the one state worth calling out. The full
-   * border/background/radius this stock input normally carries is dropped
-   * entirely for this look.
-   */
   .contact-form__input {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--color-input-text);
-    background-color: transparent;
-    padding: 0.75rem 0;
-    border: 0;
-    border-block-end: 1px solid color-mix(in srgb, var(--color-input-border) 40%, transparent);
-    transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: var(--color-input-background);
+    padding: var(--padding-lg) var(--padding-xl);
+    border-radius: var(--style-border-radius-inputs);
+    border: var(--style-border-width-inputs) solid var(--color-input-border);
     -webkit-font-smoothing: antialiased;
   }
 
+  /* The field's own border is enough of a focus signal on its own — the
+     browser's native ring on top of it read as a second, competing border. */
   .contact-form__input:focus {
     outline: none;
-    border-block-end-color: var(--color-input-border);
   }
 
   .contact-form__input--textarea {
     resize: vertical;
     min-height: var(--input-textarea-min-height);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .contact-form__input {
-      transition: none;
-    }
   }
 
   .contact-form__error,
