@@ -89,7 +89,7 @@
               {%- assign option_index = forloop.index0 -%}
               <fieldset class="subscription-group">
                 <legend class="subscription-group__label">{{ option.name }}</legend>
-                <div class="subscription-group__choices">
+                <div class="subscription-group__choices subscription-group__choices--fill">
                   {%- for value in option.values -%}
                     <label class="subscription-choice">
                       <input
@@ -131,24 +131,19 @@
 
             <fieldset class="subscription-group">
               <legend class="subscription-group__label">{{ section.settings.quantity_label | default: 'Bag amount' }}</legend>
-              <div class="subscription-stepper" data-sub-stepper>
-                <button type="button" class="subscription-stepper__button" data-sub-stepper-decrement aria-label="Fewer bags">
-                  &minus;
-                </button>
-                <input
-                  type="number"
-                  name="quantity"
-                  class="subscription-stepper__value"
-                  value="1"
-                  min="1"
-                  max="{{ max_quantity }}"
-                  inputmode="numeric"
-                  readonly
-                  data-sub-stepper-value
-                >
-                <button type="button" class="subscription-stepper__button" data-sub-stepper-increment aria-label="More bags">
-                  &plus;
-                </button>
+              <div class="subscription-group__choices subscription-group__choices--fill">
+                {%- for count in (1..max_quantity) -%}
+                  <label class="subscription-choice">
+                    <input
+                      type="radio"
+                      name="quantity"
+                      value="{{ count }}"
+                      {% if forloop.first %}checked{% endif %}
+                    >
+                    <span class="subscription-choice__label">{{ count }}</span>
+                    <span class="subscription-choice__dot" aria-hidden="true"></span>
+                  </label>
+                {%- endfor -%}
               </div>
             </fieldset>
 
@@ -469,6 +464,25 @@
     gap: 0.5rem;
   }
 
+  /*
+   * The opposite of the above: the product's own options (brew, roasters,
+   * size) and bag amount have a short, fixed list of choices rather than
+   * a merchant-editable one that could grow to wrap a row — so instead of
+   * a fixed column width leaving whatever is left over empty, flex grows
+   * each choice equally to fill it. Two brew types split the row in half;
+   * three roasters or bag-amounts split it in thirds or quarters.
+   */
+  .subscription-group__choices--fill {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .subscription-group__choices--fill .subscription-choice {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
   .subscription-choice {
     position: relative;
     display: flex;
@@ -507,53 +521,6 @@
 
   .subscription-choice:has(input:checked) .subscription-choice__dot {
     background: currentcolor;
-  }
-
-  /* Bag amount: a single bordered bar the full width of the group, not a
-     row of choices — minus and plus at the ends, the count between them. */
-  .subscription-stepper {
-    display: flex;
-    align-items: stretch;
-    border: 1px solid currentcolor;
-  }
-
-  .subscription-stepper__button {
-    flex: 0 0 auto;
-    width: 3rem;
-    border: 0;
-    background: none;
-    color: inherit;
-    cursor: pointer;
-    font-size: 1.25rem;
-    line-height: 1;
-  }
-
-  .subscription-stepper__button:disabled {
-    cursor: not-allowed;
-    opacity: 0.4;
-  }
-
-  .subscription-stepper__value {
-    flex: 1;
-    min-width: 0;
-    padding: 0.85rem 0;
-    border-inline: 1px solid currentcolor;
-    background: none;
-    color: inherit;
-    text-align: center;
-    font-family: var(--font-body--family);
-    font-size: var(--ocp-text-size);
-    letter-spacing: var(--ocp-letter-spacing);
-    /* Read-only in practice (see subscription-picker.js) — the steppers are
-       the only way to change it — but a real number input rather than a
-       span so it still submits as a normal form field. */
-    appearance: textfield;
-  }
-
-  .subscription-stepper__value::-webkit-inner-spin-button,
-  .subscription-stepper__value::-webkit-outer-spin-button {
-    appearance: none;
-    margin: 0;
   }
 
   .subscription-form__footer {
