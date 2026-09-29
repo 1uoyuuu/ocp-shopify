@@ -27,46 +27,36 @@
         "crows_nest": {
           "type": "location",
           "settings": {
-            "image": "shopify://shop_images/ocp-crow.jpg",
-            "name": "OCP Crows Nest",
-            "aspect_ratio": "1 / 1",
-            "details": "<p>Opening hours<br>6:30–15:00</p>"
+            "location": "crows-nest",
+            "aspect_ratio": "1 / 1"
           }
         },
         "artarmon": {
           "type": "location",
           "settings": {
-            "image": "shopify://shop_images/ocp-artarmon.jpg",
-            "name": "OCP Artarmon",
-            "aspect_ratio": "1 / 1",
-            "details": "<p>Opening hours<br>6:00–14:30<br>Sat–Sun 7:00–15:30</p>"
+            "location": "artarmon",
+            "aspect_ratio": "1 / 1"
           }
         },
         "victoria_cross": {
           "type": "location",
           "settings": {
-            "image": "shopify://shop_images/ocp-vc.jpg",
-            "name": "OCP Victoria Cross",
-            "aspect_ratio": "1 / 1",
-            "details": "<p>Opening hours<br>6:30–15:00<br>Sat–Sun 8:00–14:00</p>"
+            "location": "victoria-cross",
+            "aspect_ratio": "1 / 1"
           }
         },
         "george_st": {
           "type": "location",
           "settings": {
-            "image": "shopify://shop_images/ocp-george.jpg",
-            "name": "OCP George St",
-            "aspect_ratio": "1 / 1",
-            "details": "<p>Opening hours<br>7:30–16:00<br>Closed weekends</p>"
+            "location": "george-st",
+            "aspect_ratio": "1 / 1"
           }
         },
         "docklands": {
           "type": "location",
           "settings": {
-            "image": "shopify://shop_images/ocp-mel.jpg",
-            "name": "OCP Docklands",
-            "aspect_ratio": "1 / 1",
-            "details": "<p>Opening hours<br>7:00–16:00<br>Sat 8:00–14:00</p>"
+            "location": "docklands",
+            "aspect_ratio": "1 / 1"
           }
         }
       },
