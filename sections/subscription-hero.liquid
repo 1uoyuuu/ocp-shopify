@@ -72,12 +72,11 @@
     <dialog class="subscription-drawer" aria-labelledby="subscription-drawer-title-{{ section.id }}">
       <div class="subscription-drawer__inner">
         <div class="subscription-drawer__top">
+          <span class="subscription-drawer__title" id="subscription-drawer-title-{{ section.id }}">
+            {{- section.settings.drawer_title | default: product.title -}}
+          </span>
           <button type="button" class="subscription-drawer__close" data-sub-close>Close</button>
         </div>
-
-        <h2 class="subscription-drawer__title" id="subscription-drawer-title-{{ section.id }}">
-          {{- section.settings.drawer_title | default: product.title -}}
-        </h2>
 
         <form
           class="subscription-form"
@@ -366,8 +365,8 @@
     margin: 0;
     padding: 0;
     border: 0;
-    background: var(--color-background);
-    color: var(--color-foreground);
+    background: var(--sub-panel);
+    color: var(--sub-panel-text);
   }
 
   .subscription-drawer::backdrop {
@@ -391,26 +390,30 @@
     padding: 1.5rem var(--ocp-page-margin) 0;
   }
 
+  /* Title and close share one row, freeing the space the title used to take
+     on its own line for air above the first group instead. */
+  .subscription-drawer__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-block-end: 4rem;
+  }
+
+  .subscription-drawer__title,
   .subscription-drawer__close {
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    cursor: pointer;
     font-family: var(--font-subheading--family);
     font-size: var(--ocp-text-size);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
   }
 
-  .subscription-drawer__title {
-    margin: 1.5rem 0 2rem;
-    font-family: var(--font-heading--family);
-    font-weight: var(--font-heading--weight);
-    font-size: var(--ocp-display-size-sm);
-    line-height: var(--ocp-leading-display);
-    letter-spacing: var(--ocp-letter-spacing);
-    text-transform: uppercase;
+  .subscription-drawer__close {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
   }
 
   .subscription-form {
@@ -424,7 +427,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.75rem;
     overflow-y: auto;
     padding-block-end: 1.5rem;
   }
@@ -445,14 +448,21 @@
     text-transform: uppercase;
   }
 
+  /*
+   * Fixed-width columns (`auto-fill`, not `auto-fit`): a choice keeps its
+   * own size regardless of how many others share its row, rather than
+   * stretching to fill it — two brew types read the same width as five
+   * grind options, and a row with fewer items than fit just ends early
+   * instead of the last one growing to meet the edge.
+   */
   .subscription-group__choices {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    grid-template-columns: repeat(auto-fill, 13rem);
     gap: 0.5rem;
   }
 
   .subscription-group__choices--compact {
-    grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
+    grid-template-columns: repeat(auto-fill, 5rem);
   }
 
   .subscription-choice {
@@ -462,7 +472,7 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.85rem 1rem;
-    background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    border: 1px solid currentcolor;
     cursor: pointer;
     font-family: var(--font-body--family);
     font-size: var(--ocp-text-size);
@@ -499,7 +509,7 @@
     display: grid;
     gap: 1rem;
     padding-block: 1.25rem;
-    border-block-start: 1px solid var(--color-border);
+    border-block-start: 1px solid currentcolor;
   }
 
   .subscription-form__price {
@@ -519,10 +529,10 @@
 
   .subscription-form__submit {
     min-height: 3rem;
-    border: 0;
+    border: 1px solid currentcolor;
     border-radius: 0;
-    background: var(--color-foreground);
-    color: var(--color-background);
+    background: none;
+    color: inherit;
     cursor: pointer;
     font-family: var(--font-subheading--family);
     font-size: var(--ocp-text-size);
