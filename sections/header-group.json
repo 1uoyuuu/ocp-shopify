@@ -104,7 +104,8 @@
         "enable_transparent_header_subscription": true,
         "text_color_transparent_subscription": "",
         "blend_dark_color": "#ffffff",
-        "blend_light_color": "#0f80be"
+        "blend_light_color": "#0f80be",
+        "enable_transparent_header_contact": true
       }
     }
   },
