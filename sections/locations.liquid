@@ -15,6 +15,14 @@
   its own rhythm because a shop with a longer photograph pushes only its own
   side down. Below 750px it is one column and nothing is offset.
 
+  Editorial rather than a grid of equal tiles: each block picks its own size
+  (a width, as a share of its column) and photograph shape, so the spread
+  reads as considered rather than uniform. What does not vary is the outer
+  edge — a left-column shop's left edge and a right-column shop's right edge
+  always sit on the page margin, the same one the header uses, so the sizes
+  differ without the page ever looking misaligned. Only the inner edge, and
+  the vertical drop, move.
+
   Every photograph is inside a <parallax-frame>, so it drifts against the
   page as it scrolls by.
 
@@ -32,6 +40,7 @@
       assign slot = forloop.index0 | modulo: placeholders.size
       assign placeholder = placeholders[slot]
       assign ratio = block.settings.aspect_ratio | default: '1 / 1'
+      assign width = block.settings.width | default: 85
 
       assign shop = block.settings.location
       assign name = shop.name.value
@@ -45,7 +54,7 @@
         assign has_info = true
       endif
     -%}
-    <article class="location" {{ block.shopify_attributes }}>
+    <article class="location" style="--location-width: {{ width }}%;" {{ block.shopify_attributes }}>
       <parallax-frame class="location__media" style="aspect-ratio: {{ ratio }};">
         {%- if photo != blank -%}
           {{ photo | image_url: width: 1400 | image_tag: sizes: '(min-width: 750px) 30vw, 100vw', class: 'location__image', loading: 'lazy' }}
@@ -226,16 +235,22 @@
       gap: 8rem 0;
     }
 
-    /* Left shops sit in from the margin, right ones in from the far edge, and
-       every second shop is dropped by the section's own setting. */
+    /*
+     * The outer edge is fixed to the column's own edge — which, since the
+     * container's own padding is the page margin, is the same edge the
+     * header sits on — and only the inner edge moves with each block's own
+     * width. A left-column shop is flush left and varies on the right; a
+     * right-column shop is flush right and varies on the left. Every second
+     * shop also drops by the section's own setting.
+     */
     .location:nth-child(odd) {
-      width: 52%;
-      margin-inline-start: 15%;
+      width: var(--location-width, 85%);
+      margin-inline-end: auto;
     }
 
     .location:nth-child(even) {
-      width: 56%;
-      margin-inline: auto 8%;
+      width: var(--location-width, 85%);
+      margin-inline-start: auto;
       margin-block-start: var(--locations-drop);
     }
   }
@@ -273,6 +288,17 @@
             { "value": "3 / 2", "label": "Landscape" }
           ],
           "default": "1 / 1"
+        },
+        {
+          "type": "range",
+          "id": "width",
+          "label": "Size",
+          "info": "Share of its column. The outer edge (against the page margin) never moves — only the inner edge does, which is what varies the size.",
+          "min": 50,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 85
         }
       ]
     }

@@ -28,35 +28,40 @@
           "type": "location",
           "settings": {
             "location": "crows-nest",
-            "aspect_ratio": "1 / 1"
+            "aspect_ratio": "1 / 1",
+            "width": 85
           }
         },
         "artarmon": {
           "type": "location",
           "settings": {
             "location": "artarmon",
-            "aspect_ratio": "1 / 1"
+            "aspect_ratio": "4 / 5",
+            "width": 65
           }
         },
         "victoria_cross": {
           "type": "location",
           "settings": {
             "location": "victoria-cross",
-            "aspect_ratio": "1 / 1"
+            "aspect_ratio": "3 / 2",
+            "width": 95
           }
         },
         "george_st": {
           "type": "location",
           "settings": {
             "location": "george-st",
-            "aspect_ratio": "1 / 1"
+            "aspect_ratio": "4 / 5",
+            "width": 70
           }
         },
         "docklands": {
           "type": "location",
           "settings": {
             "location": "docklands",
-            "aspect_ratio": "1 / 1"
+            "aspect_ratio": "1 / 1",
+            "width": 90
           }
         }
       },
