@@ -2,11 +2,19 @@
   The top of every ordinary page: the title in the middle with the OCP arrow
   set at its upper left, pointing down into the word, and a paragraph of
   introduction under it. One section so every page opens the same way —
-  locations, about, contact and whatever comes next.
+  locations, about, contact, a collection and whatever comes next.
 
-  The title falls back to the page's own, so a fresh page needs nothing
-  typed. The introduction does not fall back to the page's body: that is
-  long on some pages (policies), and would land the whole thing up here.
+  The title falls back to whichever resource the template is for — a page's
+  own title, or a collection's — so a fresh page or a new collection needs
+  nothing typed here. `/collections/all` is the one exception: every
+  collection uses this same template, so its title can't be set per
+  collection in the template JSON the way `page.json`'s can, and Shopify's
+  own title for that virtual collection ("All products") isn't what a
+  merchant typically wants read out here — so it's the one case with its own
+  setting instead of just reading `collection.title`.
+
+  The introduction does not fall back to the page's body: that is long on
+  some pages (policies), and would land the whole thing up here.
 
   Not a `{% doc %}`: those are not valid in sections.
 {% endcomment %}
@@ -14,7 +22,15 @@
 {% liquid
   assign title = section.settings.title
   if title == blank
-    assign title = page.title
+    if page != blank
+      assign title = page.title
+    elsif collection != blank
+      if collection.handle == 'all'
+        assign title = section.settings.all_products_title | default: 'Products'
+      else
+        assign title = collection.title
+      endif
+    endif
   endif
   assign heading_font = section.settings.heading_font | default: 'heading'
 %}
@@ -137,7 +153,14 @@
       "type": "text",
       "id": "title",
       "label": "Title",
-      "info": "Leave empty to use the page's own title."
+      "info": "Leave empty to use the page's or collection's own title."
+    },
+    {
+      "type": "text",
+      "id": "all_products_title",
+      "label": "Title for the \"All\" collection",
+      "info": "Every collection shares this template, so this is the one collection whose title needs its own setting rather than just reading the collection's own name.",
+      "default": "Products"
     },
     {
       "type": "checkbox",
