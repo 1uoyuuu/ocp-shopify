@@ -1,8 +1,8 @@
 {% comment %}
   The top of every ordinary page: the title in the middle with the OCP arrow
-  set at its upper right, and a paragraph of introduction under it. One
-  section so every page opens the same way — locations, about, contact and
-  whatever comes next.
+  set at its upper left, pointing down into the word, and a paragraph of
+  introduction under it. One section so every page opens the same way —
+  locations, about, contact and whatever comes next.
 
   The title falls back to the page's own, so a fresh page needs nothing
   typed. The introduction does not fall back to the page's body: that is
@@ -61,15 +61,17 @@
     text-transform: uppercase;
   }
 
-  /* Hung off the title's upper right rather than sitting in the line, so the
-     word stays centred on the page. Sized and spaced relative to the
-     title's own font-size (em), so both scale with it together. */
+  /* Hung off the title's upper left rather than sitting in the line, so the
+     word stays centred on the page — up and in from the corner, its point
+     dropping toward the first letter, rather than flush against it. Sized
+     and spaced relative to the title's own font-size (em), so both scale
+     with it together. */
   .page-hero__mark {
     position: absolute;
-    inset-block-start: -0.15em;
-    inset-inline-start: 100%;
+    inset-block-end: 65%;
+    inset-inline-end: 100%;
     width: 0.5em;
-    margin-inline-start: 0.2em;
+    margin-inline-end: 0.15em;
   }
 
   .page-hero__mark svg {
@@ -78,13 +80,22 @@
     height: auto;
   }
 
-  /* The mark is a single filled shape with no weight axis of its own — a
-     stroke in the same colour fattens its edges outward, same trick as a
-     faux-bold. Width is in the path's own 215-unit viewBox, not CSS px, so
-     it scales with the mark's size rather than needing its own unit. */
+  /*
+   * The mark is a single filled shape with no weight axis of its own — a
+   * stroke in the same colour fattens its edges outward, same trick as a
+   * faux-bold. Width is in the path's own 215-unit viewBox, not CSS px, so
+   * it scales with the mark's size rather than needing its own unit.
+   *
+   * Explicit miter join and a raised limit: the arrow's point is an acute
+   * angle, past the 4:1 ratio SVG's default miter-limit allows before it
+   * falls back to a bevel — which is the "rounded off" look at the tip.
+   * Forcing the join and lifting the limit keeps the corner sharp.
+   */
   .page-hero__mark svg path {
     stroke: currentColor;
     stroke-width: 12;
+    stroke-linejoin: miter;
+    stroke-miterlimit: 12;
   }
 
   .page-hero__description {
