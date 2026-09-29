@@ -62,19 +62,29 @@
   }
 
   /* Hung off the title's upper right rather than sitting in the line, so the
-     word stays centred on the page. */
+     word stays centred on the page. Sized and spaced relative to the
+     title's own font-size (em), so both scale with it together. */
   .page-hero__mark {
     position: absolute;
-    inset-block-start: -0.1em;
+    inset-block-start: -0.15em;
     inset-inline-start: 100%;
-    width: 0.32em;
-    margin-inline-start: 0.12em;
+    width: 0.5em;
+    margin-inline-start: 0.2em;
   }
 
   .page-hero__mark svg {
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  /* The mark is a single filled shape with no weight axis of its own — a
+     stroke in the same colour fattens its edges outward, same trick as a
+     faux-bold. Width is in the path's own 215-unit viewBox, not CSS px, so
+     it scales with the mark's size rather than needing its own unit. */
+  .page-hero__mark svg path {
+    stroke: currentColor;
+    stroke-width: 12;
   }
 
   .page-hero__description {
