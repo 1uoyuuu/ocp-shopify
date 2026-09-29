@@ -35,8 +35,14 @@
   assign heading_font = section.settings.heading_font | default: 'heading'
 %}
 
+{% render 'contrast-override',
+  background_color: section.settings.background_color,
+  text_color: section.settings.text_color,
+  section_id: section.id
+%}
+
 <header
-  class="page-hero"
+  class="page-hero{% if section.settings.background_color != blank %} color-custom-{{ section.id }}{% endif %}"
   style="
     --page-hero-font: var(--font-{{ heading_font }}--family);
     --page-hero-weight: var(--font-{{ heading_font }}--weight);
@@ -184,6 +190,22 @@
         { "value": "accent", "label": "Accent" }
       ],
       "default": "heading"
+    },
+    {
+      "type": "header",
+      "content": "Colours"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background",
+      "info": "Leave empty for the theme's own. Text and the arrow switch to a contrasting colour automatically."
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "info": "Leave empty to pick automatically against the background."
     }
   ],
   "presets": [
