@@ -415,6 +415,10 @@
     text-transform: uppercase;
   }
 
+  .subscription-drawer__title {
+    font-weight: 700;
+  }
+
   .subscription-drawer__close {
     padding: 0;
     border: 0;
@@ -434,7 +438,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 1.75rem;
+    gap: 1.25rem;
     overflow-y: auto;
     padding-block-end: 1.5rem;
   }
@@ -450,6 +454,7 @@
     padding: 0;
     margin-block-end: 0.5rem;
     font-family: var(--font-subheading--family);
+    font-weight: 700;
     font-size: var(--ocp-text-size);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
@@ -496,7 +501,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    padding: 0.85rem 1rem;
+    padding: 0.5rem;
     border: 1px solid currentcolor;
     cursor: pointer;
     font-family: var(--font-body--family);
@@ -552,6 +557,8 @@
     opacity: 0.55;
   }
 
+  /* Same white-with-blue-text hover as the Subscribe now bar — see the note
+     there. */
   .subscription-form__submit {
     min-height: 3rem;
     border: 1px solid currentcolor;
@@ -563,6 +570,22 @@
     font-size: var(--ocp-text-size);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: uppercase;
+    transition:
+      background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .subscription-form__submit:not(:disabled):hover {
+      background: #fff;
+      color: var(--sub-panel);
+    }
+  }
+
+  .subscription-form__submit:not(:disabled):focus-visible {
+    background: #fff;
+    color: var(--sub-panel);
+    outline: none;
   }
 
   .subscription-form__submit:disabled {
@@ -575,7 +598,8 @@
       animation: none;
     }
 
-    .subscription-bar {
+    .subscription-bar,
+    .subscription-form__submit {
       transition: none;
     }
   }
