@@ -1,6 +1,6 @@
 import { Component } from '@theme/component';
 import { trapFocus, removeTrapFocus } from '@theme/focus';
-import { onAnimationEnd, removeWillChangeOnAnimationEnd } from '@theme/utilities';
+import { lockScroll, onAnimationEnd, removeWillChangeOnAnimationEnd, unlockScroll } from '@theme/utilities';
 
 /**
  * The panel's slide is driven here rather than by a CSS transition. A closed
@@ -209,6 +209,13 @@ class HeaderDrawer extends Component {
     this.#sequence++;
     details.open = true;
 
+    // Only the top-level drawer, not a submenu opening within an
+    // already-open one — theme-drawer.js's other consumers use the same
+    // owner-counted lock, so a second lockScroll call here would be
+    // harmless, but it would also mean this submenu's own close has to
+    // remember to unlock, which it has no reason to know about.
+    if (details === this.refs.details) lockScroll(details);
+
     summary.setAttribute('aria-expanded', 'true');
 
     this.preventInitialAccordionAnimations(details);
@@ -260,6 +267,9 @@ class HeaderDrawer extends Component {
     summary.setAttribute('aria-expanded', 'false');
     details.classList.remove('menu-open');
     this.refs.menuDrawer.classList.remove('menu-drawer--has-submenu-opened');
+
+    // Matches the lockScroll call in open() — same owner, same guard.
+    if (details === this.refs.details) unlockScroll(details);
 
     // Wait for the .menu-drawer element's transition, not the entire details subtree
     // This avoids waiting for child accordion/resource-card animations which can cause issues on Firefox
