@@ -46,6 +46,9 @@
   style="
     --page-hero-font: var(--font-{{ heading_font }}--family);
     --page-hero-weight: var(--font-{{ heading_font }}--weight);
+    {% if section.settings.clear_header %}
+      --page-hero-top-padding: calc(var(--header-height) + 2rem);
+    {% endif %}
   "
   {{ section.shopify_attributes }}
 >
@@ -66,7 +69,7 @@
     display: grid;
     justify-items: center;
     gap: 2rem;
-    padding: 5rem var(--ocp-page-margin) 4rem;
+    padding: var(--page-hero-top-padding, 5rem) var(--ocp-page-margin) 4rem;
     text-align: center;
     background: var(--color-background);
     color: var(--color-foreground);
@@ -206,6 +209,13 @@
       "id": "text_color",
       "label": "Text",
       "info": "Leave empty to pick automatically against the background."
+    },
+    {
+      "type": "checkbox",
+      "id": "clear_header",
+      "label": "Add room for a transparent header",
+      "info": "Turn on when this page's header is set to transparent (in the header section's own settings). A transparent header floats over this section instead of pushing it down, and needs padding under it or it sits on top of the title.",
+      "default": false
     }
   ],
   "presets": [
