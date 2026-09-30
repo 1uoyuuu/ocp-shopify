@@ -38,7 +38,7 @@
         "benefits": {
           "type": "panel",
           "settings": {
-            "image": "shopify://shop_images/sub-home.png",
+            "image": "shopify://shop_images/sub-1.png",
             "image_side": "right",
             "heading": "Subscription benefits",
             "text": "",
@@ -50,7 +50,7 @@
         "journey": {
           "type": "panel",
           "settings": {
-            "image": "shopify://shop_images/sub-2.png",
+            "image": "shopify://shop_images/sub-2_f40dc855-4ffe-4874-830a-c953dc13b546.png",
             "image_side": "left",
             "heading": "A coffee journey",
             "text": "<p>Every week we taste through what other roasters have made, here and half a world away. Your subscription pulls from that same shelf — nothing set aside, nothing lesser.</p><p>You choose how you brew and who you want to hear from. We choose the coffee, and it is revealed when it arrives.</p>",
