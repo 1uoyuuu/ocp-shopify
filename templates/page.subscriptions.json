@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "hero": {
@@ -6,10 +15,13 @@
         "product": "ocp-coffee-subscription",
         "title": "OCP Subscription",
         "tagline": "Picked by us. Freshly roasted. Delivered on repeat.",
+        "image": "shopify://shop_images/ocp-crow.jpg",
+        "darken": 30,
         "cta_label": "Subscribe now",
         "heading_font": "heading",
         "panel_color": "#0f80be",
         "panel_text_color": "#ffffff",
+        "drawer_title": "",
         "grind_label": "Grind",
         "grind_options": "Whole bean, Espresso, Aero Press, French Press, Batch Brewer, Pour Over",
         "grind_key": "Grind",
@@ -26,17 +38,25 @@
         "benefits": {
           "type": "panel",
           "settings": {
+            "image": "shopify://shop_images/sub-home.png",
             "image_side": "right",
             "heading": "Subscription benefits",
-            "lines": "Coffees picked by us from the roasters we stock\nAustralian roasters or international ones — your call\nYour brew method, grind and size, set once\nPause, skip or cancel any time"
+            "text": "",
+            "lines": "Coffees picked by us from the roasters we stock\nAustralian roasters or international ones — your call\nYour brew method, grind and size, set once\nPause, skip or cancel any time",
+            "background_color": "",
+            "text_color": ""
           }
         },
         "journey": {
           "type": "panel",
           "settings": {
+            "image": "shopify://shop_images/sub-2.png",
             "image_side": "left",
             "heading": "A coffee journey",
-            "text": "<p>Every week we taste through what other roasters have made, here and half a world away. Your subscription pulls from that same shelf — nothing set aside, nothing lesser.</p><p>You choose how you brew and who you want to hear from. We choose the coffee, and it is revealed when it arrives.</p>"
+            "text": "<p>Every week we taste through what other roasters have made, here and half a world away. Your subscription pulls from that same shelf — nothing set aside, nothing lesser.</p><p>You choose how you brew and who you want to hear from. We choose the coffee, and it is revealed when it arrives.</p>",
+            "lines": "",
+            "background_color": "",
+            "text_color": ""
           }
         },
         "steps": {
@@ -44,7 +64,10 @@
           "settings": {
             "image_side": "right",
             "heading": "How it works",
-            "lines": "Choose your brew method and the roasters you want to hear from\nPick a size, how many bags and how often\nWe choose the coffee — revealed when it arrives"
+            "text": "",
+            "lines": "Choose your brew method and the roasters you want to hear from\nPick a size, how many bags and how often\nWe choose the coffee — revealed when it arrives",
+            "background_color": "",
+            "text_color": ""
           }
         }
       },
@@ -52,7 +75,8 @@
         "benefits",
         "journey",
         "steps"
-      ]
+      ],
+      "settings": {}
     },
     "faq": {
       "type": "subscription-faq",
