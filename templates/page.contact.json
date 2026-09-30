@@ -14,7 +14,8 @@
       "settings": {
         "show_arrow": true,
         "heading_font": "heading",
-        "background_color": "#0f80be"
+        "background_color": "#0f80be",
+        "clear_header": true
       }
     },
     "main": {
