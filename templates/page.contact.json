@@ -83,9 +83,9 @@
               "settings": {
                 "label": "Submit",
                 "style_class": "button-custom",
-                "width": "fit-content",
+                "width": "custom",
                 "custom_width": 100,
-                "width_mobile": "fit-content",
+                "width_mobile": "custom",
                 "custom_width_mobile": 100,
                 "custom_button_background": "rgba(255,255,255,0)",
                 "custom_button_text": "#ffffff",

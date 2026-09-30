@@ -204,6 +204,23 @@
     align-items: center;
     gap: var(--gap-xs);
   }
+
+  /*
+   * Same white-background/page-colour-text hover as the subscription
+   * drawer's submit button. Scoped through .contact-form rather than
+   * edited into the stock button-custom-styles.liquid: that file's own
+   * per-instance hover rule is a single class + :hover, and this beats it
+   * on specificity (two classes) regardless of which lands later in the
+   * generated bundle. var(--color-background) is this page's own blue,
+   * inherited down from the section's contrast-override scope, so it
+   * follows that colour if it's ever changed rather than being a second
+   * hardcoded blue.
+   */
+  .contact-form .button-custom:hover {
+    --button-color: var(--color-background);
+    --button-background-color: #fff;
+    --button-border-color: #fff;
+  }
 {% endstylesheet %}
 
 {% schema %}
