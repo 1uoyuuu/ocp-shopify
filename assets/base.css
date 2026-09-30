@@ -340,6 +340,25 @@ p:empty {
 
 .shopify-section:not(.header-section):has(.section) {
   position: relative;
+  /*
+   * Contains .section-background's negative z-index (-2) to this section.
+   * Without a stacking context of its own here, that negative z-index has
+   * no local floor to sit on and escapes to whichever ancestor actually
+   * establishes one — on a plain page that's effectively <body>, and
+   * .section-background ends up ordered *behind* body in z-order (even
+   * though body's own background paints as the canvas backdrop, not a
+   * literal occluding box, so it still looks correct on screen).
+   *
+   * header-tone.js reads document.elementsFromPoint() front-to-back and
+   * stops at the first opaque hit — with body ahead of the section's own
+   * background in that order, it stops on body's colour instead, which is
+   * only ever wrong when body's background differs from what's actually
+   * behind the header (a transparent-header page whose sections carry
+   * their own colour, e.g. the contact page). isolation: isolate keeps
+   * the negative z-index scoped to its own section, so the section's own
+   * background is what a hit-test actually finds first.
+   */
+  isolation: isolate;
 }
 
 .shopify-section:not(.header-section) .section-background {
