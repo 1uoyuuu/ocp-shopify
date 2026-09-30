@@ -910,6 +910,16 @@
     z-index: calc(var(--layer-menu-drawer) + 1);
   }
 
+  /* The opposite direction from the above: site-logo carries a hardcoded
+     z-index of 1000 (it has to sit over hero video and other page content
+     outside the menu entirely), which otherwise paints it straight through
+     the open panel — the giant centred wordmark over the nav items. Nothing
+     is lost hiding it behind the panel; the panel already has its own
+     brand mark (.menu-drawer__brand). */
+  .header-section:has(#header-component .menu-drawer-container[open]) .site-logo {
+    z-index: calc(var(--layer-menu-drawer) - 1);
+  }
+
   /* CLOSE in the header replaces the panel's own close button, and a
      full-screen panel leaves nothing behind it to dim. */
   .menu-drawer > .menu-drawer__close-button,
