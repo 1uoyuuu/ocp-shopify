@@ -318,9 +318,15 @@
    * `justify-content: space-between`, which would also spread the tax
    * note and installments line apart the moment either one is on; those
    * still get their own row below via `flex-basis: 100%`, same as before.
+   *
+   * `flex-direction: row` has to be restated: `.text-block` in text.liquid
+   * (stock) already sets `display: flex`, but as a column — text blocks
+   * stack their own lines vertically by default — and `display` alone
+   * doesn't carry `flex-direction` back to `row` with it.
    */
   .coffee-product__col--buy product-price {
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0.25rem 1rem;
