@@ -34,7 +34,6 @@
     class="coffee-title spacing-style"
     style="
       --coffee-title-font: var(--font-{{ font }}--family);
-      --coffee-title-weight: var(--font-{{ font }}--weight);
       --coffee-title-case: {{ text_case }};
       --coffee-title-alignment: {{ block_settings.alignment | default: 'left' }};
       {% render 'spacing-style', settings: block_settings %}
@@ -54,11 +53,10 @@
   .coffee-title {
     margin: 0;
     font-family: var(--coffee-title-font, var(--font-subheading--family));
-    /* One deliberate exception to the house 3-size scale, at the owner's
-       request — the product name is the one line on this page that reads
-       a step above body text. */
-    font-size: 1.125rem;
-    font-weight: var(--coffee-title-weight, var(--font-subheading--weight));
+    font-size: var(--ocp-text-size);
+    /* Bold is what sets the product name apart from the rest of the
+       column, not a size of its own — the page stays on the house scale. */
+    font-weight: 700;
     line-height: var(--ocp-leading-snug);
     letter-spacing: var(--ocp-letter-spacing);
     text-transform: var(--coffee-title-case, uppercase);

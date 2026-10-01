@@ -15,9 +15,14 @@
   buy buttons are the stock blocks, placed in the right-hand column and
   restyled. They only need `closest.product` and `section.id`.
 
-  Columns stack below 750px — bag, order, information — and the page
-  scrolls normally. Holding a column to the viewport on a phone would trap
-  the reader inside a box the height of their screen.
+  Three tiers, not two. Below 750px everything stacks in one column — bag,
+  order, information — and the page scrolls normally; a phone screen is too
+  narrow to hold even two of these side by side. From 750–989px the bag and
+  the order sit in a row, wide enough for both, with information dropped to
+  its own full-width row below rather than crammed into a third column.
+  From 990px it's the three columns proper. Only that top tier locks a
+  column to the viewport height — holding one to the screen on a narrower
+  device would trap the reader inside a box the height of their screen.
 {% endcomment %}
 
 {% liquid
@@ -63,7 +68,7 @@
       "type": "checkbox",
       "id": "one_screen",
       "label": "Hold the three columns to one screen",
-      "info": "Each column scrolls inside itself if it runs long. Desktop only; below 750px the columns stack and the page scrolls.",
+      "info": "Each column scrolls inside itself if it runs long. 990px and up only; below that the columns stack or share a row and the page scrolls normally.",
       "default": true
     },
     {
@@ -177,7 +182,39 @@
   }
 
   /*
-   * Three columns from 750px up, the middle one wider because the bag is
+   * A middle tier, 750–989px: wide enough for the bag and the order to
+   * sit side by side, not wide enough for all three without crowding them.
+   * Info drops to its own full-width row below rather than squeezing into
+   * a third column — the three-column widths below are tuned for desktop,
+   * and a tablet-width info column would run narrower than its text wants.
+   *
+   * `grid-template-areas` rather than `order`: the mobile tier above
+   * already reorders with `order`, and a second reordering on top of that
+   * is harder to read than just naming where each column actually goes.
+   */
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    .coffee-product__grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        'media buy'
+        'info info';
+    }
+
+    .coffee-product__col--media {
+      grid-area: media;
+    }
+
+    .coffee-product__col--buy {
+      grid-area: buy;
+    }
+
+    .coffee-product__col--info {
+      grid-area: info;
+    }
+  }
+
+  /*
+   * Three columns from 990px up, the middle one wider because the bag is
    * the only thing on the page with a shape of its own.
    *
    * `lvh`, not `svh` or `vh` — the largest the viewport gets, so the frame
@@ -195,7 +232,7 @@
    * without it the row grows to the tallest column and the frame settles
    * taller than the screen.
    */
-  @media screen and (min-width: 750px) {
+  @media screen and (min-width: 990px) {
     .coffee-product__grid {
       grid-template-columns: 1fr var(--coffee-media-width, 1.4fr) 1fr;
     }
