@@ -123,7 +123,7 @@ roast_profile: Roast
       endcase
     -%}
     {%- if key != blank and value != blank -%}
-      <div class="coffee-spec__row">
+      <div class="coffee-spec__row coffee-spec__row--{{ key }}">
         <dt class="coffee-spec__label">
           {%- if stacked -%}
             <span class="coffee-spec__mark">{% render 'logo-arrow' %}</span>
@@ -185,10 +185,27 @@ roast_profile: Roast
    * the thing being read, so it takes the foreground while the label
    * stays quiet — the same weight-and-colour hierarchy the rest of the
    * theme uses in place of a second type size.
+   *
+   * Two rows share a line, process excepted: it carries the roaster's own
+   * qualifier appended ("Washed · Mosto Fermentation 48h"), which reliably
+   * runs too long for a half-width column, so it spans both and the pairs
+   * around it simply pick back up on the next line — no row list to keep
+   * in step, since the grid just places whatever comes next into the first
+   * open half.
    */
+  .coffee-spec--stacked {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1.5rem;
+  }
+
   .coffee-spec--stacked .coffee-spec__row {
     display: block;
     padding-block: 0 0.6rem;
+  }
+
+  .coffee-spec--stacked .coffee-spec__row--process {
+    grid-column: 1 / -1;
   }
 
   .coffee-spec--stacked .coffee-spec__value {
