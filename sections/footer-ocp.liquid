@@ -42,13 +42,22 @@
     {% endif %}
 
     <div class="ocp-footer__bottom">
-      <p class="ocp-footer__copyright">
-        {%- if section.settings.copyright != blank -%}
-          {{ section.settings.copyright }}
-        {%- else -%}
-          All rights reserved © {{ shop.name }} {{ 'now' | date: '%Y' }}
-        {%- endif -%}
-      </p>
+      {%- comment -%}
+        Split only on the default text: a merchant's own typed copyright is
+        one freeform string with no reliable "left half" and "right half" to
+        pull apart, so that case stays a single line. The default is made of
+        two actual pieces, so it gets to be two — spaced apart whenever this
+        row has the width to spare, the same way the legal links and credit
+        already spread across the row above.
+      {%- endcomment -%}
+      {%- if section.settings.copyright != blank -%}
+        <p class="ocp-footer__copyright">{{ section.settings.copyright }}</p>
+      {%- else -%}
+        <div class="ocp-footer__copyright">
+          <p>© {{ shop.name }} {{ 'now' | date: '%Y' }}</p>
+          <p>All rights reserved</p>
+        </div>
+      {%- endif -%}
 
       {%- comment -%}
         Same pattern as the footer menu columns: a navigation menu when one
@@ -438,10 +447,30 @@
     gap: 1rem 3rem;
   }
 
-  .ocp-footer__copyright,
   .ocp-footer__credit {
     margin: 0;
     font-weight: 400;
+  }
+
+  /*
+   * Flex whether this is the single-line custom copyright or the two-piece
+   * default: a lone text node just sits at the start either way, so there is
+   * nothing to undo for the custom case. The spread only becomes visible
+   * once this element is forced to the row's full width below — at the
+   * default width it is sized to its own content, so there is no slack for
+   * `space-between` to spend and the two halves simply sit together.
+   */
+  .ocp-footer__copyright {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .ocp-footer__copyright p {
+    margin: 0;
   }
 
   .ocp-footer__legal {
