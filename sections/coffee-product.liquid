@@ -292,12 +292,14 @@
 
   /*
    * Two groups, not six blocks in a row: what the coffee is (roast line,
-   * title, price) at the top, what orders it (variant, grind, buy button)
+   * title) at the top, what orders it (price, variant, grind, buy button)
    * pinned to the bottom. `.coffee-column` is already a column flexbox, so
    * an auto top margin on the first block of the second group is enough —
    * it eats all the leftover height in one gap rather than spreading it
    * across all six, which is what plain `space-between` on the column
-   * would do.
+   * would do. The margin sits on price rather than on the variant picker
+   * right under it, which is what keeps the two of them — styled as one
+   * continuous label/value list — touching rather than split by the gap.
    *
    * That only has space to eat once `.coffee-column` itself is as tall as
    * the column around it rather than shrunk to its own content — the grid
@@ -306,10 +308,6 @@
    */
   .coffee-product__col--buy .coffee-column {
     height: 100%;
-  }
-
-  .coffee-product__col--buy .variant-picker {
-    margin-block-start: auto;
   }
 
   /*
@@ -326,6 +324,7 @@
     flex-wrap: wrap;
     align-items: baseline;
     gap: 0.25rem 1rem;
+    margin-block-start: auto;
   }
 
   .coffee-product__col--buy product-price::before {
@@ -337,7 +336,17 @@
     white-space: nowrap;
   }
 
+  /*
+   * The stock block gives this div `width: 100%` (it's a <p>-like text
+   * block, meant to hold a whole line to itself). At full width it has
+   * nowhere to sit but its own line, which is why it was wrapping under
+   * the label instead of beside it — and with nothing left to share that
+   * line with once it did, `margin-inline-start: auto` had no free space
+   * to spend either. `width: auto` lets it shrink back to its own content
+   * so both fit on one line and the auto margin has room to push it right.
+   */
   .coffee-product__col--buy product-price [ref='priceContainer'] {
+    width: auto;
     margin-inline-start: auto;
     font-family: var(--font-subheading--family);
     font-size: var(--ocp-text-size);
