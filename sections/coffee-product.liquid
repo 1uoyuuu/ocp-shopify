@@ -15,9 +15,9 @@
   buy buttons are the stock blocks, placed in the right-hand column and
   restyled. They only need `closest.product` and `section.id`.
 
-  Columns stack below 750px, in source order — information, bag, order —
-  and the page scrolls normally. Holding a column to the viewport on a
-  phone would trap the reader inside a box the height of their screen.
+  Columns stack below 750px — bag, order, information — and the page
+  scrolls normally. Holding a column to the viewport on a phone would trap
+  the reader inside a box the height of their screen.
 {% endcomment %}
 
 {% liquid
@@ -152,6 +152,28 @@
   .coffee-product__col--media {
     display: flex;
     flex-direction: column;
+  }
+
+  /*
+   * Stacked order below 750px: the bag first, then what orders it, then
+   * what explains it — a shopper scrolling a single column meets the
+   * product before the accordions, same logic as leading with the image on
+   * any other card. `order` rather than reordering the markup, so the grid
+   * above still auto-places info/media/buy left-to-right by source order
+   * without this having to be undone there.
+   */
+  @media screen and (max-width: 749px) {
+    .coffee-product__col--media {
+      order: 1;
+    }
+
+    .coffee-product__col--buy {
+      order: 2;
+    }
+
+    .coffee-product__col--info {
+      order: 3;
+    }
   }
 
   /*
