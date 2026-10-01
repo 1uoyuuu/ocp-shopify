@@ -85,20 +85,44 @@
           "type": "question",
           "settings": {
             "question": "Can I choose the coffee I receive?",
-            "answer": "<p>You choose how you brew and whether it comes from Australian or international roasters. Which coffee arrives is our call — that is the point.</p>"
+            "answer": "<p>You choose how you brew, which roasters you want to hear from, and how much. Which coffee actually turns up is our call — that is the point of a subscription that is curated rather than picked off a list.</p>"
           }
         },
         "manage": {
           "type": "question",
           "settings": {
-            "question": "How do I manage, pause or cancel my subscription?",
-            "answer": "<p>Log in to your account to skip a delivery, pause, change how often it comes, or cancel.</p>"
+            "question": "What can I change once I've subscribed?",
+            "answer": "<p>Brew method, roasters, size, grind and how many bags — all of it, any time, from your account. Change your mind on frequency too; nothing beyond the next shipment is locked in.</p>"
+          }
+        },
+        "pause": {
+          "type": "question",
+          "settings": {
+            "question": "Can I pause, skip or cancel?",
+            "answer": "<p>Yes, all three, from your account, whenever you like. There is no minimum run and no call to make — it is self-service because it should be.</p>"
+          }
+        },
+        "grind": {
+          "type": "question",
+          "settings": {
+            "question": "Will my coffee be whole bean or ground?",
+            "answer": "<p>Whichever you tell us. Pick whole bean or a grind suited to your brewer when you sign up, and change it the same way as everything else.</p>"
+          }
+        },
+        "parallel": {
+          "type": "question",
+          "settings": {
+            "question": "Can I subscribe to both espresso and filter coffee?",
+            "answer": "<p>Yes — brew method is a choice on this subscription, not a separate product, so run two: one set to Espresso, one to Filter. Each arrives and bills on its own schedule.</p>"
           }
         }
       },
       "block_order": [
         "choose",
-        "manage"
+        "manage",
+        "pause",
+        "grind",
+        "parallel"
       ],
       "settings": {
         "heading": "Still have questions?",
