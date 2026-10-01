@@ -807,6 +807,22 @@ a {
     color var(--animation-speed) var(--animation-easing);
 }
 
+/*
+ * The browser's own stylesheet carries `:visited { color: purple }` (or
+ * similar), and a bare type selector like the plain `a` above never
+ * outranks a pseudo-class — so any link to an address actually visited in
+ * this browser (a developer credit, an outbound social link) renders in
+ * the browser's default colour instead of the theme's, no matter what else
+ * is set here. Unlike a hover, this isn't a transition that settles
+ * somewhere; it's just the wrong colour sitting there outright the moment
+ * the page loads. Matching the pseudo-class ourselves, at the same
+ * specificity `a:hover` already uses below, keeps every link — visited or
+ * not — on the colour this theme actually gives it.
+ */
+a:visited {
+  color: currentcolor;
+}
+
 :is(h1, h2, h3, h4, h5, h6, p) > a:hover {
   color: rgb(var(--color-rgb, var(--color-foreground-rgb)) / 0.7);
 }
