@@ -66,18 +66,8 @@
    * rules name .site-logo alongside .header__row — so it inverts, turns the
    * light-section colour, and takes the drawer's colour without any of that
    * being restated here.
-   *
-   * `:visited` is repeated deliberately: this is a link to the home page, so
-   * it is a visited one for anyone who has ever loaded the site, and
-   * base.css's own `a:visited { color: currentcolor }` outranks a bare
-   * `.site-logo` selector — `currentcolor` on the `color` property itself
-   * computes as `inherit`, which drops `--color-foreground` entirely and
-   * paints the logo whatever colour it inherits from outside the header
-   * instead of whatever header-tone just decided. Matching that
-   * specificity here keeps the logo on the header's own colour regardless.
    */
-  .site-logo,
-  .site-logo:visited {
+  .site-logo {
     color: var(--color-foreground);
   }
 
