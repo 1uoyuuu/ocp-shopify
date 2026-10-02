@@ -94,10 +94,10 @@
 
 {% stylesheet %}
   /*
-   * The card's title/price row: the price takes only the width it needs and
-   * sits against the right edge, a small gap away from the title, and the
-   * title fills every bit of room that is left and wraps within it. No fixed
-   * shares, so a short price like $9 doesn't hold a fifth of the row empty.
+   * The card's title/price row, space-between: the title hangs off the left
+   * edge, the price off the right, and whatever room is left sits between
+   * them. The price takes only the width it needs; a long title wraps within
+   * what the price leaves it, never closer than the margin below.
    * Keyed on the row that directly holds a price, so the swatches row and the
    * rest of the card are left alone.
    *
@@ -108,11 +108,12 @@
   .product-grid__item .group-block-content:has(> product-price) {
     flex-direction: row;
     flex-wrap: nowrap;
+    justify-content: space-between;
     align-items: baseline;
   }
 
   .product-grid__item .group-block-content:has(> product-price) > .contents .text-block {
-    flex: 1 1 0;
+    flex: 0 1 auto;
     min-width: 0;
     width: auto;
     max-width: none;
