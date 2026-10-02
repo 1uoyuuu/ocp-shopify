@@ -115,6 +115,13 @@
     max-width: 80%;
   }
 
+  /* Capitalised, not the h5 preset's uppercase. The preset applies its case to
+     the block's child `<p>` (`.text-block.h5 > *`), so that is what has to be
+     named here — setting it on the block itself would lose to that rule. */
+  .product-grid__item .group-block-content:has(> product-price) > .contents .text-block > * {
+    text-transform: capitalize;
+  }
+
   .product-grid__item .group-block-content > product-price {
     width: 20%;
     flex: 0 0 20%;
