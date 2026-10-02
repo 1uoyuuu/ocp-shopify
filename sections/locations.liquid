@@ -49,6 +49,25 @@
       assign hours = shop.hours.value
       assign has_description = shop.description.value
 
+      # The page a shop's MORE link goes to is whatever the footer's location
+      # menu already points that shop at, matched by name either way round
+      # ("Crows Nest" in the metaobject, "OCP Crows Nest" in the menu), so the
+      # two never need keeping in step. A shop that has a page of its own as a
+      # metaobject falls back to that; one with neither shows no link.
+      assign more_url = ''
+      assign shop_name_key = name | downcase | strip
+      for menu_link in linklists['footer-menu-locations'].links
+        assign menu_key = menu_link.title | downcase | strip
+        if shop_name_key != blank and menu_key != blank and more_url == blank
+          if menu_key contains shop_name_key or shop_name_key contains menu_key
+            assign more_url = menu_link.url
+          endif
+        endif
+      endfor
+      if more_url == blank
+        assign more_url = shop.system.url
+      endif
+
       assign has_info = false
       if address != blank or hours != blank or has_description != blank
         assign has_info = true
@@ -82,8 +101,8 @@
               <div class="location__hours">
                 <div class="location__hours-head">
                   <p class="location__hours-heading">{{ section.settings.hours_label | default: 'Opening hours' }}</p>
-                  {%- if shop.system.url != blank -%}
-                    <a class="location__more" href="{{ shop.system.url }}">{{ section.settings.more_label | default: 'More' }}</a>
+                  {%- if more_url != blank -%}
+                    <a class="location__more" href="{{ more_url }}">{{ section.settings.more_label | default: 'More' }}</a>
                   {%- endif -%}
                 </div>
                 {%- assign hour_lines = hours | newline_to_br | split: '<br />' -%}
@@ -339,7 +358,7 @@
       "type": "text",
       "id": "more_label",
       "label": "Link to the shop's own page",
-      "info": "Shown at the right of the hours heading, and only for a shop that has a page of its own.",
+      "info": "Shown at the right of the hours heading. It goes to the same page the footer's location menu links that shop to.",
       "default": "More"
     },
     {
