@@ -246,14 +246,20 @@
     --ocp-text-size: 0.875rem;
 
     /* The footer's size, at the owner's request: 12px against the text size's
-       14. Derived from it for the same reason the small display size is — it
-       cannot drift from the scale — and used by the footer and nothing else. */
-    --ocp-text-size-sm: calc(var(--ocp-text-size) * 6 / 7);
+       14. Capped by the text size rather than written as its own number, so it
+       can never end up larger than the text around it — on a phone, where the
+       text size comes down to 12px too, the two are the same size. Used by the
+       footer and nothing else. */
+    --ocp-text-size-sm: min(0.75rem, var(--ocp-text-size));
 
     @media screen and (max-width: 749px) {
       /* The hero stacks here and gives its lines the full width, so they
          can afford to be a larger share of it. */
       --ocp-display-size: min(8rem, 12vw);
+
+      /* 12px on a phone, where 14 reads large for the width. This is the one
+         place it changes, so every line set at the text size follows. */
+      --ocp-text-size: 0.75rem;
     }
 
     /* The house tracking. Every piece of OCP's own type — hero, header,

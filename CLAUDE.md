@@ -328,8 +328,8 @@ are the single source for the values below — nothing else may state one.
 |---|---|---|
 | `--ocp-display-size` | `min(8rem, 9.5vw)`, `12vw` ≤749px | Hero headings, subscription heading |
 | `--ocp-display-size-sm` | `calc(--ocp-display-size / 3)` | Display lines too long to sit at the full size — the panel-reveal slogan, the statement paragraph, the menu panel links |
-| `--ocp-text-size` | `0.875rem` | Everything else, without exception |
-| `--ocp-text-size-sm` | `calc(--ocp-text-size * 6 / 7)` = 12px | The footer, and only the footer (owner's request). Derived from the text size, never written out |
+| `--ocp-text-size` | `0.875rem`, `0.75rem` ≤749px | Everything else, without exception |
+| `--ocp-text-size-sm` | `min(0.75rem, --ocp-text-size)` = 12px | The footer, and only the footer (owner's request). Capped by the text size, so on phones the two are equal |
 | `--ocp-leading-display` | `1` | Both display sizes |
 | `--ocp-leading-snug` | `1.15` | Headings, labels, UI text |
 | `--ocp-leading-text` | `1.4` | Running text — footer, intros |
