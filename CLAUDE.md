@@ -329,13 +329,14 @@ are the single source for the values below — nothing else may state one.
 | `--ocp-display-size` | `min(8rem, 9.5vw)`, `12vw` ≤749px | Hero headings, subscription heading |
 | `--ocp-display-size-sm` | `calc(--ocp-display-size / 3)` | Display lines too long to sit at the full size — the panel-reveal slogan, the statement paragraph, the menu panel links |
 | `--ocp-text-size` | `0.875rem` | Everything else, without exception |
+| `--ocp-text-size-sm` | `calc(--ocp-text-size * 6 / 7)` = 12px | The footer, and only the footer (owner's request). Derived from the text size, never written out |
 | `--ocp-leading-display` | `1` | Both display sizes |
 | `--ocp-leading-snug` | `1.15` | Headings, labels, UI text |
 | `--ocp-leading-text` | `1.4` | Running text — footer, intros |
 | `--ocp-letter-spacing` | `-0.02em` | All type, ours and the theme's alike |
 | `--ocp-page-margin` | `16px`, `32px` ≥750px | Every section's inline gutter, header and footer included |
 
-**The type scale is these three and no others.** No fourth size, no
+**The type scale is these three and no others** — apart from the footer's 12px step above, which is derived from the text size and scoped to the footer. No fourth size, no
 `clamp()`, no `1rem` "just for this label" — hierarchy below them is weight,
 case and colour. The footer is the model: its headings and links are the same
 size at different weights. The site reached ten sizes once by adding one

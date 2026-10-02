@@ -245,6 +245,11 @@
 
     --ocp-text-size: 0.875rem;
 
+    /* The footer's size, at the owner's request: 12px against the text size's
+       14. Derived from it for the same reason the small display size is — it
+       cannot drift from the scale — and used by the footer and nothing else. */
+    --ocp-text-size-sm: calc(var(--ocp-text-size) * 6 / 7);
+
     @media screen and (max-width: 749px) {
       /* The hero stacks here and gives its lines the full width, so they
          can afford to be a larger share of it. */
