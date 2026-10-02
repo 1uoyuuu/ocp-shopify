@@ -92,6 +92,37 @@
   </results-list>
 </collection-component>
 
+{% stylesheet %}
+  /*
+   * The card's title/price row: the title holds 80% and wraps within it, the
+   * price holds the other 20% and sits against the right edge. Fixed shares
+   * rather than `fit-content` + space-between, so a long title wraps onto a
+   * second line instead of shoving the price off to its own row. Keyed on
+   * the row that directly holds a price, so the swatches row and the rest of
+   * the card are left alone.
+   *
+   * The title block sits inside an `<a class="contents">`, so it is the
+   * `.text-block` that is the flex item, not the link.
+   */
+  .product-grid__item .group-block-content:has(> product-price) {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: baseline;
+  }
+
+  .product-grid__item .group-block-content:has(> product-price) > .contents .text-block {
+    width: 80%;
+    max-width: 80%;
+  }
+
+  .product-grid__item .group-block-content > product-price {
+    width: 20%;
+    flex: 0 0 20%;
+    text-align: right;
+    align-items: flex-end;
+  }
+{% endstylesheet %}
+
 {% schema %}
 {
   "name": "t:names.collection_container",
