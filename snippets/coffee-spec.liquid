@@ -204,8 +204,11 @@ roast_profile: Roast
     padding-block: 0 0.6rem;
   }
 
+  /* Last whatever order `spec_rows` is typed in: every other row is at the
+     default order of 0, so a 1 here sends process to the bottom. */
   .coffee-spec--stacked .coffee-spec__row--process {
     grid-column: 1 / -1;
+    order: 1;
   }
 
   .coffee-spec--stacked .coffee-spec__value {

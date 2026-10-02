@@ -22,7 +22,7 @@
               "settings": {
                 "heading": "Coffee information",
                 "open_by_default": true,
-                "spec_rows": "origin: Origin\nregion: Region\nproducer: Producer\nvariety: Variety\nprocess: Process\naltitude: Altitude\nharvest: Harvest",
+                "spec_rows": "origin: Origin\nregion: Region\nproducer: Producer\nvariety: Variety\naltitude: Altitude\nharvest: Harvest\nprocess: Process",
                 "spec_layout": "stacked",
                 "spec_label_width": 11,
                 "spec_dividers": false,
