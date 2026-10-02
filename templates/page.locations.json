@@ -21,6 +21,7 @@
     "shops": {
       "type": "locations",
       "settings": {
+        "more_label": "More",
         "drop": 10
       },
       "blocks": {

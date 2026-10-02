@@ -80,7 +80,12 @@
 
             {%- if hours != blank -%}
               <div class="location__hours">
-                <p class="location__hours-heading">{{ section.settings.hours_label | default: 'Opening hours' }}</p>
+                <div class="location__hours-head">
+                  <p class="location__hours-heading">{{ section.settings.hours_label | default: 'Opening hours' }}</p>
+                  {%- if shop.system.url != blank -%}
+                    <a class="location__more" href="{{ shop.system.url }}">{{ section.settings.more_label | default: 'More' }}</a>
+                  {%- endif -%}
+                </div>
                 {%- assign hour_lines = hours | newline_to_br | split: '<br />' -%}
                 {%- for line in hour_lines -%}
                   {%- assign line_text = line | strip -%}
@@ -222,6 +227,26 @@
     margin: 0;
   }
 
+  /* The heading on the left, the link to the shop's own page on the right. */
+  .location__hours-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  /* Same type as the heading but at full strength — it is the one thing in the
+     row meant to be clicked, so it does not take the heading's dimming. */
+  .location__hours .location__more {
+    font-family: var(--font-subheading--family);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-transform: uppercase;
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: currentcolor;
+    text-underline-offset: 0.2em;
+  }
+
   .location__hours-heading {
     font-family: var(--font-subheading--family);
     letter-spacing: var(--ocp-letter-spacing);
@@ -309,6 +334,13 @@
       "id": "hours_label",
       "label": "Hours heading",
       "default": "Opening hours"
+    },
+    {
+      "type": "text",
+      "id": "more_label",
+      "label": "Link to the shop's own page",
+      "info": "Shown at the right of the hours heading, and only for a shop that has a page of its own.",
+      "default": "More"
     },
     {
       "type": "range",
