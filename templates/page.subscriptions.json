@@ -40,9 +40,10 @@
           "settings": {
             "image": "shopify://shop_images/sub-1.png",
             "aspect_ratio": "3 / 2",
-            "image_side": "right",
+            "image_side": "left",
             "heading": "Subscription benefits",
             "text": "",
+            "list_style": "plain",
             "lines": "Coffees picked by us from the roasters we stock\nAustralian roasters or international ones — your call\nYour brew method, grind and size, set once\nPause, skip or cancel any time",
             "background_color": "",
             "text_color": ""
@@ -53,9 +54,10 @@
           "settings": {
             "image": "shopify://shop_images/sub-2_f40dc855-4ffe-4874-830a-c953dc13b546.png",
             "aspect_ratio": "4 / 5",
-            "image_side": "left",
+            "image_side": "right",
             "heading": "A coffee journey",
             "text": "<p>Every week we taste through what other roasters have made, here and half a world away. Your subscription pulls from that same shelf — nothing set aside, nothing lesser.</p><p>You choose how you brew and who you want to hear from. We choose the coffee, and it is revealed when it arrives.</p>",
+            "list_style": "arrow",
             "lines": "",
             "background_color": "",
             "text_color": ""
@@ -68,6 +70,7 @@
             "image_side": "right",
             "heading": "How it works",
             "text": "",
+            "list_style": "steps",
             "lines": "Choose your brew method and the roasters you want to hear from\nPick a size, how many bags and how often\nWe choose the coffee — revealed when it arrives",
             "background_color": "",
             "text_color": ""
@@ -75,9 +78,9 @@
         }
       },
       "block_order": [
+        "steps",
         "benefits",
-        "journey",
-        "steps"
+        "journey"
       ],
       "settings": {}
     },

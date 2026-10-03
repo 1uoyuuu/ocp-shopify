@@ -72,13 +72,25 @@
           {%- endif -%}
 
           {%- if block.settings.lines != blank -%}
-            <ul class="subscription-panel__list">
+            {%- liquid
+              assign list_style = block.settings.list_style | default: 'arrow'
+              assign step_words = 'One,Two,Three,Four,Five,Six,Seven,Eight,Nine,Ten' | split: ','
+              assign step_number = 0
+            -%}
+            <ul class="subscription-panel__list subscription-panel__list--{{ list_style }}">
               {%- for line in lines -%}
                 {%- assign line_text = line | strip -%}
                 {%- if line_text != blank -%}
+                  {%- assign step_number = step_number | plus: 1 -%}
                   <li>
-                    <span class="subscription-panel__list-mark" aria-hidden="true">{% render 'logo-arrow' %}</span>
-                    <span>{{ line_text }}</span>
+                    {%- if list_style == 'steps' -%}
+                      {%- assign step_index = step_number | minus: 1 -%}
+                      {%- assign step_word = step_words[step_index] | default: step_number -%}
+                      <span class="subscription-panel__step-label">Step {{ step_word }}:</span>
+                    {%- elsif list_style == 'arrow' -%}
+                      <span class="subscription-panel__list-mark" aria-hidden="true">{% render 'logo-arrow' %}</span>
+                    {%- endif -%}
+                    <span class="subscription-panel__list-text">{{ line_text }}</span>
                   </li>
                 {%- endif -%}
               {%- endfor -%}
@@ -196,6 +208,31 @@
     align-items: baseline;
   }
 
+  /* Plain: the lines on their own, no marker in front. */
+  .subscription-panel__list--plain li {
+    display: block;
+  }
+
+  /* Steps: "Step One:" over its line, one step to a block with room between
+     them. The step itself is the heavier weight, the label the regular one —
+     weight carries the hierarchy, not a second size. */
+  .subscription-panel__list--steps {
+    gap: 1.5rem;
+  }
+
+  .subscription-panel__list--steps li {
+    display: block;
+  }
+
+  .subscription-panel__step-label {
+    display: block;
+  }
+
+  .subscription-panel__list--steps .subscription-panel__list-text {
+    display: block;
+    font-weight: 700;
+  }
+
   .subscription-panel__list-mark {
     flex: 0 0 auto;
     width: 0.6em;
@@ -205,6 +242,15 @@
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  /* The title sits in the middle on a phone, where the panel is one column
+     and the photograph above it is full width. The words stay left. */
+  @media screen and (max-width: 749px) {
+    .subscription-panel__heading {
+      justify-content: center;
+      text-align: center;
+    }
   }
 
   @media screen and (min-width: 750px) {
@@ -296,7 +342,18 @@
           "type": "textarea",
           "id": "lines",
           "label": "Lines",
-          "info": "One per line, each led by the arrow. Leave empty for none."
+          "info": "One per line. Leave empty for none."
+        },
+        {
+          "type": "select",
+          "id": "list_style",
+          "label": "Lines are shown as",
+          "options": [
+            { "value": "arrow", "label": "Led by the arrow" },
+            { "value": "plain", "label": "Plain list" },
+            { "value": "steps", "label": "Numbered steps (Step One: …)" }
+          ],
+          "default": "arrow"
         },
         {
           "type": "header",
