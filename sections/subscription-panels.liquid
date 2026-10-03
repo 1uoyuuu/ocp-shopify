@@ -90,7 +90,15 @@
                     {%- elsif list_style == 'arrow' -%}
                       <span class="subscription-panel__list-mark" aria-hidden="true">{% render 'logo-arrow' %}</span>
                     {%- endif -%}
-                    <span class="subscription-panel__list-text">{{ line_text }}</span>
+                    {%- if list_style == 'steps' -%}
+                      {%- assign step_parts = line_text | split: ' | ' -%}
+                      <span class="subscription-panel__list-text subscription-panel__step-title">{{ step_parts[0] }}</span>
+                      {%- if step_parts.size > 1 -%}
+                        <span class="subscription-panel__list-text subscription-panel__step-body">{{ step_parts[1] }}</span>
+                      {%- endif -%}
+                    {%- else -%}
+                      <span class="subscription-panel__list-text">{{ line_text }}</span>
+                    {%- endif -%}
                   </li>
                 {%- endif -%}
               {%- endfor -%}
@@ -230,6 +238,11 @@
 
   .subscription-panel__list--steps .subscription-panel__list-text {
     display: block;
+  }
+
+  /* The first sentence of a step is the instruction and takes the weight;
+     what follows it is the explanation, at the regular one. */
+  .subscription-panel__list--steps .subscription-panel__step-title {
     font-weight: 700;
   }
 
@@ -342,7 +355,7 @@
           "type": "textarea",
           "id": "lines",
           "label": "Lines",
-          "info": "One per line. Leave empty for none."
+          "info": "One per line. For numbered steps, put a space, a vertical bar and a space after the first sentence (it is shown bold) and the explanation after that. Leave empty for none."
         },
         {
           "type": "select",
