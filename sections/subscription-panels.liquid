@@ -273,7 +273,9 @@
     text-transform: capitalize;
   }
 
+  /* The one gap in the card: between the title and the explanation. */
   .subscription-card__body {
+    margin-block-start: 0.5rem;
     opacity: 0;
     transform: translateY(0.4rem);
     transition:
@@ -327,6 +329,39 @@
     .subscription-card,
     .subscription-card__body {
       transition: none;
+    }
+  }
+
+  /*
+   * A phone has one column of wide, short cards instead of the two-up grid:
+   * the words on the left, the number in the top corner and the arrow under
+   * it on the right. A thin line in the panel's own colour keeps them apart,
+   * since the grid has no gap to do it.
+   */
+  @media screen and (max-width: 749px) {
+    .subscription-panel__list.subscription-panel__list--cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .subscription-card {
+      aspect-ratio: auto;
+      min-height: 8rem;
+      padding: 0.75rem 6rem 0.75rem 0.75rem;
+    }
+
+    .subscription-card + .subscription-card {
+      border-block-start: 1px solid var(--panel-background, var(--color-background));
+    }
+
+    .subscription-card__number {
+      inset-block-start: 0.75rem;
+      inset-block-end: auto;
+      inset-inline-start: auto;
+      inset-inline-end: 0.75rem;
+    }
+
+    .subscription-card__mark {
+      width: 4rem;
     }
   }
 
@@ -395,6 +430,11 @@
        against the page edge on one side and the photograph on the other. */
     .subscription-panel__text-col {
       padding-inline: clamp(1.5rem, 5vw, 5rem);
+    }
+
+    /* The cards go edge to edge in their half; the padding is for prose. */
+    .subscription-panel__text-col:has(.subscription-panel__list--cards) {
+      padding-inline: 0;
     }
 
     .subscription-panel__text {
