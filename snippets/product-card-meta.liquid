@@ -157,6 +157,26 @@
     }
   }
 
+  /*
+   * Phone width: shown and parked at the top, the same as the hoverless case
+   * above but keyed on width, so a narrow window on a desktop gets it too.
+   * `!important` on the position because a pointer that can hover has already
+   * made the script write an inline `transform`, which would otherwise beat
+   * this the moment a window is dragged narrow.
+   */
+  @media screen and (max-width: 749px) {
+    .card-meta {
+      opacity: 1;
+    }
+
+    .card-gallery .card-meta,
+    .card-gallery .card-meta[data-tracking] {
+      top: 0;
+      bottom: auto;
+      transform: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .card-meta {
       transition: none;

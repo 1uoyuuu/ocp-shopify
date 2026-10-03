@@ -44,9 +44,12 @@ class ProductCardMeta extends HTMLElement {
     // A coarse or hoverless pointer can't drive this, and reduced-motion
     // users shouldn't have text chasing their cursor. Both keep the CSS
     // resting placement instead.
+    // Phone width counts too: the strip is parked at the top there, whatever
+    // the pointer is.
     const canTrack =
       matchMedia('(hover: hover) and (pointer: fine)').matches &&
-      !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      !matchMedia('(prefers-reduced-motion: reduce)').matches &&
+      !matchMedia('(max-width: 749px)').matches;
     if (!canTrack) return;
 
     this.dataset.tracking = '';

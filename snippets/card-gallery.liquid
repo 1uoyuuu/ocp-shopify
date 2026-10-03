@@ -294,6 +294,31 @@
     }
   }
 
+  /*
+   * On a phone the card simply is the hover state: the bag's colour behind it
+   * and the roast strip across the top, from the first paint. There is no
+   * cursor to bring either in, and a grid of grey tiles that only turn
+   * colour under a finger would hide what makes the shelf worth looking at.
+   * Keyed on width, not on `hover`, so a narrow desktop window matches.
+   */
+  @media screen and (max-width: 749px) {
+    .card-gallery,
+    .card-gallery slideshow-container {
+      background-color: var(
+        --card-media-hover,
+        color-mix(
+          in srgb,
+          #fff calc(var(--card-media-lift, 15) * 1%),
+          var(--card-media-background, var(--color-background))
+        )
+      );
+    }
+
+    .card-gallery[data-tinted] .card-meta {
+      color: #fff;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .card-gallery,
     .card-gallery slideshow-container {

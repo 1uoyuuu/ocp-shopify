@@ -133,6 +133,25 @@
     text-align: right;
     align-items: flex-end;
   }
+
+  /* On a phone the row stacks: the title on one line, the price under it,
+     both against the left edge. */
+  @media screen and (max-width: 749px) {
+    .product-grid__item .group-block-content:has(> product-price) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .product-grid__item .group-block-content:has(> product-price) > .contents .text-block {
+      width: 100%;
+    }
+
+    .product-grid__item .group-block-content > product-price {
+      margin-inline-start: 0;
+      text-align: left;
+      align-items: flex-start;
+    }
+  }
 {% endstylesheet %}
 
 {% schema %}
