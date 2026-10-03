@@ -37,9 +37,22 @@ html {
   }
 }
 
-html[scroll-lock],
-html[scroll-lock] .page-wrapper {
+html[scroll-lock] {
   overflow: hidden;
+}
+
+/*
+ * Only where `.page-wrapper` is what scrolls. Below 990px the document
+ * scrolls and the wrapper is just a column, but `overflow: hidden` on it
+ * still turns it into a scroll container — and a sticky header sticks to its
+ * nearest scroll container, which here never scrolls. Opening a drawer from a
+ * scrolled page then left the header (CLOSE, CART) behind at the top of the
+ * document, out of view, while the panel it belongs to was open on screen.
+ */
+@media (min-width: 990px) {
+  html[scroll-lock] .page-wrapper {
+    overflow: hidden;
+  }
 }
 
 .page-wrapper {
