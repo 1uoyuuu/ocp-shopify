@@ -82,6 +82,19 @@
                 {%- assign line_text = line | strip -%}
                 {%- if line_text != blank -%}
                   {%- assign step_number = step_number | plus: 1 -%}
+                  {%- if list_style == 'cards' -%}
+                    {%- assign card_parts = line_text | split: ' | ' -%}
+                    <li class="subscription-card">
+                      <span class="subscription-card__title">{{ card_parts[0] }}</span>
+                      {%- if card_parts.size > 1 -%}
+                        <span class="subscription-card__body">{{ card_parts[1] }}</span>
+                      {%- endif -%}
+                      <span class="subscription-card__number" aria-hidden="true">
+                        {%- if step_number < 10 -%}0{%- endif -%}{{ step_number }}
+                      </span>
+                      <span class="subscription-card__mark" aria-hidden="true">{% render 'logo-arrow' %}</span>
+                    </li>
+                  {%- else -%}
                   <li>
                     {%- if list_style == 'steps' -%}
                       {%- assign step_index = step_number | minus: 1 -%}
@@ -100,6 +113,7 @@
                       <span class="subscription-panel__list-text">{{ line_text }}</span>
                     {%- endif -%}
                   </li>
+                  {%- endif -%}
                 {%- endif -%}
               {%- endfor -%}
             </ul>
@@ -220,6 +234,93 @@
   /* Plain: the lines on their own, no marker in front. */
   .subscription-panel__list--plain li {
     display: block;
+  }
+
+  /*
+   * Cards: the text column becomes a grid of tiles. Each rests in the brand
+   * blue at 60% and fills to full strength under the cursor, which is also
+   * when its explanation appears — title, number and arrow are all that show
+   * until then. Without a hovering pointer there is nothing to reveal the
+   * explanation, so a phone gets every tile at full strength with the words
+   * already on it.
+   */
+  .subscription-panel__list--cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .subscription-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    aspect-ratio: 1;
+    min-width: 0;
+    padding: 0.75rem 0.75rem 4rem;
+    color: var(--panel-background, var(--color-background));
+    background-color: rgb(var(--color-foreground-rgb) / 0.6);
+    transition: background-color 0.3s ease;
+  }
+
+  .subscription-card__title {
+    font-weight: 700;
+  }
+
+  .subscription-card__body {
+    opacity: 0;
+    transform: translateY(0.4rem);
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .subscription-card__number {
+    position: absolute;
+    inset-block-end: 0.75rem;
+    inset-inline-start: 0.75rem;
+    font-weight: 700;
+  }
+
+  .subscription-card__mark {
+    position: absolute;
+    inset-block-end: 0.75rem;
+    inset-inline-end: 0.75rem;
+    width: 28%;
+  }
+
+  .subscription-card__mark svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .subscription-card:hover {
+      background-color: rgb(var(--color-foreground-rgb));
+    }
+
+    .subscription-card:hover .subscription-card__body {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .subscription-card {
+      background-color: rgb(var(--color-foreground-rgb));
+    }
+
+    .subscription-card__body {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .subscription-card,
+    .subscription-card__body {
+      transition: none;
+    }
   }
 
   /* Steps: "Step One:" over its line, one step to a block with room between
@@ -354,7 +455,7 @@
           "type": "textarea",
           "id": "lines",
           "label": "Lines",
-          "info": "One per line. For numbered steps, put a space, a vertical bar and a space after the first sentence (it is shown bold) and the explanation after that. Leave empty for none."
+          "info": "One per line. For numbered steps or cards, put a space, a vertical bar and a space after the first phrase (it is shown bold) and the explanation after that. Leave empty for none."
         },
         {
           "type": "select",
@@ -363,7 +464,8 @@
           "options": [
             { "value": "arrow", "label": "Led by the arrow" },
             { "value": "plain", "label": "Plain list" },
-            { "value": "steps", "label": "Numbered steps (Step One: …)" }
+            { "value": "steps", "label": "Numbered steps (Step One: …)" },
+            { "value": "cards", "label": "Grid of cards (shown on hover)" }
           ],
           "default": "arrow"
         },
