@@ -124,6 +124,11 @@
      named here — setting it on the block itself would lose to that rule. */
   .product-grid__item .group-block-content:has(> product-price) > .contents .text-block > * {
     text-transform: capitalize;
+
+    /* Plain wrapping. The headings' `balance` evens the lines out to about
+       the same length, so a title that fits on one line and a bit breaks in
+       the middle and leaves both short of the row instead of filling it. */
+    text-wrap: wrap;
   }
 
   .product-grid__item .group-block-content > product-price {
