@@ -126,9 +126,13 @@
 </footer>
 
 {% stylesheet %}
-  /* Exactly one viewport tall, so scrolling to the end lands on it cleanly
-     with no leftover strip. `svh` rather than `vh` matches the hero and
-     avoids the gap mobile browsers leave when their chrome retracts. */
+  /* One viewport tall at least, so scrolling to the end lands on it cleanly
+     with no leftover strip. `lvh`, the largest the viewport gets, like every
+     other full-screen frame here: mobile browsers shrink the viewport while
+     their address bar is showing and `svh` is that smallest size, so a
+     footer sized in it stops short of the bottom the moment the bar
+     retracts and leaves the page behind it showing. `vh` is the fallback
+     where `lvh` is not understood. */
   .ocp-footer {
     box-sizing: border-box;
 
@@ -142,7 +146,8 @@
      * and degrades into a slightly taller footer at the sizes that do not.
      */
     display: flex;
-    min-height: 100svh;
+    min-height: 100vh;
+    min-height: 100lvh;
     background-color: var(--ocp-footer-background);
     color: var(--ocp-footer-text);
     font-family: var(--ocp-footer-font);
