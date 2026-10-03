@@ -147,7 +147,6 @@
   .subscription-panel__text {
     display: grid;
     gap: 1.5rem;
-    max-width: 32rem;
   }
 
   /* Same mark, same ratios as the page hero's title — a row rather than
@@ -156,6 +155,8 @@
   .subscription-panel__heading {
     display: flex;
     align-items: flex-start;
+    justify-content: center;
+    text-align: center;
     gap: 0.11em;
     margin: 0;
     font-family: var(--font-heading--family);
@@ -257,15 +258,6 @@
     height: auto;
   }
 
-  /* The title sits in the middle on a phone, where the panel is one column
-     and the photograph above it is full width. The words stay left. */
-  @media screen and (max-width: 749px) {
-    .subscription-panel__heading {
-      justify-content: center;
-      text-align: center;
-    }
-  }
-
   @media screen and (min-width: 750px) {
     .subscription-panel {
       grid-template-columns: 1fr 1fr;
@@ -283,6 +275,13 @@
 
     /* The text column itself stays stretched, so it has a box exactly as
        tall as the photograph for the sticky child below to roam inside. */
+    /* Room on both sides of the words, so with them running the full width
+       of what is left they sit in the middle of their half rather than
+       against the page edge on one side and the photograph on the other. */
+    .subscription-panel__text-col {
+      padding-inline: clamp(1.5rem, 5vw, 5rem);
+    }
+
     .subscription-panel__text {
       position: sticky;
       top: calc(var(--header-height, 0px) + 3rem);
