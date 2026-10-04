@@ -1,7 +1,7 @@
 {% comment %}
-  The questions at the foot of the subscription page: the heading on the
-  left, and on the right the line of introduction with the questions listed
-  under it. Each question is a block, so a new one is one click in the
+  The questions at the foot of the subscription page, in one column: the
+  heading centred at the top, the line of introduction under it, and the
+  questions listed below that. Each question is a block, so a new one is one click in the
   editor. Goes through the coffee page's own disclosure, so it has the same
   rule, arrow and open-one-close-the-rest behaviour rather than a second
   accordion to keep in step with it.
@@ -50,6 +50,7 @@
 
   .subscription-faq__heading {
     margin: 0;
+    text-align: center;
     font-family: var(--font-heading--family);
     font-weight: var(--font-heading--weight);
     font-size: var(--ocp-display-size-sm);
@@ -96,7 +97,6 @@
 
   @media screen and (min-width: 750px) {
     .subscription-faq {
-      grid-template-columns: 1fr 1fr;
       min-height: 100lvh;
     }
   }
