@@ -65,7 +65,12 @@
     align-content: start;
   }
 
+  /* Centred under the title and held to a narrower line than the questions
+     below it, so it reads as a lead-in rather than a full-width paragraph. */
   .subscription-faq__intro {
+    max-width: 32rem;
+    margin-inline: auto;
+    text-align: center;
     font-family: var(--font-body--family);
     font-size: var(--ocp-text-size);
     line-height: var(--ocp-leading-text);
