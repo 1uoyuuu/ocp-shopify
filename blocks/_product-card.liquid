@@ -195,3 +195,71 @@
   ]
 }
 {% endschema %}
+
+{% stylesheet %}
+  /*
+   * The title/price row, on every product card in the theme: the collection,
+   * the homepage, the recommendations under a product. Title against the left
+   * edge, price against the right, the room between them. The price takes only
+   * the width it needs; a long title wraps within what it leaves, never closer
+   * than the margin below. Keyed on the row that directly holds a price, so the
+   * swatches row and the rest of the card are left alone.
+   *
+   * The title block sits inside an `<a class="contents">`, so it is the
+   * `.text-block` that is the flex item, not the link. `min-width: 0` lets it
+   * shrink below its longest word's width instead of pushing the price out.
+   */
+  .product-card .group-block-content:has(> product-price) {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .product-card .group-block-content:has(> product-price) > .contents .text-block {
+    flex: 0 1 auto;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+  }
+
+  /* Capitalised, not the h5 preset's uppercase. The preset applies its case to
+     the block's child `<p>` (`.text-block.h5 > *`), so that is what has to be
+     named here — setting it on the block itself would lose to that rule. */
+  .product-card .group-block-content:has(> product-price) > .contents .text-block > * {
+    text-transform: capitalize;
+
+    /* Plain wrapping. The headings' `balance` evens the lines out to about
+       the same length, so a title that fits on one line and a bit breaks in
+       the middle and leaves both short of the row instead of filling it. */
+    text-wrap: wrap;
+  }
+
+  .product-card .group-block-content > product-price {
+    flex: 0 0 auto;
+    width: auto;
+    margin-inline-start: 0.75rem;
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  /* On a phone the row stacks: the title on one line, the price under it,
+     both against the left edge. */
+  @media screen and (max-width: 749px) {
+    .product-card .group-block-content:has(> product-price) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .product-card .group-block-content:has(> product-price) > .contents .text-block {
+      width: 100%;
+    }
+
+    .product-card .group-block-content > product-price {
+      margin-inline-start: 0;
+      margin-block-start: 0.25rem;
+      text-align: left;
+      align-items: flex-start;
+    }
+  }
+{% endstylesheet %}

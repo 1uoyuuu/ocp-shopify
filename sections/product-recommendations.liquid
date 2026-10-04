@@ -190,6 +190,23 @@
   </div>
 </product-recommendations>
 
+{% stylesheet %}
+  /*
+   * The heading over the recommendations is set exactly as "Still have
+   * questions?" is on the subscription page: the heading font at the small
+   * display size, upper case, solid leading, centred. The h2 preset already
+   * supplies the font and size; the case and leading are named here, on the
+   * paragraph the preset styles (`.text-block.h2 > *`), because that is the
+   * element its own rule lands on.
+   */
+  .product-recommendations .text-block.h2 > * {
+    text-transform: uppercase;
+    line-height: var(--ocp-leading-display);
+    letter-spacing: var(--ocp-letter-spacing);
+    text-align: center;
+  }
+{% endstylesheet %}
+
 {% schema %}
 {
   "name": "t:names.product_recommendations",

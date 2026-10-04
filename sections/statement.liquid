@@ -230,44 +230,6 @@
   }
 
   /*
-   * The card's title/price row, as on the collection page: title against the
-   * left edge, price against the right, the room between them. The title is
-   * bold and capitalised; the price keeps the regular weight. The preset
-   * styles the block's child `<p>` (`.text-block.h3 > *`), so that is what
-   * these name — a rule on the block itself would lose to it.
-   */
-  .statement__product .group-block-content:has(> product-price) {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-
-  .statement__product .group-block-content:has(> product-price) > .contents .text-block {
-    flex: 0 1 auto;
-    min-width: 0;
-    width: auto;
-    max-width: none;
-  }
-
-  .statement__product .group-block-content:has(> product-price) > .contents .text-block > * {
-    font-weight: 700;
-    text-transform: capitalize;
-    text-wrap: wrap;
-  }
-
-  .statement__product .group-block-content > product-price {
-    flex: 0 0 auto;
-    width: auto;
-    text-align: right;
-    align-items: flex-end;
-  }
-
-  .statement__product .group-block-content > product-price .price {
-    font-weight: 400;
-  }
-
-  /*
    * Out of flow, so a column far taller than the screen cannot stretch the
    * panel it sits in. Nothing clips it: it begins below the fold and the
    * sticky frame is what hides the rest.
