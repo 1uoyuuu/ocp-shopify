@@ -127,6 +127,11 @@
 
 {% render 'parallax' %}
 
+<script
+  src="{{ 'subscription-cards.js' | asset_url }}"
+  type="module"
+></script>
+
 {% stylesheet %}
   .subscription-panels {
     display: grid;
@@ -361,6 +366,93 @@
     }
 
     .subscription-card__mark {
+      width: 4rem;
+    }
+  }
+
+  /*
+   * Once the script has made the cards buttons (below 750px), they are an
+   * accordion. Closed, a card is one row: number, label, title, a small
+   * arrow. Open, it is the full card: label over title, the number in the top
+   * corner, the explanation, and the large arrow bottom-right. Keyed on
+   * `[role='button']` so that without the script the stacked cards above
+   * simply stay open.
+   */
+  @media screen and (max-width: 749px) {
+    .subscription-card[role='button'] {
+      display: grid;
+      grid-template-columns: auto auto minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 1rem;
+      min-height: 0;
+      padding: 1rem 0.75rem;
+      cursor: pointer;
+      background-color: rgb(var(--color-foreground-rgb));
+    }
+
+    .subscription-card[role='button'] .subscription-card__number {
+      position: static;
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .subscription-card[role='button'] .subscription-card__label {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .subscription-card[role='button'] .subscription-card__title {
+      grid-column: 3;
+      grid-row: 1;
+    }
+
+    .subscription-card[role='button'] .subscription-card__mark {
+      position: static;
+      grid-column: 4;
+      grid-row: 1;
+      width: 1.25rem;
+    }
+
+    .subscription-card[role='button'] .subscription-card__body {
+      display: none;
+    }
+
+    .subscription-card[role='button'][data-open] {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      column-gap: 0;
+      padding: 0.75rem;
+    }
+
+    .subscription-card[role='button'][data-open] .subscription-card__label {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .subscription-card[role='button'][data-open] .subscription-card__title {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .subscription-card[role='button'][data-open] .subscription-card__body {
+      display: block;
+      grid-column: 1;
+      grid-row: 3;
+      padding-inline-end: 1rem;
+      opacity: 1;
+      transform: none;
+    }
+
+    .subscription-card[role='button'][data-open] .subscription-card__number {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
+    }
+
+    .subscription-card[role='button'][data-open] .subscription-card__mark {
+      grid-column: 2;
+      grid-row: 2 / 4;
+      align-self: end;
       width: 4rem;
     }
   }
