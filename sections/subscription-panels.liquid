@@ -45,6 +45,8 @@
       style="
         {% if block.settings.background_color != blank %}--panel-background: {{ block.settings.background_color }};{% endif %}
         {% if block.settings.text_color != blank %}--panel-text: {{ block.settings.text_color }};{% endif %}
+        --panel-title-top: {{ block.settings.title_padding_top | default: 0 }}px;
+        --panel-title-bottom: {{ block.settings.title_padding_bottom | default: 0 }}px;
       "
       {{ block.shopify_attributes }}
     >
@@ -173,6 +175,7 @@
      centred text, top-aligned because the word's line-height is taller
      than the arrow. */
   .subscription-panel__heading {
+    padding-block: var(--panel-title-top, 0) var(--panel-title-bottom, 0);
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -591,6 +594,26 @@
           "id": "heading",
           "label": "Heading",
           "default": "A coffee journey"
+        },
+        {
+          "type": "range",
+          "id": "title_padding_top",
+          "label": "Space above the title",
+          "min": 0,
+          "max": 100,
+          "step": 4,
+          "unit": "px",
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "title_padding_bottom",
+          "label": "Space below the title",
+          "min": 0,
+          "max": 100,
+          "step": 4,
+          "unit": "px",
+          "default": 0
         },
         {
           "type": "richtext",

@@ -12,6 +12,8 @@
     "hero": {
       "type": "page-hero",
       "settings": {
+        "title_padding_top": 80,
+        "title_padding_bottom": 64,
         "show_arrow": true,
         "heading_font": "heading",
         "all_products_title": "Products"

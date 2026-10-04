@@ -13,7 +13,14 @@
   Not a `{% doc %}`: those are not valid in sections.
 {% endcomment %}
 
-<section class="subscription-faq" {{ section.shopify_attributes }}>
+<section
+  class="subscription-faq"
+  style="
+    --faq-title-top: {{ section.settings.title_padding_top | default: 0 }}px;
+    --faq-title-bottom: {{ section.settings.title_padding_bottom | default: 0 }}px;
+  "
+  {{ section.shopify_attributes }}
+>
   {%- if section.settings.heading != blank -%}
     <h2 class="subscription-faq__heading">{{ section.settings.heading }}</h2>
   {%- endif -%}
@@ -50,6 +57,7 @@
 
   .subscription-faq__heading {
     margin: 0;
+    padding-block: var(--faq-title-top, 0) var(--faq-title-bottom, 0);
     text-align: center;
     font-family: var(--font-heading--family);
     font-weight: var(--font-heading--weight);
@@ -136,6 +144,26 @@
       "id": "heading",
       "label": "Heading",
       "default": "Still have questions?"
+    },
+    {
+      "type": "range",
+      "id": "title_padding_top",
+      "label": "Space above the title",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "title_padding_bottom",
+      "label": "Space below the title",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
     },
     {
       "type": "richtext",

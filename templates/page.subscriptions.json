@@ -14,6 +14,8 @@
       "settings": {
         "product": "ocp-coffee-subscription",
         "title": "OCP Subscription",
+        "title_padding_top": 0,
+        "title_padding_bottom": 0,
         "tagline": "Picked by us. Freshly roasted. Delivered on repeat.",
         "image": "shopify://shop_images/ocp-crow.jpg",
         "darken": 30,
@@ -42,6 +44,8 @@
             "aspect_ratio": "3 / 2",
             "image_side": "left",
             "heading": "Benefits",
+            "title_padding_top": 0,
+            "title_padding_bottom": 0,
             "text": "",
             "card_label": "Benefit",
             "list_style": "cards",
@@ -57,6 +61,8 @@
             "aspect_ratio": "4 / 5",
             "image_side": "right",
             "heading": "A coffee journey",
+            "title_padding_top": 0,
+            "title_padding_bottom": 0,
             "text": "<p>Every week we taste through what other roasters have made, here and half a world away. Your subscription pulls from that same shelf — nothing set aside, nothing lesser.</p><p>You choose how you brew and who you want to hear from. We choose the coffee, and it is revealed when it arrives.</p><p>Over a few shipments it turns into a way of tasting your way around: different origins, different processes, different roasters, without ever having to choose from a wall of bags. When something lands that you love, you will know who roasted it, and you can find more of their coffee on the shelf.</p>",
             "list_style": "arrow",
             "lines": "",
@@ -70,6 +76,8 @@
             "aspect_ratio": "4 / 5",
             "image_side": "right",
             "heading": "How it works",
+            "title_padding_top": 0,
+            "title_padding_bottom": 0,
             "text": "<p>Subscribing takes a minute, and almost all of it is a choice you make once: how you brew, which roasters, how much and how often. We choose from there.</p>",
             "list_style": "steps",
             "lines": "Choose how you brew. | Pick Espresso or Filter. It decides which coffees we pick from, so what arrives suits how you make coffee.\nPick the roasters you want to hear from. | Choose Australian roasters to drink local, or international roasters for what has just landed. Either way it comes off the shelf we stock.\nSet your size, how many bags and how often. | Take 200g, 500g or 1kg bags, one to four a shipment, every two weeks or every month. Enough to never run out.\nTell us how to grind it. | Keep it whole bean, or have it ground for espresso, AeroPress, French press, batch brewer or pour over.\nWe choose the coffee, and it is revealed when it arrives. | Every week we taste through what other roasters have made, and your shipment comes from whatever earns its place. Change anything, or pause, skip or cancel, from your account.",
@@ -133,6 +141,8 @@
       ],
       "settings": {
         "heading": "Still have questions?",
+        "title_padding_top": 0,
+        "title_padding_bottom": 0,
         "intro": "<p>Anything not covered here, get in touch and we will help.</p>"
       }
     }

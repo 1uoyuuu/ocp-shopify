@@ -43,6 +43,8 @@
     --sub-panel-text: {{ section.settings.panel_text_color | default: '#ffffff' }};
     --sub-scrim: {{ scrim }};
     --sub-heading-font: var(--font-{{ heading_font }}--family);
+    --sub-title-top: {{ section.settings.title_padding_top | default: 0 }}px;
+    --sub-title-bottom: {{ section.settings.title_padding_bottom | default: 0 }}px;
   "
   {{ section.shopify_attributes }}
 >
@@ -281,6 +283,7 @@
 
   .subscription-hero__title {
     margin: 0;
+    padding-block: var(--sub-title-top, 0) var(--sub-title-bottom, 0);
     font-family: var(--sub-heading-font);
     font-weight: 700;
     font-size: var(--ocp-display-size-sm);
@@ -621,6 +624,26 @@
       "id": "title",
       "label": "Title",
       "default": "OCP Subscription"
+    },
+    {
+      "type": "range",
+      "id": "title_padding_top",
+      "label": "Space above the title",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "title_padding_bottom",
+      "label": "Space below the title",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
     },
     {
       "type": "text",

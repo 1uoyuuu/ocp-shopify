@@ -47,8 +47,11 @@
     --page-hero-font: var(--font-{{ heading_font }}--family);
     --page-hero-weight: var(--font-{{ heading_font }}--weight);
     {% if section.settings.clear_header %}
-      --page-hero-top-padding: calc(var(--header-height) + 4rem);
+      --page-hero-top-padding: calc(var(--header-height) + {{ section.settings.title_padding_top | default: 80 }}px);
+    {% else %}
+      --page-hero-top-padding: {{ section.settings.title_padding_top | default: 80 }}px;
     {% endif %}
+    --page-hero-bottom-padding: {{ section.settings.title_padding_bottom | default: 64 }}px;
   "
   {{ section.shopify_attributes }}
 >
@@ -69,7 +72,7 @@
     display: grid;
     justify-items: center;
     gap: 2rem;
-    padding: var(--page-hero-top-padding, 5rem) var(--ocp-page-margin) 4rem;
+    padding: var(--page-hero-top-padding, 5rem) var(--ocp-page-margin) var(--page-hero-bottom-padding, 4rem);
     text-align: center;
     background: var(--color-background);
     color: var(--color-foreground);
@@ -163,6 +166,26 @@
       "id": "title",
       "label": "Title",
       "info": "Leave empty to use the page's or collection's own title."
+    },
+    {
+      "type": "range",
+      "id": "title_padding_top",
+      "label": "Space above the title",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "title_padding_bottom",
+      "label": "Space below the title",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 64
     },
     {
       "type": "text",
