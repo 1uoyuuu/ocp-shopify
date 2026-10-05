@@ -624,7 +624,9 @@
       {% if block_settings.drawer_show_arrow or block_settings.drawer_social_menu != blank %}
         <div class="menu-drawer__brand menu-drawer__animated-element">
           {% if block_settings.drawer_show_arrow %}
-            <span class="menu-drawer__arrow">{% render 'logo-arrow' %}</span>
+            <a class="menu-drawer__arrow" href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+              {% render 'logo-arrow' %}
+            </a>
           {% endif %}
 
           {% if block_settings.drawer_social_menu != blank %}
