@@ -219,7 +219,24 @@ function scan() {
 
 scan();
 
-// Sections re-render on filter, pagination and editor edits, and morph leaves
-// new cards behind that were never scanned.
 document.addEventListener('shopify:section:load', scan);
 document.addEventListener('DOMContentLoaded', scan);
+
+/*
+ * Cards that arrive after load. The recommendations under a product are
+ * fetched once the page is up and written into it, a collection re-renders on
+ * every filter and page, and neither fires an event this file hears —
+ * `shopify:section:load` is the editor's alone. So any change to the document
+ * schedules a fresh pass, coalesced to one per tick; a pass over cards
+ * already done costs a query and a dataset check each. This is what had the
+ * recommended cards sitting grey on hover while the collection's turned colour.
+ */
+let queued = false;
+new MutationObserver(() => {
+  if (queued) return;
+  queued = true;
+  setTimeout(() => {
+    queued = false;
+    scan();
+  }, 0);
+}).observe(document.documentElement, { childList: true, subtree: true });
