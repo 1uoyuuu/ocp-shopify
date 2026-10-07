@@ -150,8 +150,8 @@ out which roaster actually sells.
 ### Titles
 
 ```
-coffee   {Roaster} - {Country} / {Lot} / {Variety} ({Process})
-gear     {Brand} - {Model} / {Category} ({Material})
+coffee   {Roaster} - {Country} {Lot} {Variety} ({Process})
+gear     {Brand} - {Model} {Category} ({Material})
 merch    OCP {Item}
 ```
 
@@ -163,14 +163,16 @@ be structure for its own sake.
 Real ones:
 
 ```
-Rose - Ecuador / La Florida / Sidra (Honey)
-Terraform - Ethiopia / Elto Elora / Ethiopian Landrace (Washed)
-Hario - Switch / Immersion dripper (Glass)
+Rose - Ecuador La Florida Sidra (Honey)
+Terraform - Ethiopia Elto Elora Ethiopian Landrace (Washed)
+Hario - Switch Immersion dripper (Glass)
 OCP Tote Bag
 ```
 
-The separator is a plain hyphen between maker and product, and forward
-slashes inside the product. The tail carries the selling point and the
+The separator is a plain hyphen between maker and product, and plain spaces
+inside the product — there were forward slashes there until 2026-10-07, when
+all 43 titles that had them were rewritten. `blocks/coffee-title.liquid`
+splits on the hyphen only, so it never depended on them. The tail carries the selling point and the
 search terms — nobody searches "coffee", they search "sidra honey" or
 "hario switch".
 
@@ -181,7 +183,7 @@ search terms — nobody searches "coffee", they search "sidra honey" or
 - **Roast date never goes in the title** — it changes every batch.
   `coffee.roast_date` owns it.
 - **Drop the category word only when the brand already is the category.**
-  `AeroPress - Original`, not `AeroPress - Original / Brewer`. But keep it
+  `AeroPress - Original`, not `AeroPress - Original Brewer`. But keep it
   everywhere else: `Kalita - Wave` alone does not say whether it is the
   dripper or the filter papers, and Kalita sells both.
 - **Collisions take the smallest distinguishing word.** Two Elto Elora
