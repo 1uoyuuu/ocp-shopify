@@ -42,7 +42,7 @@ const TINT_LIGHTNESS = [0.34, 0.6];
  * a flat printed block. */
 const BUCKET = 24;
 
-/** @type {Map<string, Promise<string | null>>} */
+/** @type {Map<string, Promise<{ colour: string, chromatic: boolean } | null>>} */
 const readings = new Map();
 
 /** @param {number} r @param {number} g @param {number} b */
@@ -69,8 +69,12 @@ function toHsl(r, g, b) {
  * returned as a CSS colour with its lightness brought into the band white text
  * can be read against.
  *
+ * `chromatic` says whether that colour came from pixels with real colour in
+ * them, or is only the first opaque pixel found because the product has none
+ * — a black dripper, a white filter pack.
+ *
  * @param {Uint8ClampedArray} data
- * @returns {string | null}
+ * @returns {{ colour: string, chromatic: boolean } | null}
  */
 function dominant(data) {
   /** @type {Map<number, { count: number, r: number, g: number, b: number }>} */
@@ -118,7 +122,10 @@ function dominant(data) {
 
   const channel = (value) => Math.round(Math.min(255, Math.max(0, value * scale)));
 
-  return `rgb(${channel(picked.r)} ${channel(picked.g)} ${channel(picked.b)})`;
+  return {
+    colour: `rgb(${channel(picked.r)} ${channel(picked.g)} ${channel(picked.b)})`,
+    chromatic: Boolean(winner),
+  };
 }
 
 /**
@@ -140,7 +147,7 @@ function thumbnail(src) {
   }
 }
 
-/** @param {string} src @returns {Promise<string | null>} */
+/** @param {string} src @returns {Promise<{ colour: string, chromatic: boolean } | null>} */
 function read(src) {
   const cached = readings.get(src);
   if (cached) return cached;
@@ -184,10 +191,19 @@ async function tint(gallery) {
   const image = gallery.querySelector('img');
   if (!image?.currentSrc && !image?.src) return;
 
-  const colour = await read(image.currentSrc || image.src);
-  if (!colour) return;
+  const reading = await read(image.currentSrc || image.src);
+  if (!reading) return;
 
-  gallery.style.setProperty('--card-media-hover', colour);
+  /*
+   * A product with no colour of its own — most equipment is black, white or
+   * steel — would otherwise get a grey picked from one stray pixel. Where the
+   * card says so (anything that is not coffee), those take the brand blue
+   * instead, so a dripper still answers the cursor with a colour, and the
+   * same one the rest of the site is set in.
+   */
+  const brand = !reading.chromatic && gallery.dataset.tintFallback === 'brand';
+
+  gallery.style.setProperty('--card-media-hover', brand ? 'var(--color-foreground)' : reading.colour);
   gallery.dataset.tinted = '';
 }
 

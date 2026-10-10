@@ -74,6 +74,7 @@
     --card-media-lift: {{ block_settings.card_media_hover_lift | default: 15 }};
   "
   data-product-id="{{ product.id }}"
+  {% if product != blank and product.type != 'Coffee' %}data-tint-fallback="brand"{% endif %}
   {% if settings.show_second_image_on_hover and product.media.size > 1 %}
     on:pointerenter="/previewImage"
     on:pointerleave="/resetImage"
