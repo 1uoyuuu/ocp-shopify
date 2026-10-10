@@ -1,9 +1,8 @@
 {%- doc -%}
   The hover strip that rides over a product card's image: roast profile on
   the left, roast date on the right, both read from product metafields.
-  On equipment and merch it reads the `gear.*` metafields instead: category
-  on the left, then the first of pack size, capacity, material or
-  compatibility on the right.
+  On equipment and merch it shows the `gear.category` metafield on the left
+  and leaves the right empty.
 
   The profile reads the same as the product page's roast line — "(Filter)",
   or "(Filter Blend)" when `coffee.is_blend` is set.
@@ -40,24 +39,11 @@
     endif
   endif
 
-  # Equipment and merch have no roast to report, so the same two slots carry
-  # what is worth knowing about them at a glance: the kind of thing it is on
-  # the left, one fact on the right — how many sheets in the pack, how many
-  # cups it makes, what it is made of. Whichever of those the product has
-  # first, in that order; a card with none shows the category alone.
+  # Equipment and merch have no roast to report, so the strip carries just
+  # what kind of thing it is, on the left, and nothing on the right.
   assign gear_category = product.metafields.gear.category.value
   if profile == blank and roast_date == blank and gear_category != blank
     assign profile = '(' | append: gear_category | append: ')'
-    assign roast_date = product.metafields.gear.pack_size.value
-    if roast_date == blank
-      assign roast_date = product.metafields.gear.capacity.value
-    endif
-    if roast_date == blank
-      assign roast_date = product.metafields.gear.material.value
-    endif
-    if roast_date == blank
-      assign roast_date = product.metafields.gear.compatibility.value
-    endif
   endif
 
   # Liquid has no operator precedence and evaluates right to left, so the
